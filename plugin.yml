@@ -1,0 +1,7 @@
+name: Nexly
+version: 1.0.0
+main: Nexly\Nexly
+src-namespace-prefix: Nexly
+api: 5.0.0
+author: Zwuiix
+load: STARTUP

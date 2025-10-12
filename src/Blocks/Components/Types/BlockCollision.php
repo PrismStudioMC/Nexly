@@ -1,0 +1,99 @@
+<?php
+
+namespace Nexly\Blocks\Components\Types;
+
+use pocketmine\math\Vector3;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\utils\RegistryTrait;
+
+/**
+ * This doc-block is generated automatically, do not modify it manually.
+ * This must be regenerated whenever registry members are added, removed or changed.
+ * @see build/generate-registry-annotations.php
+ * @generate-registry-docblock
+ *
+ * @method static BlockCollision SLAB()
+ * @method static BlockCollision FENCE_GATE()
+ * @method static BlockCollision MOBHEAD()
+ */
+class BlockCollision
+{
+    use RegistryTrait;
+
+    protected static function setup(): void
+    {
+        self::_registryRegister("slab", new BlockCollision(new Vector3(-8, 4, -8), new Vector3(16, 8, 16)));
+        self::_registryRegister("fence_gate", new BlockCollision(new Vector3(-8, 0, -2), new Vector3(16, 18, 4)));
+        self::_registryRegister("mobhead", new BlockCollision(new Vector3(-4, 0, -4), new Vector3(8, 8, 8)));
+    }
+
+    public static function checkInit(): void
+    {
+        if (self::$members === null) {
+            self::$members = [];
+            self::setup();
+        }
+    }
+
+    public function __construct(
+        private Vector3 $origin,
+        private Vector3 $size,
+    ) {
+    }
+
+    /**
+     * @return Vector3
+     */
+    public function getOrigin(): Vector3
+    {
+        return $this->origin;
+    }
+
+    /**
+     * @param Vector3 $origin
+     */
+    public function setOrigin(Vector3 $origin): void
+    {
+        $this->origin = $origin;
+    }
+
+    /**
+     * @return Vector3
+     */
+    public function getSize(): Vector3
+    {
+        return $this->size;
+    }
+
+    /**
+     * @param Vector3 $size
+     */
+    public function setSize(Vector3 $size): void
+    {
+        $this->size = $size;
+    }
+
+    /**
+     * Returns the component in the correct NBT format supported by the client.
+     *
+     * @return CompoundTag
+     */
+    public function toNBT(): CompoundTag
+    {
+        return CompoundTag::create()
+            ->setTag("origin", new ListTag([
+                new FloatTag($this->origin->getX()),
+                new FloatTag($this->origin->getY()),
+                new FloatTag($this->origin->getZ())
+            ], NBT::TAG_Float))
+            ->setTag("size", new ListTag([
+                new FloatTag($this->size->getX()),
+                new FloatTag($this->size->getY()),
+                new FloatTag($this->size->getZ())
+            ], NBT::TAG_Float));
+    }
+}
+BlockCollision::checkInit();
