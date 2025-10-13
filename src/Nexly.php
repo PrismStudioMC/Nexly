@@ -8,6 +8,7 @@ use Nexly\Events\Impl\BlockRegistryEvent;
 use Nexly\Events\Impl\ItemRegistryEvent;
 use Nexly\Events\Impl\RecipeRegistryEvent;
 use Nexly\Listener\BlockBreakingListener;
+use Nexly\Listener\LadderClimbingListener;
 use Nexly\Mappings\BlockMappings;
 use Nexly\Recipes\NexlyRecipes;
 use Nexly\Tasks\AsyncRegisterBlocksTask;
@@ -39,6 +40,14 @@ class Nexly extends PluginBase
             $this->getLogger()->notice("You can enable the BlockBreakingListener in config.yml");
             $this->getLogger()->notice("This allows you to break blocks with custom items like the Emerald Pickaxe");
             $this->getLogger()->notice("================================");
+        }
+
+        if ($config->get("enable-ladder-climbing", true)) {
+            try {
+                $this->getServer()->getpluginManager()->registerEvents(new LadderClimbingListener(), $this);
+            } catch (\Exception $e) {
+                $this->getLogger()->error("Failed to register LadderClimbingListener: " . $e->getMessage());
+            }
         }
 
         $ev = new BlockRegistryEvent();

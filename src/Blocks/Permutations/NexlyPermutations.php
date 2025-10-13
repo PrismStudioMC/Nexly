@@ -21,11 +21,13 @@ use Nexly\Blocks\Permutations\Impl\FencePermutation;
 use Nexly\Blocks\Permutations\Impl\WallPermutation;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Blocks\Vanilla\NexlyFence;
+use Nexly\Blocks\Vanilla\NexlyLadder;
 use pocketmine\block\Crops;
 use pocketmine\block\Door;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Hopper;
+use pocketmine\block\Ladder;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Slab;
 use pocketmine\block\Trapdoor;
@@ -503,7 +505,7 @@ final class NexlyPermutations
             ->setFacing($in->readFacingWithoutUp())
         );
 
-        $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = [0, 2, 3, 4, 5])); // 0: Down, 2: North, 3: South, 4: West, 5: East
+        $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(0, 5))); // 0: Down, 2: North, 3: South, 4: West, 5: East
         $builder->addProperty(new BlockProperty(StateNames::TOGGLE_BIT, range(0, 1)));
 
         $builder->addComponent(
@@ -571,6 +573,37 @@ final class NexlyPermutations
 
                 $builder->addPermutation($permutation);
             }
+        }
+    }
+
+    /**
+     * Create permutations for ladder blocks.
+     * 
+     * @param Builder $builder
+     * @param Ladder $block
+     * @return void
+     */
+    public static function makeLadder(Builder $builder, Ladder $block): void
+    {
+        $stringId = $builder->getStringId();
+        $builder->setSerializer(static fn(Ladder $b) => (new Writer($stringId))->writeHorizontalFacing($b->getFacing()));
+        $builder->setDeserializer(static fn(Reader $in) => (clone $block)->setFacing($in->readHorizontalFacing()));
+
+        $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(2, 5)));
+        $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LADDER->toString()));
+
+        foreach ($facings as $dir) {
+            $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
+                ->addComponent(new CollisionBoxBlockComponent(true, BlockCollision::LADDER()))
+                ->addComponent(new SelectionBoxBlockComponent(true, BlockCollision::LADDER()))
+                ->addComponent(new TransformationBlockComponent(match ($dir) {
+                    2 => new Vector3(0, 0, 0),
+                    3 => new Vector3(0, 180, 0),
+                    4 => new Vector3(0, 90, 0),
+                    5 => new Vector3(0, 270, 0),
+                    default => throw new \RuntimeException("Invalid direction")
+                }))
+            );
         }
     }
 }

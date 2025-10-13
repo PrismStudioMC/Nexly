@@ -18,6 +18,7 @@ use pocketmine\utils\RegistryTrait;
  * @method static BlockCollision SLAB()
  * @method static BlockCollision FENCE_GATE()
  * @method static BlockCollision MOBHEAD()
+ * @method static BlockCollision LADDER()
  */
 class BlockCollision
 {
@@ -28,6 +29,7 @@ class BlockCollision
         self::_registryRegister("slab", new BlockCollision(new Vector3(-8, 4, -8), new Vector3(16, 8, 16)));
         self::_registryRegister("fence_gate", new BlockCollision(new Vector3(-8, 0, -2), new Vector3(16, 18, 4)));
         self::_registryRegister("mobhead", new BlockCollision(new Vector3(-4, 0, -4), new Vector3(8, 8, 8)));
+        self::_registryRegister("ladder", new BlockCollision(new Vector3(-8, 0, 5), new Vector3(16, 16, 3)));
     }
 
     public static function checkInit(): void

@@ -5,6 +5,7 @@ namespace Nexly\Items\Components\Legacy;
 use Nexly\Items\ItemBuilder;
 use Nexly\Items\ItemVersion;
 use pocketmine\block\Crops;
+use pocketmine\block\Door;
 use pocketmine\block\Hopper;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\VanillaBlocks;
@@ -131,7 +132,7 @@ class LegacyItemBuilder extends ItemBuilder
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::FARMLAND()));
         } elseif ($block instanceof NetherWartPlant) {
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::SOUL_SAND()));
-        } elseif ($block instanceof Hopper) {
+        } elseif ($block instanceof Hopper || $block instanceof Door) {
             $this->addComponent(SeedComponent::fromBlocks($block));
         }
         return $this;

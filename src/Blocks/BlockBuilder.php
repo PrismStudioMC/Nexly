@@ -44,6 +44,7 @@ use pocketmine\block\Door;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Hopper;
+use pocketmine\block\Ladder;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\block\Slab;
@@ -597,6 +598,7 @@ class BlockBuilder
             $block instanceof Trapdoor => NexlyPermutations::makeTrapdoor($this, $block),
             $block instanceof Hopper => NexlyPermutations::makeHopper($this, $block),
             $block instanceof HeadBlock => NexlyPermutations::makeHead($this, $block),
+            $block instanceof Ladder => NexlyPermutations::makeLadder($this, $block),
             default => null,
         };
     }
