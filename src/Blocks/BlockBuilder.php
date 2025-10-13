@@ -385,7 +385,7 @@ class BlockBuilder
             ->setTag("properties", new ListTag(array_reverse(array_map(fn (BlockProperty $property) => $property->toNBT(), $this->properties)), NBT::TAG_Compound))
             ->setTag("menu_category", CompoundTag::create()
                 ->setTag("category", new StringTag(strtolower($this->getCreativeInfo()?->getCategory()?->name ?? "none")))
-                ->setTag("group", new StringTag(strtolower($this->getCreativeInfo()?->getGroup()?->name ?? "none"))))
+                ->setTag("group", new StringTag(strtolower($this->getCreativeInfo()?->getGroup()?->value ?? "none"))))
             ->setTag("vanilla_block_data", CompoundTag::create()
                 ->setTag("block_id", new IntTag(BlockMappings::getInstance()->nextRuntimeId())))
             ->setTag("molangVersion", new IntTag(12));
@@ -583,7 +583,7 @@ class BlockBuilder
         }
     }
 
-    private function detectDefaultComponent(block $block): void
+    private function detectDefaultComponent(Block $block): void
     {
         match (true) {
             $block instanceof Crops => NexlyPermutations::makeCrop($this, $block),

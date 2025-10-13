@@ -2,6 +2,7 @@
 
 namespace Nexly\Items\Creative;
 
+use BackedEnum;
 use pocketmine\block\Air;
 use pocketmine\block\Anvil;
 use pocketmine\block\BaseSign;
@@ -63,7 +64,7 @@ class NexlyCreative
     private static array $groups = [];
     /** @var CreativeCategory[]  */
     private static array $groupToCategory = [];
-    /** @var CreativeGroup[]  */
+    /** @var CreativeGroup|\StringBackedEnum[]  */
     private static array $categoryToGroups = [];
 
     /**
@@ -98,10 +99,10 @@ class NexlyCreative
      *
      * @param Item $item
      * @param CreativeCategory|null $category
-     * @param CreativeGroup|null $group
+     * @param CreativeGroup|BackedEnum|null $group
      * @return void
      */
-    public static function add(Item $item, CreativeCategory $category = null, CreativeGroup $group = null): void
+    public static function add(Item $item, CreativeCategory $category = null, CreativeGroup|BackedEnum $group = null): void
     {
         self::loadGroups(); // Ensure groups are loaded
 
@@ -114,9 +115,9 @@ class NexlyCreative
 
         $pm = null;
         if ($group !== null) {
-            $pm = self::$groups[$group->getValue()] ??= new CreativeGroupPM($group->getValue(), $item);
+            $pm = self::$groups[$group->value] ??= new CreativeGroupPM($group->value, $item);
             self::$categoryToGroups[$category->name] = $pm;
-            self::$groupToCategory[$group->getValue()] = $category;
+            self::$groupToCategory[$group->value] = $category;
         }
 
         CreativeInventory::getInstance()->add($item, $category, $pm);

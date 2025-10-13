@@ -99,7 +99,7 @@ final class NexlyPermutations
             SlabType::BOTTOM => StateValues::MC_VERTICAL_HALF_BOTTOM,
             SlabType::TOP => StateValues::MC_VERTICAL_HALF_TOP,
             SlabType::DOUBLE => "double",
-            default => throw new \RuntimeException("Invalid slab type"),
+
         }));
         $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setSlabType(match ($in->readString(BlockStateNames::MC_VERTICAL_HALF)) {
             StateValues::MC_VERTICAL_HALF_BOTTOM => SlabType::BOTTOM,

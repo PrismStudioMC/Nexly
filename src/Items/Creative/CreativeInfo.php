@@ -3,6 +3,7 @@
 namespace Nexly\Items\Creative;
 
 use Attribute;
+use BackedEnum;
 use pocketmine\inventory\CreativeCategory;
 
 #[Attribute(Attribute::TARGET_CLASS)]
@@ -10,7 +11,7 @@ class CreativeInfo
 {
     public function __construct(
         private ?CreativeCategory $category,
-        private ?CreativeGroup $group = null,
+        private CreativeGroup|BackedEnum|null $group = null,
     ) {
     }
 
@@ -23,9 +24,9 @@ class CreativeInfo
     }
 
     /**
-     * @return CreativeGroup|null
+     * @return BackedEnum|CreativeGroup|null
      */
-    public function getGroup(): ?CreativeGroup
+    public function getGroup(): BackedEnum|CreativeGroup|null
     {
         return $this->group;
     }
