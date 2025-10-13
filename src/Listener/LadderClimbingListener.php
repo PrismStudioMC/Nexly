@@ -91,7 +91,14 @@ final class LadderClimbingListener implements Listener
         }
 
         if($block instanceof NexlyLadder) {
-            $this->addVelocity($player, $now, $block->getClimbSpeed());
+            $speed = $block->getClimbSpeed();
+
+            $upBlock = $block->getSide(Facing::UP);
+            if(!$upBlock instanceof Ladder) {
+                $speed /= 1.5;
+            }
+
+            $this->addVelocity($player, $now, $speed);
         }
     }
 
