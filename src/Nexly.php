@@ -41,13 +41,13 @@ class Nexly extends PluginBase
             $this->getLogger()->notice("================================");
         }
 
-        $ev = new ItemRegistryEvent();
-        $ev->trigger();
-        $this->getLogger()->notice("Registered " . $ev->getCount() . " items.");
-
         $ev = new BlockRegistryEvent();
         $ev->trigger();
         $this->getLogger()->notice("Registered " . $ev->getCount() . " blocks.");
+
+        $ev = new ItemRegistryEvent();
+        $ev->trigger();
+        $this->getLogger()->notice("Registered " . $ev->getCount() . " items.");
 
         $this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, function (DataPacketSendEvent $ev): void {
             $packets = $ev->getPackets();
