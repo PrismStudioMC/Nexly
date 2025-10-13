@@ -34,3 +34,6 @@ Focus on your game logic and visual design while Nexly handles the complex techn
 - **Modular architecture**: Easy to extend and customize for specific needs
 - **Type safety**: Full type hints and IDE support for better development experience
 - **Documentation**: Detailed API documentation and usage guides
+
+# Servers using Nexly
+- [Érodia](https://discord.gg/JS3nk6QV) - A French PvP-Faction server with custom items and blocks.
