@@ -154,7 +154,7 @@ class NexlyCreative
             $item instanceof Record => new CreativeInfo(null, CreativeGroup::GROUP_RECORD),
             $item instanceof GoatHorn => new CreativeInfo(null, CreativeGroup::GROUP_GOAT_HORN),
             $item instanceof Banner => new CreativeInfo(null, CreativeGroup::GROUP_BANNER),
-            $item instanceof SpawnEgg => new CreativeInfo(null, CreativeGroup::GROUP_MOB_EGGS),
+            //$item instanceof SpawnEgg => new CreativeInfo(null, CreativeGroup::GROUP_MOB_EGGS),
             !$item->getBlock() instanceof Air => self::detectCreativeInfoFromBlock($item->getBlock()),
             default => new CreativeInfo(CreativeCategory::ITEMS),
         };

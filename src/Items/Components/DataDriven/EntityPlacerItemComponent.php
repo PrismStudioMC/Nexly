@@ -61,7 +61,7 @@ class EntityPlacerItemComponent extends DataDrivenItemComponent
     {
         return CompoundTag::create()
             ->setTag("entity", new StringTag($this->entity))
-            ->setTag("dispense_on", new ListTag(...array_map(fn (string $name) => new StringTag($name), $this->dispenseOn), NBT::TAG_String))
-            ->setTag("use_on", new ListTag(...array_map(fn (string $name) => new StringTag($name), $this->useOn), NBT::TAG_String));
+            ->setTag("dispense_on", new ListTag(array_map(fn (string $name) => new StringTag($name), $this->dispenseOn), NBT::TAG_String))
+            ->setTag("use_on", new ListTag(array_map(fn (string $name) => new StringTag($name), $this->useOn), NBT::TAG_String));
     }
 }

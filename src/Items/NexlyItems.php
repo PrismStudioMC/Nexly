@@ -48,6 +48,7 @@ class NexlyItems
 
         $builder = LegacyItemBuilder::create();
         $builder->setStringId($stringId);
+        $builder->setNumericId($item->getTypeId());
         $builder->setItem($item);
         $builder->setCreativeInfo($creativeInfo);
 
@@ -87,6 +88,7 @@ class NexlyItems
 
         $builder = DataDrivenItemBuilder::create();
         $builder->setStringId($stringId);
+        $builder->setNumericId($item->getTypeId());
         $builder->setItem($item);
         $builder->setCreativeInfo($creativeInfo);
 
