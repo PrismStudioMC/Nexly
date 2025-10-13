@@ -7,6 +7,7 @@ enum ExtendedGeometry: string
     case CROP = "geometry.crop";
     case NETHER_WART = "geometry.nether_wart";
     case SLAB = "geometry.slab";
+    case DOOR = "geometry.door";
     case FENCE = "geometry.fence";
     case FENCE_GATE = "geometry.fence_gate";
     case WALL = "geometry.wall";

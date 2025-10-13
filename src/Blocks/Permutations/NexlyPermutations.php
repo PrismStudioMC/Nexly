@@ -3,6 +3,7 @@
 namespace Nexly\Blocks\Permutations;
 
 use Nexly\Blocks\BlockBuilder as Builder;
+use Nexly\Blocks\Components\BlockComponent;
 use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
 use Nexly\Blocks\Components\GeometryBlockComponent;
@@ -21,6 +22,7 @@ use Nexly\Blocks\Permutations\Impl\WallPermutation;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Blocks\Vanilla\NexlyFence;
 use pocketmine\block\Crops;
+use pocketmine\block\Door;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Hopper;
@@ -30,8 +32,8 @@ use pocketmine\block\Trapdoor;
 use pocketmine\block\utils\SlabType;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\block\Wall;
-use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\BlockStateNames as StateNames;
+use pocketmine\data\bedrock\block\BlockStateSerializeException;
 use pocketmine\data\bedrock\block\BlockStateStringValues as StateValues;
 use pocketmine\data\bedrock\block\convert\BlockStateDeserializerHelper as DeserializerHelper;
 use pocketmine\data\bedrock\block\convert\BlockStateReader as Reader;
@@ -95,13 +97,13 @@ final class NexlyPermutations
     public static function makeSlab(Builder $builder, Slab $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static fn (Slab $block) => (new Writer($stringId))->writeString(BlockStateNames::MC_VERTICAL_HALF, match ($block->getSlabType()) {
+        $builder->setSerializer(static fn (Slab $block) => (new Writer($stringId))->writeString(StateNames::MC_VERTICAL_HALF, match ($block->getSlabType()) {
             SlabType::BOTTOM => StateValues::MC_VERTICAL_HALF_BOTTOM,
             SlabType::TOP => StateValues::MC_VERTICAL_HALF_TOP,
             SlabType::DOUBLE => "double",
 
         }));
-        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setSlabType(match ($in->readString(BlockStateNames::MC_VERTICAL_HALF)) {
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setSlabType(match ($in->readString(StateNames::MC_VERTICAL_HALF)) {
             StateValues::MC_VERTICAL_HALF_BOTTOM => SlabType::BOTTOM,
             StateValues::MC_VERTICAL_HALF_TOP => SlabType::TOP,
             "double" => SlabType::DOUBLE,
@@ -113,23 +115,101 @@ final class NexlyPermutations
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
         $builder->addComponent(new ItemVisualBlockComponent($geometry, $material));
-        $builder->addProperty(new BlockProperty(BlockStateNames::MC_VERTICAL_HALF, [StateValues::MC_VERTICAL_HALF_BOTTOM, StateValues::MC_VERTICAL_HALF_TOP, "double"]))
+        $builder->addProperty(new BlockProperty(StateNames::MC_VERTICAL_HALF, [StateValues::MC_VERTICAL_HALF_BOTTOM, StateValues::MC_VERTICAL_HALF_TOP, "double"]))
             ->addPermutation(
-                Permutation::create("q.block_state('" . BlockStateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_BOTTOM . "'")
+                Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_BOTTOM . "'")
                 ->addComponent(new CollisionBoxBlockComponent(true, BlockCollision::SLAB()))
                 ->addComponent(new SelectionBoxBlockComponent(true, BlockCollision::SLAB()))
                 ->addComponent(new TransformationBlockComponent(translation: new Vector3(0, -0.25, 0)))
             )
             ->addPermutation(
-                Permutation::create("q.block_state('" . BlockStateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_TOP . "'")
+                Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_TOP . "'")
                 ->addComponent(new CollisionBoxBlockComponent(true, BlockCollision::SLAB()))
                 ->addComponent(new SelectionBoxBlockComponent(true, BlockCollision::SLAB()))
                 ->addComponent(new TransformationBlockComponent(translation: new Vector3(0, 0.25, 0)))
             )
-            ->addPermutation(Permutation::create("q.block_state('" . BlockStateNames::MC_VERTICAL_HALF . "') == 'double'")
+            ->addPermutation(Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == 'double'")
                 ->addComponent(new GeometryBlockComponent())
                 ->addComponent(new CollisionBoxBlockComponent(true))
                 ->addComponent(new SelectionBoxBlockComponent(true)));
+    }
+
+    /**
+     * Create permutations for door blocks.
+     *
+     * @param Builder $builder
+     * @param Door $block
+     * @return void
+     */
+    public static function makeDoor(Builder $builder, Door $block): void
+    {
+        $stringId = $builder->getStringId();
+        $builder->setSerializer(static fn (Door $block) => (new Writer($stringId))
+            ->writeInt(StateNames::UPPER_BLOCK_BIT, $block->isTop())
+            ->writeInt(StateNames::MC_CARDINAL_DIRECTION, Facing::rotateY($value = match($block->getFacing()){
+                Facing::NORTH => 2,
+                Facing::SOUTH => 3,
+                Facing::WEST => 4,
+                Facing::EAST => 5,
+                default => throw new BlockStateSerializeException("Invalid horizontal facing $value")
+            }, clockwise: true))
+            ->writeInt(StateNames::DOOR_HINGE_BIT, $block->isHingeRight())
+            ->writeInt(StateNames::OPEN_BIT, $block->isOpen())
+        );
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block)
+            ->setTop($in->readInt(StateNames::UPPER_BLOCK_BIT))
+            ->setFacing(Facing::rotateY(match($raw = $in->readInt(StateNames::MC_CARDINAL_DIRECTION)){
+                2 => Facing::NORTH,
+                3 => Facing::SOUTH,
+                4 => Facing::WEST,
+                5 => Facing::EAST,
+                default => throw new \RuntimeException("Invalid facing direction: $raw")
+            }, clockwise: false))
+            ->setHingeRight($in->readInt(StateNames::DOOR_HINGE_BIT))
+            ->setOpen($in->readInt(StateNames::OPEN_BIT))
+        );
+
+        $builder->addProperty(new BlockProperty(StateNames::MC_CARDINAL_DIRECTION, $facings = range(2, 5))); // 2: North, 3: South, 4: West, 5: East
+        $builder->addProperty(new BlockProperty(StateNames::UPPER_BLOCK_BIT, range(0, 1)));
+        $builder->addProperty(new BlockProperty(StateNames::DOOR_HINGE_BIT, range(0, 1)));
+        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, range(0, 1)));
+
+        $builder->addComponent(new OnInteractBlockComponent());
+        $builder->addComponent((new GeometryBlockComponent(ExtendedGeometry::DOOR->toString()))
+            ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
+            ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0"));
+        
+        foreach ($facings as $dir) {
+            foreach (range(0, 1) as $top) {
+                foreach (range(0, 1) as $open) {
+                    $expr =
+                        "q.block_state('" . StateNames::MC_CARDINAL_DIRECTION . "') == $dir && " .
+                        "q.block_state('" . StateNames::UPPER_BLOCK_BIT . "') == $top && " .
+                        "q.block_state('" . StateNames::OPEN_BIT . "') == $open";
+
+                    $permutation = Permutation::create($expr);
+                    $permutation->addComponent(new MaterialInstancesBlockComponent([new Material(
+                        texture: $builder->getName() . ($top ? "_upper" : "_lower"),
+                        renderMethod: MaterialRenderMethod::BLEND
+                    )]));
+
+                    $box = $open ? new BlockCollision(new Vector3(-8, 0, 5), new Vector3(16, 16, 3)) : new BLockCollision(new Vector3(-8, 0, -8), new Vector3(3, 16, 16));
+                    $permutation->addComponent(new CollisionBoxBlockComponent(true, $box));
+                    $permutation->addComponent(new SelectionBoxBlockComponent(true, $box));
+                    $permutation->addComponent(new TransformationBlockComponent(match ($dir) {
+                        2 => new Vector3(0, 0, 0),
+                        3 => new Vector3(0, 180, 0),
+                        4 => new Vector3(0, 90, 0),
+                        5 => new Vector3(0, 270, 0),
+                        default => throw new \RuntimeException("Invalid direction")
+                    }));
+
+                    $builder->addPermutation($permutation);
+                }
+            }
+        }
+
+
     }
 
     /**
@@ -177,10 +257,10 @@ final class NexlyPermutations
             $connections->setValue($cloned, $co);
             return $cloned;
         });
-        $builder->addProperty(new BlockProperty("mc:n", [0, 1]))
-            ->addProperty(new BlockProperty("mc:s", [0, 1]))
-            ->addProperty(new BlockProperty("mc:w", [0, 1]))
-            ->addProperty(new BlockProperty("mc:e", [0, 1]));
+        $builder->addProperty(new BlockProperty("mc:n", range(0, 1)))
+            ->addProperty(new BlockProperty("mc:s", range(0, 1)))
+            ->addProperty(new BlockProperty("mc:w", range(0, 1)))
+            ->addProperty(new BlockProperty("mc:e", range(0, 1)));
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
@@ -227,20 +307,20 @@ final class NexlyPermutations
                 5 => Facing::EAST,
                 default => throw new \RuntimeException("Invalid facing direction"),
             })
-            ->setInWall($in->readInt(BlockStateNames::IN_WALL_BIT))
-            ->setOpen($in->readInt(BlockStateNames::OPEN_BIT))
+            ->setInWall($in->readInt(StateNames::IN_WALL_BIT))
+            ->setOpen($in->readInt(StateNames::OPEN_BIT))
         );
         $builder->addProperty(new BlockProperty(StateNames::MC_CARDINAL_DIRECTION, $facings = range(2, 5)));
-        $builder->addProperty(new BlockProperty(StateNames::IN_WALL_BIT, [0, 1]));
-        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [0, 1]));
+        $builder->addProperty(new BlockProperty(StateNames::IN_WALL_BIT, range(0, 1)));
+        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, range(0, 1)));
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString() . "_render"), $material));
         $builder->addComponent(new OnInteractBlockComponent());
         foreach ($facings as $dir) {
-            foreach ([0, 1] as $open) {
-                foreach ([0, 1] as $inWall) {
+            foreach (range(0, 1) as $open) {
+                foreach (range(0, 1) as $inWall) {
                     $expr =
                         "q.block_state('" . StateNames::OPEN_BIT . "') == $open && " .
                         "q.block_state('" . StateNames::IN_WALL_BIT . "') == $inWall && " .
@@ -308,7 +388,7 @@ final class NexlyPermutations
             ->setConnection(Facing::EAST, $decode($in->readInt(StateNames::WALL_CONNECTION_TYPE_EAST)))
         );
 
-        $builder->addProperty(new BlockProperty(StateNames::WALL_POST_BIT, [0, 1]))
+        $builder->addProperty(new BlockProperty(StateNames::WALL_POST_BIT, range(0, 1)))
             ->addProperty(new BlockProperty(StateNames::WALL_CONNECTION_TYPE_NORTH, [0, 1, 2]))
             ->addProperty(new BlockProperty(StateNames::WALL_CONNECTION_TYPE_SOUTH, [0, 1, 2]))
             ->addProperty(new BlockProperty(StateNames::WALL_CONNECTION_TYPE_WEST, [0, 1, 2]))
@@ -355,8 +435,8 @@ final class NexlyPermutations
         );
 
         $builder->addProperty(new BlockProperty(StateNames::DIRECTION, $facings = [0, 1, 2, 3])); // 0: East, 1: West, 2: South, 3: North
-        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, [0, 1]));
-        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [0, 1]));
+        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, range(0, 1)));
+        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, range(0, 1)));
 
         $builder->addComponent(new OnInteractBlockComponent());
         $builder->addComponent($material = new MaterialInstancesBlockComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::BLEND)]));
@@ -371,8 +451,8 @@ final class NexlyPermutations
         );
 
         foreach ($facings as $dir) {
-            foreach ([0, 1] as $open) {
-                foreach ([0, 1] as $top) {
+            foreach (range(0, 1) as $open) {
+                foreach (range(0, 1) as $top) {
                     $expr =
                         "q.block_state('" . StateNames::DIRECTION . "') == $dir && " .
                         "q.block_state('" . StateNames::OPEN_BIT . "') == $open && " .
@@ -424,7 +504,7 @@ final class NexlyPermutations
         );
 
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = [0, 2, 3, 4, 5])); // 0: Down, 2: North, 3: South, 4: West, 5: East
-        $builder->addProperty(new BlockProperty(StateNames::TOGGLE_BIT, [0, 1]));
+        $builder->addProperty(new BlockProperty(StateNames::TOGGLE_BIT, range(0, 1)));
 
         $builder->addComponent(
             (new GeometryBlockComponent(ExtendedGeometry::HOPPER->toString()))

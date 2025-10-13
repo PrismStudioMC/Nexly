@@ -40,6 +40,7 @@ use Nexly\Recipes\Types\Recipe;
 use pocketmine\block\block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\Crops;
+use pocketmine\block\Door;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Hopper;
@@ -589,6 +590,7 @@ class BlockBuilder
             $block instanceof Crops => NexlyPermutations::makeCrop($this, $block),
             $block instanceof NetherWartPlant => NexlyPermutations::makeNetherPlant($this, $block),
             $block instanceof Slab => NexlyPermutations::makeSlab($this, $block),
+            $block instanceof Door => NexlyPermutations::makeDoor($this, $block),
             $block instanceof Fence => NexlyPermutations::makeFence($this, $block),
             $block instanceof FenceGate => NexlyPermutations::makeFenceGate($this, $block),
             $block instanceof Wall => NexlyPermutations::makeWall($this, $block),
