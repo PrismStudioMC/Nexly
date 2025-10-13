@@ -192,7 +192,7 @@ final class NexlyPermutations
                     $permutation = Permutation::create($expr);
                     $permutation->addComponent(new MaterialInstancesBlockComponent([new Material(
                         texture: $builder->getName() . ($top ? "_upper" : "_lower"),
-                        renderMethod: MaterialRenderMethod::BLEND
+                        renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
                     )]));
 
                     $box = $open ? new BlockCollision(new Vector3(-8, 0, 5), new Vector3(16, 16, 3)) : new BLockCollision(new Vector3(-8, 0, -8), new Vector3(3, 16, 16));
