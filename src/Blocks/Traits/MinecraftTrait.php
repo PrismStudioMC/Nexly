@@ -17,7 +17,8 @@ class MinecraftTrait
         private TraitIds $identifier,
         private float  $rotationOffset,
         private State $state,
-    ) {
+    )
+    {
     }
 
     /**

@@ -20,7 +20,6 @@ use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use WeakMap;
-
 use function in_array;
 
 /**

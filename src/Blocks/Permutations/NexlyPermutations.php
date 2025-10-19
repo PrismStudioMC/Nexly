@@ -174,7 +174,7 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::UPPER_BLOCK_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::DOOR_HINGE_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
-
+        
         $builder->addComponent(new CustomComponentsBlockComponent());
         $builder->addComponent((new GeometryBlockComponent(ExtendedGeometry::DOOR->toString()))
             ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
@@ -580,7 +580,7 @@ final class NexlyPermutations
 
     /**
      * Create permutations for ladder blocks.
-     *
+     * 
      * @param Builder $builder
      * @param Ladder $block
      * @return void
@@ -588,15 +588,14 @@ final class NexlyPermutations
     public static function makeLadder(Builder $builder, Ladder $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static fn (Ladder $b) => (new Writer($stringId))->writeHorizontalFacing($b->getFacing()));
-        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setFacing($in->readHorizontalFacing()));
+        $builder->setSerializer(static fn(Ladder $b) => (new Writer($stringId))->writeHorizontalFacing($b->getFacing()));
+        $builder->setDeserializer(static fn(Reader $in) => (clone $block)->setFacing($in->readHorizontalFacing()));
 
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(2, 5)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LADDER->toString()));
 
         foreach ($facings as $dir) {
-            $builder->addPermutation(
-                Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
+            $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
                 ->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::LADDER()))
                 ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::LADDER()))
                 ->addComponent(new TransformationBlockComponent(match ($dir) {
@@ -620,8 +619,8 @@ final class NexlyPermutations
     public static function makeFarmland(Builder $builder, Farmland $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static fn (Farmland $b) => (new Writer($stringId))->writeInt(StateNames::MOISTURIZED_AMOUNT, $b->getWetness()));
-        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT)));
+        $builder->setSerializer(static fn(Farmland $b) => (new Writer($stringId))->writeInt(StateNames::MOISTURIZED_AMOUNT, $b->getWetness()));
+        $builder->setDeserializer(static fn(Reader $in) => (clone $block)->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT)));
 
         $builder->addProperty(new BlockProperty(StateNames::MOISTURIZED_AMOUNT, range(0, Farmland::MAX_WETNESS)));
 
@@ -716,8 +715,7 @@ final class NexlyPermutations
             ->addProperty(new BlockProperty("mc:w", range(0, 1)))
             ->addProperty(new BlockProperty("mc:e", range(0, 1)));
 
-        $builder->addComponent(
-            $geometry = (new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString()))
+        $builder->addComponent($geometry = (new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString()))
                 ->add("n", "q.block_state('mc:n') == 1")
                 ->add("s", "q.block_state('mc:s') == 1")
                 ->add("w", "q.block_state('mc:w') == 1")

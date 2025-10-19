@@ -79,7 +79,6 @@ use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\format\io\GlobalBlockStateHandlers as BlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers as ItemDataHandlers;
 use ReflectionClass;
-
 use function Opis\Closure\init;
 
 class BlockBuilder
@@ -127,7 +126,7 @@ class BlockBuilder
      */
     public function setStringId(string $stringId): self
     {
-        if (str_contains("minecraft:", $stringId)) {
+        if(str_contains("minecraft:", $stringId)) {
             throw new \InvalidArgumentException("Custom block string ID cannot contain the 'minecraft:' namespace.");
         }
 
@@ -434,17 +433,13 @@ class BlockBuilder
             ->setTag("components", $components)
             ->setTag("permutations", new ListTag(array_map(fn (Permutation $permutation) => $permutation->toNBT(), $this->permutations), NBT::TAG_Compound))
             ->setTag("properties", new ListTag(array_reverse(array_map(fn (BlockProperty $property) => $property->toNBT(), $this->properties)), NBT::TAG_Compound))
-            ->setTag(
-                "menu_category",
-                CompoundTag::create()
+            ->setTag("menu_category", CompoundTag::create()
                 ->setTag("category", new StringTag(strtolower($this->getCreativeInfo()?->getCategory()?->name ?? "none")))
                 ->setTag("group", new StringTag(strtolower($this->getCreativeInfo()?->getGroup()?->value ?? "none")))
                 ->setTag("is_hidden_in_commands", new ByteTag($this->getCreativeInfo()?->isHidden() ?? false))
             )
             ->setTag("traits", new ListTag(array_map(fn (MinecraftTrait $trait) => $trait->toNBT(), $this->traits), NBT::TAG_Compound))
-            ->setTag(
-                "vanilla_block_data",
-                CompoundTag::create()
+            ->setTag("vanilla_block_data", CompoundTag::create()
                 ->setTag("block_id", new IntTag(BlockMappings::getInstance()->nextRuntimeId()))
                 ->setTag("material", new StringTag($this->material->value))
             )
@@ -492,18 +487,18 @@ class BlockBuilder
         AsyncInitialization::addAsyncBlock($stringId, [
             $this->numericId,
             $this->block,
-            json_encode(array_map(fn (BlockProperty $property) => [
+            json_encode(array_map(fn(BlockProperty $property) => [
                 "name" => $property->getName(),
                 "values" => $property->getValues()
             ], $this->properties), JSON_THROW_ON_ERROR),
-            json_encode(array_map(fn (Permutation $permutation) => [
+            json_encode(array_map(fn(Permutation $permutation) => [
                 "condition" => $permutation->getCondition(),
-                "components" => array_map(fn (BlockComponent $component) => [
+                "components" => array_map(fn(BlockComponent $component) => [
                     "name" => $component->getName(),
                     "nbt" => base64_encode((new CacheableNbt($component->toNBT()))->getEncodedNbt())
                 ], $permutation->getComponents())
             ], $this->permutations), JSON_THROW_ON_ERROR),
-            json_encode(array_map(fn (BlockComponent $component) => [
+            json_encode(array_map(fn(BlockComponent $component) => [
                 "name" => $component->getName(),
                 "nbt" => base64_encode((new CacheableNbt($component->toNBT()))->getEncodedNbt())
             ], $this->getComponents()), JSON_THROW_ON_ERROR),
@@ -512,7 +507,7 @@ class BlockBuilder
         ]);
 
         $item = $block->asItem();
-        if ($item instanceof ItemBlock) {
+        if($item instanceof ItemBlock) {
             ItemMappings::registerEntry(new ItemTypeEntry(
                 $stringId,
                 $block->getTypeId(),
@@ -520,9 +515,7 @@ class BlockBuilder
                 ItemVersion::NONE->getValue(),
                 new CacheableNbt(CompoundTag::create())
             ));
-        } else {
-            $this->registerItem($block);
-        }
+        } else $this->registerItem($block);
         $this->registerBlockItem($block);
 
         $creativeInfo = $this->getCreativeInfo() ?? NexlyCreative::detectCreativeInfoFrom($block->asItem());

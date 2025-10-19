@@ -19,7 +19,8 @@ final class Material
         private readonly float                $ambientOcclusion = 1.0,
         private readonly bool                 $faceDimming = true,
         private readonly bool                 $packedBools = false,
-    ) {
+    )
+    {
     }
 
     /**

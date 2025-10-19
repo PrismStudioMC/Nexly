@@ -51,10 +51,8 @@ use pocketmine\item\Hoe;
 use pocketmine\item\Item;
 use pocketmine\item\ItemBlock;
 use pocketmine\item\Pickaxe;
-use pocketmine\item\Potion;
 use pocketmine\item\Record;
 use pocketmine\item\Shovel;
-use pocketmine\item\SpawnEgg;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\Sword;
 
@@ -147,7 +145,6 @@ class NexlyCreative
             },
             $item instanceof Food && $item->getBlock() instanceof Crops => new CreativeInfo(null, CreativeGroup::GROUP_CROP),
             $item instanceof Food => new CreativeInfo(null, CreativeGroup::GROUP_MISC_FOOD),
-            $item instanceof Potion => new CreativeInfo(null, CreativeGroup::GROUP_POTION),
             $item instanceof SplashPotion => new CreativeInfo(null, CreativeGroup::GROUP_SLASH_POTION),
             $item instanceof EnchantedBook => new CreativeInfo(null, CreativeGroup::GROUP_ENCHANTED_BOOK),
             $item instanceof Arrow => new CreativeInfo(null, CreativeGroup::GROUP_ARROW),

@@ -139,7 +139,7 @@ class LegacyItemBuilder extends ItemBuilder
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::SOUL_SAND()));
         } elseif ($block instanceof Hopper || $block instanceof Door) {
             $this->addComponent(SeedComponent::fromBlocks($block));
-        } elseif ($block instanceof Flower) {
+        } else if($block instanceof Flower) {
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::GRASS(), VanillaBlocks::DIRT(), VanillaBlocks::PODZOL(), VanillaBlocks::MYCELIUM()));
         }
         return $this;

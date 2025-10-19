@@ -13,12 +13,13 @@ trait LegacyItemBlockTrait
      */
     public function asItem(): Item
     {
-        return new class (new ItemIdentifier(-$this->getTypeId()), $this->getName(), clone $this) extends Item {
+        return new class(new ItemIdentifier(-$this->getTypeId()), $this->getName(), clone $this) extends Item {
             public function __construct(
                 ItemIdentifier $identifier,
                 string                         $name,
                 private readonly Block $block,
-            ) {
+            )
+            {
                 parent::__construct($identifier, $name);
             }
 

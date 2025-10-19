@@ -11,7 +11,8 @@ class BlockLoaderEvent extends Event
     public function __construct(
         private BlockBuilder $builder,
         private Block $block
-    ) {
+    )
+    {
     }
 
     /**

@@ -37,6 +37,6 @@ class LiquidDetectionComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("detectionRules", new ListTag(array_map(fn (LiquidRule $rule) => $rule->toNBT(), $this->rules), NBT::TAG_Compound));
+            ->setTag("detectionRules", new ListTag(array_map(fn(LiquidRule $rule) => $rule->toNBT(), $this->rules), NBT::TAG_Compound));
     }
 }

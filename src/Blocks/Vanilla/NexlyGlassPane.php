@@ -47,7 +47,7 @@ class NexlyGlassPane extends GlassPane
 
         foreach (Facing::HORIZONTAL as $facing) {
             $block = $this->getSide($facing);
-            if ($block instanceof Thin || $block instanceof Wall || $block->getSupportType(Facing::opposite($facing)) === SupportType::FULL) {
+            if($block instanceof Thin || $block instanceof Wall || $block->getSupportType(Facing::opposite($facing)) === SupportType::FULL){
                 if (!isset($this->connections[$facing])) {
                     $this->connections[$facing] = $facing;
                     $changed++;

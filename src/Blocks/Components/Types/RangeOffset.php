@@ -9,7 +9,8 @@ class RangeOffset
     public function __construct(
         private Vector3 $min,
         private Vector3 $max,
-    ) {
+    )
+    {
     }
 
     /**
