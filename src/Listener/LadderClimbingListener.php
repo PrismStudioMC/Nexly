@@ -6,27 +6,15 @@ namespace Nexly\Listener;
 
 use Nexly\Blocks\Vanilla\NexlyLadder;
 use pocketmine\block\Ladder;
-use pocketmine\entity\Entity;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
-use pocketmine\event\player\PlayerLoginEvent;
-use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\handler\InGamePacketHandler;
-use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
-use pocketmine\network\mcpe\protocol\types\PlayerAction;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
-use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
-use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
-use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
-use pocketmine\player\SurvivalBlockBreakHandler;
-use WeakMap;
 
 final class LadderClimbingListener implements Listener
 {
@@ -51,50 +39,50 @@ final class LadderClimbingListener implements Listener
         $packet = $ev->getPacket();
 
         $handler = $origin->getHandler();
-        if(!$handler instanceof InGamePacketHandler) {
+        if (!$handler instanceof InGamePacketHandler) {
             return; // Not an in-game packet handler
         }
 
-        if(!$packet instanceof PlayerAuthInputPacket) {
+        if (!$packet instanceof PlayerAuthInputPacket) {
             return; // Not a PlayerAuthInputPacket
         }
 
         $player = $origin->getPlayer();
-        if($player == null || !$player->isConnected()) {
+        if ($player == null || !$player->isConnected()) {
             return; // Player is not connected
         }
 
         $now = $packet->getPosition()->subtract(0, $player->getEyeHeight(), 0);
-        if($player->getPosition()->distance($now) > 2) {
+        if ($player->getPosition()->distance($now) > 2) {
             return; // Player moved too far
         }
 
         $block = $player->getWorld()->getBlock($now);
-        if(!$block instanceof Ladder) {
-            if($player->canClimbWalls()) {
+        if (!$block instanceof Ladder) {
+            if ($player->canClimbWalls()) {
                 $player->setCanClimbWalls(false);
             }
             return;
         }
 
-        if(!$player->canClimbWalls()) {
+        if (!$player->canClimbWalls()) {
             $player->setCanClimbWalls();
         }
 
-        if($player->isSneaking()) {
+        if ($player->isSneaking()) {
             $player->setMotion(Vector3::zero());
             return; // Stop climbing when sneaking
         }
 
-        if(!$packet->getInputFlags()->get(PlayerAuthInputFlags::HORIZONTAL_COLLISION)) {
+        if (!$packet->getInputFlags()->get(PlayerAuthInputFlags::HORIZONTAL_COLLISION)) {
             return; // Not colliding with a wall
         }
 
-        if($block instanceof NexlyLadder) {
+        if ($block instanceof NexlyLadder) {
             $speed = $block->getClimbSpeed();
 
             $upBlock = $block->getSide(Facing::UP);
-            if(!$upBlock instanceof Ladder) {
+            if (!$upBlock instanceof Ladder) {
                 $speed /= 1.5;
             }
 
@@ -112,16 +100,16 @@ final class LadderClimbingListener implements Listener
      */
     public function addVelocity(Player $player, Vector3 $now, float $climbSpeed): void
     {
-        if($climbSpeed <= 0) {
+        if ($climbSpeed <= 0) {
             return; // No climbing speed defined
         }
 
-        if(!$player->isConnected()){
+        if (!$player->isConnected()) {
             return;
         }
 
         $pos = $player->getPosition();
-        if($pos->y >= $now->y) {
+        if ($pos->y >= $now->y) {
             return; // Player is moving downwards
         }
 

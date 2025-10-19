@@ -10,6 +10,10 @@ use pocketmine\nbt\tag\StringTag;
 
 class BlockProperty
 {
+    /**
+     * @param string $name
+     * @param array $values
+     */
     public function __construct(
         private readonly string $name,
         private readonly array $values

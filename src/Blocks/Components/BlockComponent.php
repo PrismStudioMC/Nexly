@@ -11,7 +11,7 @@ abstract class BlockComponent
      *
      * @return string
      */
-    abstract public static function getName(): string;
+    abstract public function getName(): string;
 
     /**
      * Build the NBT tag for this component.

@@ -17,7 +17,7 @@ class ReplaceableBlockComponent extends BlockComponent
      *
      * @return string
      */
-    public static function getName(): string
+    public function getName(): string
     {
         return BlockComponentIds::REPLACEABLE->getValue();
     }

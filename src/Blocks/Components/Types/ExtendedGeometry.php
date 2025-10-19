@@ -15,6 +15,8 @@ enum ExtendedGeometry: string
     case HOPPER = "geometry.hopper";
     case MOBHEAD = "geometry.mob_head";
     case LADDER = "geometry.ladder";
+    case FARMLAND = "geometry.farmland";
+    case GLASS_PANE = "geometry.glass_pane";
 
     /**
      * Returns the enum value as a string.

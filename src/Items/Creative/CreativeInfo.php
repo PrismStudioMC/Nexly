@@ -12,6 +12,7 @@ class CreativeInfo
     public function __construct(
         private ?CreativeCategory $category,
         private CreativeGroup|BackedEnum|null $group = null,
+        private bool $isHidden = false,
     ) {
     }
 
@@ -29,5 +30,13 @@ class CreativeInfo
     public function getGroup(): BackedEnum|CreativeGroup|null
     {
         return $this->group;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHidden(): bool
+    {
+        return $this->isHidden;
     }
 }

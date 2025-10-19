@@ -6,14 +6,13 @@ use Nexly\Items\ItemBuilder;
 use Nexly\Items\ItemVersion;
 use pocketmine\block\Crops;
 use pocketmine\block\Door;
+use pocketmine\block\Flower;
 use pocketmine\block\Hopper;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\VanillaBlocks;
-use pocketmine\entity\Consumable;
+use pocketmine\entity\FoodSource;
+use pocketmine\item\ConsumableItem;
 use pocketmine\item\Durable;
-use pocketmine\item\Food;
-use pocketmine\item\Hoe;
-use pocketmine\item\Shovel;
 use pocketmine\item\Tool;
 use pocketmine\nbt\tag\CompoundTag;
 
@@ -107,21 +106,27 @@ class LegacyItemBuilder extends ItemBuilder
         $this->addComponent(new StackedByDataComponent(false));
         $this->addComponent(new HandEquippedComponent($item instanceof Tool));
 
-        if ($item instanceof Shovel) {
-            $this->addComponent(SeedComponent::fromBlocks(VanillaBlocks::AIR(), VanillaBlocks::GRASS(), VanillaBlocks::DIRT(), VanillaBlocks::PODZOL(), VanillaBlocks::MYCELIUM()));
-        }
-
-        if ($item instanceof Hoe) {
-            $this->addComponent(SeedComponent::fromBlocks(VanillaBlocks::AIR(), VanillaBlocks::GRASS(), VanillaBlocks::DIRT()));
-        }
-
         if ($item instanceof Durable) {
             $this->addComponent(new MaxDamageComponent($item->getMaxDurability()));
         }
 
-        if ($item instanceof Consumable) {
-            if ($item instanceof Food) {
-                $this->addComponent(new FoodComponent($item->getFoodRestore(), $item->getSaturationRestore(), $item->requiresHunger()));
+        if ($item instanceof ConsumableItem) {
+            if ($item instanceof FoodSource) {
+                $this->addComponent(new FoodComponent(
+                    $item->getFoodRestore(),
+                    $item->getSaturationRestore(),
+                    !$item->requiresHunger(),
+                    cooldownType: $item->getCooldownTag() ?? $this->getStringId(),
+                    cooldownTick: $item->getCooldownTicks(),
+                ));
+            } else {
+                $this->addComponent(new FoodComponent(
+                    0.0,
+                    0.0,
+                    true,
+                    cooldownType: $item->getCooldownTag() ?? $this->getStringId(),
+                    cooldownTick: $item->getCooldownTicks(),
+                ));
             }
 
             $this->addComponent(new UseDurationComponent(32));
@@ -134,6 +139,8 @@ class LegacyItemBuilder extends ItemBuilder
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::SOUL_SAND()));
         } elseif ($block instanceof Hopper || $block instanceof Door) {
             $this->addComponent(SeedComponent::fromBlocks($block));
+        } elseif ($block instanceof Flower) {
+            $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::GRASS(), VanillaBlocks::DIRT(), VanillaBlocks::PODZOL(), VanillaBlocks::MYCELIUM()));
         }
         return $this;
     }

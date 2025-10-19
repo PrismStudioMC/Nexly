@@ -24,6 +24,9 @@ enum BlockComponentIds: string
     case REPLACEABLE = "minecraft:replaceable";
     case SELECTION_BOX = "minecraft:selection_box";
     case TRANSFORMATION = "minecraft:transformation";
+    case CUSTOM_COMPONENTS = "minecraft:custom_components";
+    case FLOWER_POTTABLE = "minecraft:flower_pottable";
+    case RANDOM_OFFSET = "minecraft:random_offset";
 
     /**
      * Returns the name of the component.

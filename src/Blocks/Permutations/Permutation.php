@@ -25,6 +25,14 @@ final class Permutation
     }
 
     /**
+     * @return string
+     */
+    public function getCondition(): string
+    {
+        return $this->condition;
+    }
+
+    /**
      * @param string $condition
      * @return Permutation
      */
@@ -35,12 +43,20 @@ final class Permutation
     }
 
     /**
+     * @return array
+     */
+    public function getComponents(): array
+    {
+        return $this->components;
+    }
+
+    /**
      * @param BlockComponent $component
      * @return $this
      */
     public function addComponent(BlockComponent $component): self
     {
-        $this->components[$component::getName()] = $component;
+        $this->components[$component->getName()] = $component;
         return $this;
     }
 

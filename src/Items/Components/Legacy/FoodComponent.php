@@ -33,7 +33,7 @@ class FoodComponent extends LegacyItemComponent
      * @param int $nutrition
      * @param float $saturationModifier
      * @param bool $canAlwaysEat
-     * @param LegacyItemCooldownType $cooldownType
+     * @param LegacyItemCooldownType|\BackedEnum|string $cooldownType
      * @param int $cooldownTick
      * @param string $usingConvertsTo
      * @param LegacyItemUseActionType $useActionType
@@ -45,7 +45,7 @@ class FoodComponent extends LegacyItemComponent
         private readonly int                     $nutrition,
         private readonly float                   $saturationModifier,
         private readonly bool                    $canAlwaysEat = false,
-        private readonly LegacyItemCooldownType  $cooldownType = LegacyItemCooldownType::NONE,
+        private readonly LegacyItemCooldownType|\BackedEnum|string  $cooldownType = LegacyItemCooldownType::NONE,
         private readonly int                     $cooldownTick = 0,
         private string                           $usingConvertsTo = "air",
         private readonly LegacyItemUseActionType $useActionType = LegacyItemUseActionType::NONE,
@@ -81,7 +81,7 @@ class FoodComponent extends LegacyItemComponent
             ->setTag("nutrition", new IntTag($this->nutrition))
             ->setTag("saturation_modifier", new FloatTag($this->saturationModifier))
             ->setTag("can_always_eat", new ByteTag($this->canAlwaysEat))
-            ->setTag("cooldown_type", new StringTag($this->cooldownType->getValue()))
+            ->setTag("cooldown_type", new StringTag(is_string($this->cooldownType) ? $this->cooldownType : $this->cooldownType->value))
             ->setTag("cooldown_time", new IntTag($this->cooldownTick))
             ->setTag("using_converts_to", CompoundTag::create()->setTag("name", new StringTag($this->usingConvertsTo)))
             ->setTag("on_use_action", new IntTag($this->useActionType->getValue()))

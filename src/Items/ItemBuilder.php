@@ -45,6 +45,10 @@ abstract class ItemBuilder
      */
     public function setStringId(string $stringId): self
     {
+        if (str_contains("minecraft:", $stringId)) {
+            throw new \InvalidArgumentException("Custom block string ID cannot contain the 'minecraft:' namespace.");
+        }
+
         $this->stringId = $stringId;
         return $this;
     }

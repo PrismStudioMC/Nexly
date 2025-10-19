@@ -20,7 +20,7 @@ class BreathabilityBlockComponent extends BlockComponent
      *
      * @return string
      */
-    public static function getName(): string
+    public function getName(): string
     {
         return BlockComponentIds::BREATHABILITY->getValue();
     }

@@ -2,6 +2,7 @@
 
 namespace Nexly\Events\Impl;
 
+use Nexly\Blocks\BlockBuilder;
 use Nexly\Blocks\NexlyBlocks;
 use Nexly\Events\Event;
 use Nexly\Items\Creative\CreativeInfo;
@@ -14,13 +15,24 @@ class BlockRegistryEvent extends Event
      * @param string $stringId
      * @param \Closure $block
      * @param CreativeInfo|null $creativeInfo
-     * @return self
+     * @return BlockBuilder
      */
-    public function register(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null): self
+    public function register(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null): BlockBuilder
     {
-        NexlyBlocks::register($stringId, $block, $creativeInfo);
         $this->count++;
-        return $this;
+        return NexlyBlocks::register($stringId, $block, $creativeInfo);
+    }
+
+    /**
+     * @param string $stringId
+     * @param \Closure $block
+     * @param CreativeInfo|null $creativeInfo
+     * @return BlockBuilder
+     */
+    public function build(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null): BlockBuilder
+    {
+        $this->count++;
+        return NexlyBlocks::buildComplex($stringId, $block, $creativeInfo);
     }
 
     /**

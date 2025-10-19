@@ -271,7 +271,7 @@ class DataDrivenItemBuilder extends ItemBuilder
 
         $cooldown = $item->getCooldownTicks();
         if ($cooldown > 0) {
-            $this->addComponent(new CooldownItemComponent($cooldown));
+            $this->addComponent(new CooldownItemComponent($cooldown / 20, $item->getCooldownTag()));
         }
 
         if ($item instanceof Dye) {

@@ -5,11 +5,6 @@ namespace Nexly\Blocks\Vanilla;
 use pocketmine\block\BlockIdentifier;
 use pocketmine\block\BlockTypeInfo;
 use pocketmine\block\Ladder;
-use pocketmine\entity\Entity;
-use pocketmine\entity\Living;
-use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\handler\InGamePacketHandler;
-use pocketmine\player\Player;
 
 class NexlyLadder extends Ladder
 {
