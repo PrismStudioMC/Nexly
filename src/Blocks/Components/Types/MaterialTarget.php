@@ -5,7 +5,6 @@ namespace Nexly\Blocks\Components\Types;
 enum MaterialTarget: string
 {
     case ALL = "*";
-    case SIDES = "sides";
     case UP = "up";
     case DOWN = "down";
     case NORTH = "north";

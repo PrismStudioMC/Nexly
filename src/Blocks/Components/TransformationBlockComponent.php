@@ -4,6 +4,7 @@ namespace Nexly\Blocks\Components;
 
 use Attribute;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
@@ -14,7 +15,8 @@ class TransformationBlockComponent extends BlockComponent
     public function __construct(
         private readonly Vector3 $rotation = new Vector3(0, 0, 0),
         private readonly Vector3 $scale = new Vector3(1, 1, 1),
-        private readonly Vector3 $translation = new Vector3(0, 0, 0)
+        private readonly Vector3 $translation = new Vector3(0, 0, 0),
+        private readonly bool $hasJsonVersionBeforeValidation = false,
     ) {
 
     }
@@ -24,7 +26,7 @@ class TransformationBlockComponent extends BlockComponent
      *
      * @return string
      */
-    public static function getName(): string
+    public function getName(): string
     {
         return BlockComponentIds::TRANSFORMATION->getValue();
     }
@@ -45,6 +47,7 @@ class TransformationBlockComponent extends BlockComponent
             ->setTag("SZ", new FloatTag($this->scale->getZ()))
             ->setTag("TX", new FloatTag($this->translation->getX()))
             ->setTag("TY", new FloatTag($this->translation->getY()))
-            ->setTag("TZ", new FloatTag($this->translation->getZ()));
+            ->setTag("TZ", new FloatTag($this->translation->getZ()))
+            ->setTag("hasJsonVersionBeforeValidation", new ByteTag($this->hasJsonVersionBeforeValidation));
     }
 }

@@ -5,6 +5,10 @@ namespace Nexly\Blocks\Components;
 use Attribute;
 use pocketmine\nbt\tag\CompoundTag;
 
+/**
+ * @see CustomComponentsBlockComponent
+ * @deprecated
+ */
 #[Attribute(Attribute::TARGET_CLASS)]
 class OnPlayerPlacingBlockComponent extends BlockComponent
 {
@@ -17,7 +21,7 @@ class OnPlayerPlacingBlockComponent extends BlockComponent
      *
      * @return string
      */
-    public static function getName(): string
+    public function getName(): string
     {
         return BlockComponentIds::ON_PLAYER_PLACING->getValue();
     }

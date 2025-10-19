@@ -3,19 +3,19 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
-use Nexly\Blocks\Components\Types\LiquidTouchAction;
-use Nexly\Blocks\Components\Types\LiquidType;
-use pocketmine\nbt\tag\ByteTag;
+use Nexly\Blocks\Components\Types\LiquidRule;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\ListTag;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class LiquidDetectionComponent extends BlockComponent
 {
+    /**
+     * @param LiquidRule[] $rules
+     */
     public function __construct(
-        private readonly bool              $waterloggable,
-        private readonly LiquidType        $type = LiquidType::WATER,
-        private readonly LiquidTouchAction $toucheAction = LiquidTouchAction::NO_REACTION,
+        private array $rules,
     ) {
     }
 
@@ -24,7 +24,7 @@ class LiquidDetectionComponent extends BlockComponent
      *
      * @return string
      */
-    public static function getName(): string
+    public function getName(): string
     {
         return BlockComponentIds::LIQUID_DETECTION->getValue();
     }
@@ -37,9 +37,6 @@ class LiquidDetectionComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("detection_rules", CompoundTag::create()
-                ->setTag("can_contain_liquid", new ByteTag($this->waterloggable))
-                ->setTag("liquid_type", new StringTag($this->type->value))
-                ->setTag("on_liquid_touches", new StringTag($this->toucheAction->value)));
+            ->setTag("detectionRules", new ListTag(array_map(fn (LiquidRule $rule) => $rule->toNBT(), $this->rules), NBT::TAG_Compound));
     }
 }
