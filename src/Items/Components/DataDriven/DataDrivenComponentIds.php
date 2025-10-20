@@ -35,6 +35,7 @@ enum DataDrivenComponentIds: string
     case USE_MODIFIERS = "minecraft:use_modifiers";
     case WEAPON = "minecraft:weapon";
     case WEARABLE = "minecraft:wearable";
+    case PUBLISHER_ON_USE_ON = "minecraft:publisher_on_use_on";
 
     /**
      * Returns the name of the component.
