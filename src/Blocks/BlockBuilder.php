@@ -56,6 +56,7 @@ use pocketmine\block\Slab;
 use pocketmine\block\tile\Container;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\Wall;
+use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
@@ -90,6 +91,9 @@ class BlockBuilder
     private ?Closure $deserializer = null;
     private ?CreativeInfo $creativeInfo = null;
     private MaterialType $material = MaterialType::Dirt;
+
+    /** @var array<string> */
+    private array $tags = [];
 
     /** @var array<BlockComponent> */
     private array $components = [];
@@ -154,6 +158,33 @@ class BlockBuilder
     {
         $this->numericId = $numericId;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTags(): array
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @param array $tags
+     */
+    public function setTags(array $tags): void
+    {
+        $this->tags = $tags;
+    }
+
+    /**
+     * @param string $tag
+     * @return void
+     */
+    public function addTag(string $tag): void
+    {
+        if(!in_array($tag, $this->tags, true)) {
+            $this->tags[] = $tag;
+        }
     }
 
     /**
@@ -429,15 +460,32 @@ class BlockBuilder
         foreach ($this->components as $k => $component) {
             $components->setTag($component->getName(), $component->toNBT());
         }
+
+        $properties = [];
+        foreach ($this->properties as $property) {
+            foreach ($this->traits as $trait) {
+                if($trait->getState()->isCardinal() && $property->getName() == BlockStateNames::MC_CARDINAL_DIRECTION) {
+                    continue 2;
+                }
+
+                if($trait->getState()->isFacing() && $property->getName() == BlockStateNames::FACING_DIRECTION) {
+                    continue 2;
+                }
+            }
+
+            $properties[] = $property->toNBT();
+        }
+
         return CompoundTag::create()
             ->setTag("components", $components)
             ->setTag("permutations", new ListTag(array_map(fn (Permutation $permutation) => $permutation->toNBT(), $this->permutations), NBT::TAG_Compound))
-            ->setTag("properties", new ListTag(array_reverse(array_map(fn (BlockProperty $property) => $property->toNBT(), $this->properties)), NBT::TAG_Compound))
+            ->setTag("properties", new ListTag($properties, NBT::TAG_Compound))
             ->setTag("menu_category", CompoundTag::create()
                 ->setTag("category", new StringTag(strtolower($this->getCreativeInfo()?->getCategory()?->name ?? "none")))
                 ->setTag("group", new StringTag(strtolower($this->getCreativeInfo()?->getGroup()?->value ?? "none")))
                 ->setTag("is_hidden_in_commands", new ByteTag($this->getCreativeInfo()?->isHidden() ?? false))
             )
+            ->setTag("blockTags", new ListTag(array_map(fn (string $tag) => new StringTag($tag), $this->tags), NBT::TAG_String))
             ->setTag("traits", new ListTag(array_map(fn (MinecraftTrait $trait) => $trait->toNBT(), $this->traits), NBT::TAG_Compound))
             ->setTag("vanilla_block_data", CompoundTag::create()
                 ->setTag("block_id", new IntTag(BlockMappings::getInstance()->nextRuntimeId()))
@@ -502,6 +550,14 @@ class BlockBuilder
                 "name" => $component->getName(),
                 "nbt" => base64_encode((new CacheableNbt($component->toNBT()))->getEncodedNbt())
             ], $this->getComponents()), JSON_THROW_ON_ERROR),
+            json_encode(array_map(fn(MinecraftTrait $trait) => [
+                "identifier" => $trait->getIdentifier()->value,
+                "rotationOffset" => $trait->getRotationOffset(),
+                "state" => [
+                    "cardinal" => $trait->getState()->isCardinal(),
+                    "facing" => $trait->getState()->isFacing(),
+                ],
+            ], $this->traits), JSON_THROW_ON_ERROR),
             $serializer,
             $deserializer,
         ]);

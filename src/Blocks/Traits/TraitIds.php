@@ -22,4 +22,17 @@ enum TraitIds: string
     {
         return $this->value;
     }
+
+    /**
+     * @param string $value
+     * @return self
+     */
+    public static function fromString(string $value): self
+    {
+        return match ($value) {
+            "minecraft:placement_direction" => self::PLACEMENT_DIRECTION,
+            "minecraft:placement_position" => self::PLACEMENT_POSITION,
+            default => throw new \InvalidArgumentException("Invalid TraitIds value: " . $value),
+        };
+    }
 }

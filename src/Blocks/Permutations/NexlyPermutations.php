@@ -27,6 +27,9 @@ use Nexly\Blocks\Components\Types\RangeOffset;
 use Nexly\Blocks\Permutations\Impl\FencePermutation;
 use Nexly\Blocks\Permutations\Impl\GlassPanePermutation;
 use Nexly\Blocks\Permutations\Impl\WallPermutation;
+use Nexly\Blocks\Traits\MinecraftTrait;
+use Nexly\Blocks\Traits\State;
+use Nexly\Blocks\Traits\TraitIds;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Blocks\Vanilla\NexlyFence;
 use Nexly\Blocks\Vanilla\NexlyGlassPane;
@@ -324,8 +327,8 @@ final class NexlyPermutations
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString() . "_render"), $material));
         $builder->addComponent(new CustomComponentsBlockComponent());
         foreach ($facings as $dir) {
-            foreach ([false, true] as $open) {
-                foreach ([false, true] as $inWall) {
+            foreach (range(0, 1) as $open) {
+                foreach (range(0, 1) as $inWall) {
                     $expr =
                         "q.block_state('" . StateNames::OPEN_BIT . "') == $open && " .
                         "q.block_state('" . StateNames::IN_WALL_BIT . "') == $inWall && " .
@@ -347,8 +350,8 @@ final class NexlyPermutations
                         StateValues::MC_CARDINAL_DIRECTION_WEST => new Vector3(0, 270, 0),
                         default => throw new \RuntimeException("Invalid direction")
                     }, translation: match ($inWall) {
-                        false => new Vector3(0, 0, 0),
-                        true => new Vector3(0, -0.187, 0),
+                        0 => new Vector3(0, 0, 0),
+                        1 => new Vector3(0, -0.187, 0),
                     }));
 
                     $builder->addPermutation($permutation);
