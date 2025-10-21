@@ -20,6 +20,8 @@ use pocketmine\block\Door;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Flower;
+use pocketmine\block\Glass;
+use pocketmine\block\GlassPane;
 use pocketmine\block\GlazedTerracotta;
 use pocketmine\block\MobHead;
 use pocketmine\block\NetherWartPlant;
@@ -194,6 +196,8 @@ class NexlyCreative
             $block instanceof Flower => new CreativeInfo(null, CreativeGroup::GROUP_FLOWER),
             $block instanceof ConcretePowder => new CreativeInfo(null, CreativeGroup::GROUP_CONCRETE_POWDER),
             $block instanceof Concrete => new CreativeInfo(null, CreativeGroup::GROUP_CONCRETE),
+            $block instanceof Glass => new CreativeInfo(null, CreativeGroup::GROUP_GLASS),
+            $block instanceof GlassPane => new CreativeInfo(null, CreativeGroup::GROUP_GLASS_PANE),
 
             $block instanceof NetherWartPlant => new CreativeInfo(CreativeCategory::NATURE, null),
             default => new CreativeInfo(CreativeCategory::CONSTRUCTION),

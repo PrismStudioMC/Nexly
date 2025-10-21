@@ -4,7 +4,9 @@ namespace Nexly\Items;
 
 use Nexly\Items\Components\DataDriven\DataDrivenItemBuilder;
 use Nexly\Items\Components\DataDriven\DataDrivenItemComponent;
+use Nexly\Items\Components\DataDriven\Property\PropertyComponentIds;
 use Nexly\Items\Components\DataDriven\Property\PropertyItemComponent;
+use Nexly\Items\Components\DataDriven\Types\IgnoreBlockVisual;
 use Nexly\Items\Components\Legacy\LegacyItemBuilder;
 use Nexly\Items\Components\Legacy\LegacyItemComponent;
 use Nexly\Items\Creative\CreativeInfo;

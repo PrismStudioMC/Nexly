@@ -38,7 +38,7 @@ class OnInteractBlockComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("condition",  new StringTag($this->condition))
+            ->setTag("condition", new StringTag($this->condition))
             ->setTag("event", new StringTag($this->event))
             ->setTag("target", new StringTag($this->target));
     }

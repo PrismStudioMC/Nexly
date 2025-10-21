@@ -8,11 +8,12 @@ use pocketmine\block\Block;
 
 class BlockLoaderEvent extends Event
 {
+    private bool $affected = false;
+
     public function __construct(
         private BlockBuilder $builder,
         private Block $block
-    )
-    {
+    ) {
     }
 
     /**
@@ -29,5 +30,21 @@ class BlockLoaderEvent extends Event
     public function getBlock(): Block
     {
         return $this->block;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAffected(): bool
+    {
+        return $this->affected;
+    }
+
+    /**
+     * @param bool $affected
+     */
+    public function affected(bool $affected = true): void
+    {
+        $this->affected = $affected;
     }
 }

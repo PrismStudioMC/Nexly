@@ -33,6 +33,7 @@ use Nexly\Blocks\Traits\TraitIds;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Blocks\Vanilla\NexlyFence;
 use Nexly\Blocks\Vanilla\NexlyGlassPane;
+use pocketmine\block\Block;
 use pocketmine\block\Crops;
 use pocketmine\block\Door;
 use pocketmine\block\Farmland;
@@ -43,10 +44,12 @@ use pocketmine\block\GlassPane;
 use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
 use pocketmine\block\Lava;
+use pocketmine\block\Lever;
 use pocketmine\block\Liquid;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Slab;
 use pocketmine\block\Trapdoor;
+use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\SlabType;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\block\Wall;
@@ -177,7 +180,7 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::UPPER_BLOCK_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::DOOR_HINGE_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
-        
+
         $builder->addComponent(new CustomComponentsBlockComponent());
         $builder->addComponent((new GeometryBlockComponent(ExtendedGeometry::DOOR->toString()))
             ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
@@ -583,7 +586,7 @@ final class NexlyPermutations
 
     /**
      * Create permutations for ladder blocks.
-     * 
+     *
      * @param Builder $builder
      * @param Ladder $block
      * @return void
@@ -591,14 +594,15 @@ final class NexlyPermutations
     public static function makeLadder(Builder $builder, Ladder $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static fn(Ladder $b) => (new Writer($stringId))->writeHorizontalFacing($b->getFacing()));
-        $builder->setDeserializer(static fn(Reader $in) => (clone $block)->setFacing($in->readHorizontalFacing()));
+        $builder->setSerializer(static fn (Ladder $b) => (new Writer($stringId))->writeHorizontalFacing($b->getFacing()));
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setFacing($in->readHorizontalFacing()));
 
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(2, 5)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LADDER->toString()));
 
         foreach ($facings as $dir) {
-            $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
+            $builder->addPermutation(
+                Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
                 ->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::LADDER()))
                 ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::LADDER()))
                 ->addComponent(new TransformationBlockComponent(match ($dir) {
@@ -622,8 +626,8 @@ final class NexlyPermutations
     public static function makeFarmland(Builder $builder, Farmland $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static fn(Farmland $b) => (new Writer($stringId))->writeInt(StateNames::MOISTURIZED_AMOUNT, $b->getWetness()));
-        $builder->setDeserializer(static fn(Reader $in) => (clone $block)->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT)));
+        $builder->setSerializer(static fn (Farmland $b) => (new Writer($stringId))->writeInt(StateNames::MOISTURIZED_AMOUNT, $b->getWetness()));
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT)));
 
         $builder->addProperty(new BlockProperty(StateNames::MOISTURIZED_AMOUNT, range(0, Farmland::MAX_WETNESS)));
 
@@ -718,7 +722,8 @@ final class NexlyPermutations
             ->addProperty(new BlockProperty("mc:w", range(0, 1)))
             ->addProperty(new BlockProperty("mc:e", range(0, 1)));
 
-        $builder->addComponent($geometry = (new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString()))
+        $builder->addComponent(
+            $geometry = (new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString()))
                 ->add("n", "q.block_state('mc:n') == 1")
                 ->add("s", "q.block_state('mc:s') == 1")
                 ->add("w", "q.block_state('mc:w') == 1")
@@ -727,9 +732,91 @@ final class NexlyPermutations
         $builder->addComponent($material = new MaterialInstancesBlockComponent([
             new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED)
         ]));
+        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString() . "_render"), $material));
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
         $builder->addComponent(new FlowerPottableBlockComponent());
 
         GlassPanePermutation::create($builder)->apply();
+    }
+
+    /**
+     * Create permutations for lever blocks.
+     *
+     * @param Builder $builder
+     * @param Lever $block
+     * @return void
+     */
+    public static function makeLever(Builder $builder, Lever $block): void
+    {
+        $stringId = $builder->getStringId();
+        $builder->setSerializer(
+            static fn (Lever $block) => Writer::create($stringId)
+            ->writeBool(StateNames::OPEN_BIT, $block->isActivated())
+            ->writeString(StateNames::LEVER_DIRECTION, match($block->getFacing()) {
+                LeverFacing::DOWN_AXIS_Z => StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH,
+                LeverFacing::DOWN_AXIS_X => StateValues::LEVER_DIRECTION_DOWN_EAST_WEST,
+                LeverFacing::UP_AXIS_Z => StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH,
+                LeverFacing::UP_AXIS_X => StateValues::LEVER_DIRECTION_UP_EAST_WEST,
+                LeverFacing::NORTH => StateValues::LEVER_DIRECTION_NORTH,
+                LeverFacing::SOUTH => StateValues::LEVER_DIRECTION_SOUTH,
+                LeverFacing::WEST => StateValues::LEVER_DIRECTION_WEST,
+                LeverFacing::EAST => StateValues::LEVER_DIRECTION_EAST,
+            })
+        );
+        $builder->setDeserializer(
+            static fn (Reader $in) => (clone $block)
+            ->setActivated($in->readBool(StateNames::OPEN_BIT))
+            ->setFacing(match($in->readString(StateNames::LEVER_DIRECTION)) {
+                StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => LeverFacing::DOWN_AXIS_Z,
+                StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => LeverFacing::DOWN_AXIS_X,
+                StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => LeverFacing::UP_AXIS_Z,
+                StateValues::LEVER_DIRECTION_UP_EAST_WEST => LeverFacing::UP_AXIS_X,
+                StateValues::LEVER_DIRECTION_NORTH => LeverFacing::NORTH,
+                StateValues::LEVER_DIRECTION_SOUTH => LeverFacing::SOUTH,
+                StateValues::LEVER_DIRECTION_WEST => LeverFacing::WEST,
+                StateValues::LEVER_DIRECTION_EAST => LeverFacing::EAST,
+                default => throw new \RuntimeException("Invalid lever direction"),
+            })
+        );
+
+        $builder->addProperty(new BlockProperty(StateNames::LEVER_DIRECTION, $facings = [
+            StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH,
+            StateValues::LEVER_DIRECTION_DOWN_EAST_WEST,
+            StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH,
+            StateValues::LEVER_DIRECTION_UP_EAST_WEST,
+            StateValues::LEVER_DIRECTION_NORTH,
+            StateValues::LEVER_DIRECTION_SOUTH,
+            StateValues::LEVER_DIRECTION_WEST,
+            StateValues::LEVER_DIRECTION_EAST
+        ]));
+        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
+        $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LEVER->toString()));
+
+        foreach ($facings as $dir) {
+            foreach (range(0, 1) as $open) {
+                $expr =
+                    "q.block_state('" . StateNames::LEVER_DIRECTION . "') == '$dir' && " .
+                    "q.block_state('" . StateNames::OPEN_BIT . "') == $open";
+
+                $permutation = Permutation::create($expr);
+                $permutation->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::FLOWER()))
+                    ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::FLOWER()))
+                    ->addComponent(new TransformationBlockComponent(
+                        match ($dir) {
+                            StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => new Vector3(0, 0, 0),
+                            StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => new Vector3(0, 0, 90),
+                            StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => new Vector3(0, 0, 180),
+                            StateValues::LEVER_DIRECTION_UP_EAST_WEST => new Vector3(0, 0, 270),
+                            StateValues::LEVER_DIRECTION_NORTH => new Vector3(0, 90, 0),
+                            StateValues::LEVER_DIRECTION_SOUTH => new Vector3(0, 270, 0),
+                            StateValues::LEVER_DIRECTION_WEST => new Vector3(0, 180, 0),
+                            StateValues::LEVER_DIRECTION_EAST => new Vector3(0, 0, 0),
+                            default => throw new \RuntimeException("Invalid lever direction"),
+                        }
+                    ));
+
+                $builder->addPermutation($permutation);
+            }
+        }
     }
 }

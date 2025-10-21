@@ -2,7 +2,7 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum MaterialType : string
+enum MaterialType: string
 {
     case Air = "air";
     case Dirt = "dirt";

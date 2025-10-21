@@ -17,8 +17,7 @@ class RandomOffsetBlockComponent extends BlockComponent
     public function __construct(
         private BlockPosition $steps,
         private RangeOffset   $offset,
-    )
-    {
+    ) {
     }
 
     /**
@@ -39,23 +38,35 @@ class RandomOffsetBlockComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("x", CompoundTag::create()
+            ->setTag(
+                "x",
+                CompoundTag::create()
                 ->setTag("steps", new IntTag($this->steps->getX()))
-                ->setTag("range", CompoundTag::create()
+                ->setTag(
+                    "range",
+                    CompoundTag::create()
                     ->setTag("min", new FloatTag($this->offset->getMin()->getX()))
                     ->setTag("max", new FloatTag($this->offset->getMax()->getX()))
                 )
             )
-            ->setTag("y", CompoundTag::create()
+            ->setTag(
+                "y",
+                CompoundTag::create()
                 ->setTag("steps", new IntTag($this->steps->getY()))
-                ->setTag("range", CompoundTag::create()
+                ->setTag(
+                    "range",
+                    CompoundTag::create()
                     ->setTag("min", new FloatTag($this->offset->getMin()->getY()))
                     ->setTag("max", new FloatTag($this->offset->getMax()->getY()))
                 )
             )
-            ->setTag("z", CompoundTag::create()
+            ->setTag(
+                "z",
+                CompoundTag::create()
                 ->setTag("steps", new IntTag($this->steps->getZ()))
-                ->setTag("range", CompoundTag::create()
+                ->setTag(
+                    "range",
+                    CompoundTag::create()
                     ->setTag("min", new FloatTag($this->offset->getMin()->getZ()))
                     ->setTag("max", new FloatTag($this->offset->getMax()->getZ()))
                 )

@@ -10,8 +10,7 @@ readonly class State
     public function __construct(
         private bool $cardinal,
         private bool $facing,
-    )
-    {
+    ) {
     }
 
     /**

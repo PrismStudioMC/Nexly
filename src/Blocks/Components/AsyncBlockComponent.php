@@ -12,8 +12,7 @@ class AsyncBlockComponent extends BlockComponent
     public function __construct(
         private string $name,
         string $nbt,
-    )
-    {
+    ) {
         $this->nbt = (new NetworkNbtSerializer())->read(base64_decode($nbt))->getTag();
     }
 

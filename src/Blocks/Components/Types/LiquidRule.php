@@ -13,8 +13,7 @@ readonly class LiquidRule
         private LiquidType        $liquidType = LiquidType::WATER,
         private LiquidTouchAction $onLiquidTouches = LiquidTouchAction::NO_REACTION,
         private bool              $stopsLiquidFromDirection = false,
-    )
-    {
+    ) {
     }
 
     /**

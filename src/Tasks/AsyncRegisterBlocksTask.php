@@ -84,27 +84,27 @@ final class AsyncRegisterBlocksTask extends AsyncTask
 
             foreach (json_decode($this->traits[$stringId], true) as $trait) {
                 $identifier = $trait["identifier"] ?? null;
-                if(!is_string($identifier)) {
+                if (!is_string($identifier)) {
                     throw new \InvalidArgumentException("Invalid identifier for trait " . $identifier);
                 }
 
                 $rotationOffset = $trait["rotationOffset"] ?? null;
-                if(!is_numeric($rotationOffset)) {
+                if (!is_numeric($rotationOffset)) {
                     throw new \InvalidArgumentException("Invalid rotationOffset for trait " . $rotationOffset);
                 }
 
                 $state = $trait["state"] ?? null;
-                if(!is_array($state)) {
+                if (!is_array($state)) {
                     throw new \InvalidArgumentException("Invalid state for trait " . $state);
                 }
 
                 $cardinal = $state["cardinal"] ?? null;
-                if(!is_bool($cardinal)) {
+                if (!is_bool($cardinal)) {
                     throw new \InvalidArgumentException("Invalid cardinal for trait " . $cardinal);
                 }
 
                 $facing = $state["facing"] ?? null;
-                if(!is_bool($facing)) {
+                if (!is_bool($facing)) {
                     throw new \InvalidArgumentException("Invalid facing for trait " . $facing);
                 }
 
