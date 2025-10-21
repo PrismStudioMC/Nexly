@@ -27,6 +27,8 @@ enum BlockComponentIds: string
     case CUSTOM_COMPONENTS = "minecraft:custom_components";
     case FLOWER_POTTABLE = "minecraft:flower_pottable";
     case RANDOM_OFFSET = "minecraft:random_offset";
+    case SUPPORT = "minecraft:support";
+    case PRECIPITATION_INTERACTIONS = "minecraft:precipitation_interactions";
 
     /**
      * Returns the name of the component.

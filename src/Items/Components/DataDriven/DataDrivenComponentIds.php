@@ -36,6 +36,11 @@ enum DataDrivenComponentIds: string
     case WEAPON = "minecraft:weapon";
     case WEARABLE = "minecraft:wearable";
     case PUBLISHER_ON_USE_ON = "minecraft:publisher_on_use_on";
+    case SWING_DURATION = "minecraft:swing_duration";
+    case SWING_SOUNDS = "minecraft:swing_sounds";
+    case PIERCING_WEAPON = "minecraft:piercing_weapon";
+    case KINETIC_WEAPON = "minecraft:kinetic_weapon";
+    case KINETIC_WEAPON_KINETIC_EFFECT_CONDITIONS = "minecraft:kinetic_weapon_kinetic_effect_conditions";
 
     /**
      * Returns the name of the component.
