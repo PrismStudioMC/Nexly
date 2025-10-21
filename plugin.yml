@@ -1,5 +1,5 @@
 name: Nexly
-version: 1.0.0
+version: 1.0.1
 main: Nexly\Nexly
 src-namespace-prefix: Nexly
 api: 5.0.0
