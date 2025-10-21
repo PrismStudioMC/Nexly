@@ -12,11 +12,13 @@ use Nexly\Items\Components\DataDriven\Property\IconProperty;
 use Nexly\Items\Components\DataDriven\Property\LiquidClippedProperty;
 use Nexly\Items\Components\DataDriven\Property\MaxStackSizeProperty;
 use Nexly\Items\Components\DataDriven\Property\MiningSpeedProperty;
+use Nexly\Items\Components\DataDriven\Property\PropertyComponentIds;
 use Nexly\Items\Components\DataDriven\Property\PropertyItemComponent;
 use Nexly\Items\Components\DataDriven\Property\ShouldDespawnProperty;
 use Nexly\Items\Components\DataDriven\Property\StackedByDataProperty;
 use Nexly\Items\Components\DataDriven\Property\UseAnimationProperty;
 use Nexly\Items\Components\DataDriven\Property\UseDurationProperty;
+use Nexly\Items\Components\DataDriven\Types\IgnoreBlockVisual;
 use Nexly\Items\Components\DataDriven\Types\ItemEnchantSlot;
 use Nexly\Items\Components\DataDriven\Types\ItemRepair;
 use Nexly\Items\Components\DataDriven\Types\ItemSlot;
@@ -98,12 +100,13 @@ class DataDrivenItemBuilder extends ItemBuilder
     /**
      * Remove a property by its name.
      *
-     * @param string $name
+     * @param \BackedEnum|string $name
      * @return $this
      */
-    public function removeProperty(string $name): self
+    public function removeProperty(\BackedEnum|string $name): self
     {
-        unset($this->properties[$name]);
+        $key = is_string($name) ? $name : $name->value;
+        unset($this->properties[$key]);
         return $this;
     }
 
@@ -186,6 +189,8 @@ class DataDrivenItemBuilder extends ItemBuilder
             $icon = explode(":", $icon, 2)[1];
         }
 
+        $reflection = new \ReflectionClass($item);
+
         $this->addProperty(new IconProperty($icon));
         $this->addProperty(new StackedByDataProperty(false));
         $this->addProperty(new ShouldDespawnProperty(false));
@@ -200,7 +205,7 @@ class DataDrivenItemBuilder extends ItemBuilder
         }
 
         $block = $item->getBlock();
-        if (!($block instanceof Air)) {
+        if (!($block instanceof Air) && empty($reflection->getAttributes(IgnoreBlockVisual::class))) {
             $this->addProperty(BlockProperty::from($block));
         }
 
