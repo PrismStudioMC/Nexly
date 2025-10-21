@@ -25,12 +25,8 @@ use pocketmine\Server;
 
 class Nexly extends PluginBase
 {
-    use SingletonTrait;
-
     protected function onLoad(): void
     {
-        self::setInstance($this);
-
         $this->saveDefaultConfig();
         $this->saveResource("config.yml");
     }
@@ -38,7 +34,6 @@ class Nexly extends PluginBase
     protected function onEnable(): void
     {
         $config = $this->getConfig();
-        $blockNetworkIdsAreHashes = $config->get("block-network-ids-are-hashes", false);
         if ($config->get("enable-block-breaking", true)) {
             try {
                 $this->getServer()->getpluginManager()->registerEvents(new BlockBreakingListener(), $this);
