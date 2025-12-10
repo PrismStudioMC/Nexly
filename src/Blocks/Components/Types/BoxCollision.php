@@ -85,10 +85,25 @@ class BoxCollision
     /**
      * Returns the component in the correct NBT format supported by the client.
      *
+     * @param bool $latest
      * @return CompoundTag
      */
-    public function toNBT(): CompoundTag
+    public function toNBT(bool $latest): CompoundTag
     {
+        if($latest) {
+            $minX = 8 + $this->origin->getX();
+            $minY = $this->origin->getY();
+            $minZ = 8 + $this->origin->getZ();
+
+            return CompoundTag::create()
+                ->setTag("minX", new FloatTag($minX))
+                ->setTag("minY", new FloatTag($minY))
+                ->setTag("minZ", new FloatTag($minZ))
+                ->setTag("maxX", new FloatTag($minX + $this->size->getX()))
+                ->setTag("maxY", new FloatTag($minY + $this->size->getY()))
+                ->setTag("maxZ", new FloatTag($minZ + $this->size->getZ()));
+        }
+
         return CompoundTag::create()
             ->setTag("origin", new ListTag([
                 new FloatTag($this->origin->getX()),
