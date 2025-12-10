@@ -66,6 +66,7 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use ReflectionClass;
+use RuntimeException;
 
 final class NexlyPermutations
 {
@@ -131,7 +132,7 @@ final class NexlyPermutations
             StateValues::MC_VERTICAL_HALF_BOTTOM => SlabType::BOTTOM,
             StateValues::MC_VERTICAL_HALF_TOP => SlabType::TOP,
             "double" => SlabType::DOUBLE,
-            default => throw new \RuntimeException("Invalid slab type"),
+            default => throw new RuntimeException("Invalid slab type"),
         }));
 
         $builder->addComponent($geometry = new GeometryBlockComponent(ExtendedGeometry::SLAB->toString()));
@@ -142,14 +143,14 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::MC_VERTICAL_HALF, [StateValues::MC_VERTICAL_HALF_BOTTOM, StateValues::MC_VERTICAL_HALF_TOP, "double"]))
             ->addPermutation(
                 Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_BOTTOM . "'")
-                ->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::SLAB()))
-                ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::SLAB()))
+                ->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::SLAB()]))
+                ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::SLAB()]))
                 ->addComponent(new TransformationBlockComponent(translation: new Vector3(0, -0.25, 0)))
             )
             ->addPermutation(
                 Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_TOP . "'")
-                ->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::SLAB()))
-                ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::SLAB()))
+                ->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::SLAB()]))
+                ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::SLAB()]))
                 ->addComponent(new TransformationBlockComponent(translation: new Vector3(0, 0.25, 0)))
             )
             ->addPermutation(Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == 'double'")
@@ -201,14 +202,14 @@ final class NexlyPermutations
                     )]));
 
                     $box = $open ? new BoxCollision(new Vector3(-8, 0, 5), new Vector3(16, 16, 3)) : new BoxCollision(new Vector3(-8, 0, -8), new Vector3(3, 16, 16));
-                    $permutation->addComponent(new CollisionBoxBlockComponent(true, $box));
-                    $permutation->addComponent(new SelectionBoxBlockComponent(true, $box));
+                    $permutation->addComponent(new CollisionBoxBlockComponent(true, [$box]));
+                    $permutation->addComponent(new SelectionBoxBlockComponent(true, [$box]));
                     $permutation->addComponent(new TransformationBlockComponent(match ($dir) {
                         StateValues::MC_CARDINAL_DIRECTION_NORTH => new Vector3(0, 0, 0),
                         StateValues::MC_CARDINAL_DIRECTION_SOUTH => new Vector3(0, 180, 0),
                         StateValues::MC_CARDINAL_DIRECTION_WEST => new Vector3(0, 90, 0),
                         StateValues::MC_CARDINAL_DIRECTION_EAST => new Vector3(0, 270, 0),
-                        default => throw new \RuntimeException("Invalid direction")
+                        default => throw new RuntimeException("Invalid direction")
                     }));
 
                     $builder->addPermutation($permutation);
@@ -227,7 +228,7 @@ final class NexlyPermutations
     public static function makeFence(Builder $builder, Fence $block): void
     {
         if (!$block instanceof NexlyFence) {
-            throw new \RuntimeException("Fence blocks must extend " . NexlyFence::class . " to be registered.");
+            throw new RuntimeException("Fence blocks must extend " . NexlyFence::class . " to be registered.");
         }
 
         $stringId = $builder->getStringId();
@@ -299,7 +300,7 @@ final class NexlyPermutations
                 Facing::SOUTH => StateValues::MC_CARDINAL_DIRECTION_SOUTH,
                 Facing::WEST => StateValues::MC_CARDINAL_DIRECTION_WEST,
                 Facing::EAST => StateValues::MC_CARDINAL_DIRECTION_EAST,
-                default => throw new \RuntimeException("Invalid facing direction"),
+                default => throw new RuntimeException("Invalid facing direction"),
             })
             ->writeBool(StateNames::IN_WALL_BIT, $block->isInWall())
             ->writeBool(StateNames::OPEN_BIT, $block->isOpen())
@@ -311,7 +312,7 @@ final class NexlyPermutations
                 StateValues::MC_CARDINAL_DIRECTION_SOUTH => Facing::SOUTH,
                 StateValues::MC_CARDINAL_DIRECTION_WEST => Facing::WEST,
                 StateValues::MC_CARDINAL_DIRECTION_EAST => Facing::EAST,
-                default => throw new \RuntimeException("Invalid facing direction"),
+                default => throw new RuntimeException("Invalid facing direction"),
             })
             ->setInWall($in->readBool(StateNames::IN_WALL_BIT))
             ->setOpen($in->readBool(StateNames::OPEN_BIT))
@@ -343,15 +344,15 @@ final class NexlyPermutations
                         ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
                         ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0")
                     )->addComponent(
-                        new CollisionBoxBlockComponent(!$open, BoxCollision::FENCE_GATE())
+                        new CollisionBoxBlockComponent(!$open, [BoxCollision::FENCE_GATE()])
                     )->addComponent(
-                        new SelectionBoxBlockComponent(true, BoxCollision::FENCE_GATE())
+                        new SelectionBoxBlockComponent(true, [BoxCollision::FENCE_GATE()])
                     )->addComponent(new TransformationBlockComponent(match ($dir) {
                         StateValues::MC_CARDINAL_DIRECTION_NORTH => new Vector3(0, 0, 0),
                         StateValues::MC_CARDINAL_DIRECTION_SOUTH => new Vector3(0, 180, 0),
                         StateValues::MC_CARDINAL_DIRECTION_EAST => new Vector3(0, 90, 0),
                         StateValues::MC_CARDINAL_DIRECTION_WEST => new Vector3(0, 270, 0),
-                        default => throw new \RuntimeException("Invalid direction")
+                        default => throw new RuntimeException("Invalid direction")
                     }, translation: match ($inWall) {
                         0 => new Vector3(0, 0, 0),
                         1 => new Vector3(0, -0.187, 0),
@@ -476,14 +477,14 @@ final class NexlyPermutations
 
                     $translation = $top && !$open ? new Vector3(0, 0.813, 0) : new Vector3(0, 0, 0);
 
-                    $permutation->addComponent(new CollisionBoxBlockComponent(true, $box))
-                        ->addComponent(new SelectionBoxBlockComponent(true, $box))
+                    $permutation->addComponent(new CollisionBoxBlockComponent(true, [$box]))
+                        ->addComponent(new SelectionBoxBlockComponent(true, [$box]))
                         ->addComponent(new TransformationBlockComponent(match ($dir) {
                             0 => new Vector3(0, 180, 0),    // East
                             1 => new Vector3(0, 0, 0),  // West
                             2 => new Vector3(0, 90, 0),   // South
                             3 => new Vector3(0, 270, 0),  // North
-                            default => throw new \RuntimeException("Invalid direction")
+                            default => throw new RuntimeException("Invalid direction")
                         }, translation: $translation));
 
                     $builder->addPermutation($permutation);
@@ -567,8 +568,8 @@ final class NexlyPermutations
                     "q.block_state('" . StateNames::ROTATION . "') == $rot";
 
                 $permutation = Permutation::create($expr);
-                $permutation->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::MOBHEAD()))
-                    ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::MOBHEAD()))
+                $permutation->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::MOBHEAD()]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::MOBHEAD()]))
                     ->addComponent(new TransformationBlockComponent(translation: new Vector3($dir !== 1 ? match($dir) {
                         4 => 0.24,
                         5 => -0.24,
@@ -603,14 +604,14 @@ final class NexlyPermutations
         foreach ($facings as $dir) {
             $builder->addPermutation(
                 Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
-                ->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::LADDER()))
-                ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::LADDER()))
+                ->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::LADDER()]))
+                ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::LADDER()]))
                 ->addComponent(new TransformationBlockComponent(match ($dir) {
                     2 => new Vector3(0, 0, 0),
                     3 => new Vector3(0, 180, 0),
                     4 => new Vector3(0, 90, 0),
                     5 => new Vector3(0, 270, 0),
-                    default => throw new \RuntimeException("Invalid direction")
+                    default => throw new RuntimeException("Invalid direction")
                 }))
             );
         }
@@ -644,8 +645,8 @@ final class NexlyPermutations
                 renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ]));
-        $builder->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::FARMLAND()));
-        $builder->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::FARMLAND()));
+        $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
+        $builder->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
         $builder->addComponent(new CustomComponentsBlockComponent(true));
     }
 
@@ -663,7 +664,7 @@ final class NexlyPermutations
             new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)
         ]));
 
-        $builder->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::FLOWER()));
+        $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
         $builder->addComponent(new LightDampeningBlockComponent(0));
 
         $builder->addComponent(new FlowerPottableBlockComponent());
@@ -681,7 +682,7 @@ final class NexlyPermutations
     public static function makeGlassPane(Builder $builder, GlassPane $block): void
     {
         if (!$block instanceof NexlyGlassPane) {
-            throw new \RuntimeException("Glass pane blocks must extend " . NexlyGlassPane::class . " to be registered.");
+            throw new RuntimeException("Glass pane blocks must extend " . NexlyGlassPane::class . " to be registered.");
         }
 
         $stringId = $builder->getStringId();
@@ -775,7 +776,7 @@ final class NexlyPermutations
                 StateValues::LEVER_DIRECTION_SOUTH => LeverFacing::SOUTH,
                 StateValues::LEVER_DIRECTION_WEST => LeverFacing::WEST,
                 StateValues::LEVER_DIRECTION_EAST => LeverFacing::EAST,
-                default => throw new \RuntimeException("Invalid lever direction"),
+                default => throw new RuntimeException("Invalid lever direction"),
             })
         );
 
@@ -799,8 +800,8 @@ final class NexlyPermutations
                     "q.block_state('" . StateNames::OPEN_BIT . "') == $open";
 
                 $permutation = Permutation::create($expr);
-                $permutation->addComponent(new CollisionBoxBlockComponent(true, BoxCollision::FLOWER()))
-                    ->addComponent(new SelectionBoxBlockComponent(true, BoxCollision::FLOWER()))
+                $permutation->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::FLOWER()]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]))
                     ->addComponent(new TransformationBlockComponent(
                         match ($dir) {
                             StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => new Vector3(0, 0, 0),
@@ -811,7 +812,7 @@ final class NexlyPermutations
                             StateValues::LEVER_DIRECTION_SOUTH => new Vector3(0, 270, 0),
                             StateValues::LEVER_DIRECTION_WEST => new Vector3(0, 180, 0),
                             StateValues::LEVER_DIRECTION_EAST => new Vector3(0, 0, 0),
-                            default => throw new \RuntimeException("Invalid lever direction"),
+                            default => throw new RuntimeException("Invalid lever direction"),
                         }
                     ));
 
