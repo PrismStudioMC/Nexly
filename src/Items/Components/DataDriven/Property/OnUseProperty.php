@@ -21,7 +21,7 @@ class OnUseProperty extends PropertyItemComponent
      */
     public static function getName(): string
     {
-        return PropertyComponentIds::GLINT->getValue();
+        return PropertyComponentIds::ON_USE->getValue();
     }
 
     /**
