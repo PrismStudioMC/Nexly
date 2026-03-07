@@ -4,7 +4,7 @@ namespace Nexly\Items\Components\DataDriven\Property;
 
 enum PropertyComponentIds: string
 {
-    case ALLOW_OFF_HAND = "allow_offhand";
+    case ALLOW_OFF_HAND = "allow_off_hand";
     case CAN_DESTROY_IN_CREATIVE = "can_destroy_in_creative";
     case DAMAGE = "damage";
     case ENCHANTABLE_VALUE = "enchantable_value";
