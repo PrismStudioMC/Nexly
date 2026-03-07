@@ -11,15 +11,19 @@ enum CreativeGroup: string
     case GROUP_BANNER_PATTERN = "itemGroup.name.banner_pattern";
     case GROUP_BED = "itemGroup.name.bed";
     case GROUP_BOAT = "itemGroup.name.boat";
+    case GROUP_CHEST_BOAT = "itemGroup.name.chestboat";
     case GROUP_BOOTS = "itemGroup.name.boots";
+    case GROUP_BUNDLES = "itemGroup.name.bundles";
     case GROUP_BUTTONS = "itemGroup.name.buttons";
     case GROUP_CHALKBOARD = "itemGroup.name.chalkboard";
+    case GROUP_CANDLES = "itemGroup.name.candles";
     case GROUP_CHEST = "itemGroup.name.chest";
     case GROUP_CHESTPLATE = "itemGroup.name.chestplate";
+    case GROUP_COMPOUNDS = "itemGroup.name.compounds";
     case GROUP_CONCRETE = "itemGroup.name.concrete";
     case GROUP_CONCRETE_POWDER = "itemGroup.name.concretePowder";
     case GROUP_COOKED_FOOD = "itemGroup.name.cookedFood";
-    case GROUP_COOPPER = "itemGroup.name.copper";
+    case GROUP_COPPER = "itemGroup.name.copper";
     case GROUP_CORAL = "itemGroup.name.coral";
     case GROUP_CORAL_DECORATIONS = "itemGroup.name.coral_decorations";
     case GROUP_CROP = "itemGroup.name.crop";
@@ -34,6 +38,7 @@ enum CreativeGroup: string
     case GROUP_GLASS = "itemGroup.name.glass";
     case GROUP_GLASS_PANE = "itemGroup.name.glassPane";
     case GROUP_GLAZED_TERRACOTTA = "itemGroup.name.glazedTerracotta";
+    case GROUP_GOAT_HORN = "itemGroup.name.goatHorn";
     case GROUP_GRASS = "itemGroup.name.grass";
     case GROUP_HELMET = "itemGroup.name.helmet";
     case GROUP_HOE = "itemGroup.name.hoe";
@@ -42,18 +47,20 @@ enum CreativeGroup: string
     case GROUP_LEGGINGS = "itemGroup.name.leggings";
     case GROUP_LINGERING_POTION = "itemGroup.name.lingeringPotion";
     case GROUP_LOG = "itemGroup.name.log";
-    case GROUP_MINECRAFT = "itemGroup.name.minecart";
+    case GROUP_MINECART = "itemGroup.name.minecart";
     case GROUP_MISC_FOOD = "itemGroup.name.miscFood";
-    case GROUP_MOB_EGGS = "itemGroup.name.mobEgg";
+    case GROUP_MOB_EGG = "itemGroup.name.mobEgg";
     case GROUP_MONSTER_STONE_EGG = "itemGroup.name.monsterStoneEgg";
     case GROUP_MUSHROOM = "itemGroup.name.mushroom";
     case GROUP_NETHERWART_BLOCK = "itemGroup.name.netherWartBlock";
+    case GROUP_OMINOUS_BOTTLE = "itemGroup.name.ominousBottle";
     case GROUP_ORE = "itemGroup.name.ore";
     case GROUP_PERMISSION = "itemGroup.name.permission";
     case GROUP_PICKAXE = "itemGroup.name.pickaxe";
     case GROUP_PLANKS = "itemGroup.name.planks";
     case GROUP_POTION = "itemGroup.name.potion";
     case GROUP_PRESSURE_PLATE = "itemGroup.name.pressurePlate";
+    case GROUP_PRODUCTS = "itemGroup.name.products";
     case GROUP_RAIL = "itemGroup.name.rail";
     case GROUP_RAW_FOOD = "itemGroup.name.rawFood";
     case GROUP_RECORD = "itemGroup.name.record";
@@ -62,7 +69,6 @@ enum CreativeGroup: string
     case GROUP_SEED = "itemGroup.name.seed";
     case GROUP_SHOVEL = "itemGroup.name.shovel";
     case GROUP_SHULKER_BOX = "itemGroup.name.shulkerBox";
-    case GROUP_HANDGING_SIGN = "itemGroup.name.wallSign";
     case GROUP_SIGN = "itemGroup.name.sign";
     case GROUP_SKULL = "itemGroup.name.skull";
     case GROUP_SLAB = "itemGroup.name.slab";
@@ -77,9 +83,6 @@ enum CreativeGroup: string
     case GROUP_WOOD = "itemGroup.name.wood";
     case GROUP_WOOL = "itemGroup.name.wool";
     case GROUP_WOOL_CARPET = "itemGroup.name.woolCarpet";
-    case GROUP_CANDLES = "itemGroup.name.candles";
-    case GROUP_GOAT_HORN = "itemGroup.name.goatHorn";
-    case GROUP_BUNDLE = "itemGroup.name.bundle";
 
     /**
      * Get the name of the enum case.
