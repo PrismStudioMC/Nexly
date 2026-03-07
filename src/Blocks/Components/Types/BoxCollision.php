@@ -29,7 +29,7 @@ class BoxCollision
     protected static function setup(): void
     {
         self::_registryRegister("slab", new BoxCollision(new Vector3(-8, 4, -8), new Vector3(16, 8, 16)));
-        self::_registryRegister("fence_gate", new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 18, 4)));
+        self::_registryRegister("fence_gate", new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4)));
         self::_registryRegister("mobhead", new BoxCollision(new Vector3(-4, 0, -4), new Vector3(8, 8, 8)));
         self::_registryRegister("ladder", new BoxCollision(new Vector3(-8, 0, 5), new Vector3(16, 16, 3)));
         self::_registryRegister("farmland", new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 15, 16)));
@@ -90,7 +90,7 @@ class BoxCollision
      */
     public function toNBT(bool $latest): CompoundTag
     {
-        if($latest) {
+        if ($latest) {
             $minX = 8 + $this->origin->getX();
             $minY = $this->origin->getY();
             $minZ = 8 + $this->origin->getZ();
