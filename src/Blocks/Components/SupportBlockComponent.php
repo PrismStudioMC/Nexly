@@ -5,7 +5,6 @@ namespace Nexly\Blocks\Components;
 use Attribute;
 use Nexly\Blocks\Components\Types\SupportShape;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 
 /**

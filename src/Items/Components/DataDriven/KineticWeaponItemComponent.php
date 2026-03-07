@@ -3,11 +3,10 @@
 namespace Nexly\Items\Components\DataDriven;
 
 use Attribute;
+use Nexly\Items\Components\DataDriven\KineticWeaponKineticEffectConditionsItemComponent as DamageConditions;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
-use Nexly\Items\Components\DataDriven\KineticWeaponKineticEffectConditionsItemComponent as DamageConditions;
 
 /**
  * @see https://learn.microsoft.com/en-us/minecraft/creator/reference/content/itemreference/examples/itemcomponents/minecraft_kinetic_weapon?view=minecraft-bedrock-stable

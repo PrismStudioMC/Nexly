@@ -10,10 +10,8 @@ use pocketmine\block\Carrot;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Potato;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class SelectionBoxBlockComponent extends BlockComponent
@@ -25,10 +23,10 @@ class SelectionBoxBlockComponent extends BlockComponent
     public function __construct(
         private readonly bool $enabled,
         private array $collisions = [],
-    )
-    {
-        if (empty($this->collisions))
+    ) {
+        if (empty($this->collisions)) {
             $this->collisions[] = new BoxCollision(new Vector3(-8.0, 0.0, -8.0), new Vector3(16.0, 16.0, 16.0));
+        }
     }
 
     /**
@@ -73,7 +71,7 @@ class SelectionBoxBlockComponent extends BlockComponent
      */
     public function toNBT(): CompoundTag
     {
-        if(!$this->enabled) {
+        if (!$this->enabled) {
             return CompoundTag::create()
                 ->setTag("enabled", new ByteTag($this->enabled));
         }

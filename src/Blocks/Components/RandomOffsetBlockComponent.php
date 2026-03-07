@@ -4,8 +4,6 @@ namespace Nexly\Blocks\Components;
 
 use Attribute;
 use Nexly\Blocks\Components\Types\RangeOffset;
-use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\IntTag;

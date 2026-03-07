@@ -3,7 +3,6 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
-use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 
 #[Attribute(Attribute::TARGET_CLASS)]

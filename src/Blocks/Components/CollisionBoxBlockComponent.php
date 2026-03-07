@@ -21,8 +21,9 @@ class CollisionBoxBlockComponent extends BlockComponent
         private readonly bool $enabled,
         private array $collisions = [],
     ) {
-        if (empty($this->collisions))
+        if (empty($this->collisions)) {
             $this->collisions[] = new BoxCollision(new Vector3(-8.0, 0.0, -8.0), new Vector3(16.0, 16.0, 16.0));
+        }
     }
 
     /**
@@ -44,12 +45,15 @@ class CollisionBoxBlockComponent extends BlockComponent
     {
         return CompoundTag::create()
             ->setTag("enabled", new ByteTag($this->enabled))
-            ->setTag("boxes", new ListTag(
+            ->setTag(
+                "boxes",
+                new ListTag(
                     array_map(
                         fn (BoxCollision $collision) => $collision->toNBT(true),
                         $this->collisions
                     ),
-                    NBT::TAG_Compound)
+                    NBT::TAG_Compound
+                )
             );
     }
 }
