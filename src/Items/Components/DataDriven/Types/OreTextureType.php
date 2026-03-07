@@ -10,6 +10,7 @@ enum OreTextureType: string
 {
     case NONE = "none";
     case CHAIN = "chain";
+    case COPPER = "copper";
     case DIAMOND = "diamond";
     case ELYTRA = "elytra";
     case GOLD = "gold";
@@ -40,6 +41,7 @@ enum OreTextureType: string
             return match (true) {
                 $item->getMaterial() === VanillaArmorMaterials::LEATHER() => self::LEATHER,
                 $item->getMaterial() === VanillaArmorMaterials::CHAINMAIL() => self::CHAIN,
+                $item->getMaterial() === VanillaArmorMaterials::COPPER() => self::COPPER,
                 $item->getMaterial() === VanillaArmorMaterials::IRON() => self::IRON,
                 $item->getMaterial() === VanillaArmorMaterials::GOLD() => self::GOLD,
                 $item->getMaterial() === VanillaArmorMaterials::DIAMOND() => self::DIAMOND,
