@@ -34,17 +34,15 @@ enum MaterialRenderMethod: string
     }
 
     /**
-     * Creates a MaterialRenderMethod from a string value.
-     *
      * @param string $value
-     * @return MaterialTarget|null
+     * @return self|null
      */
     public static function fromString(string $value): ?self
     {
         return match ($value) {
-            self::RENDER_METHOD_ALPHA_TEST->value => self::RENDER_METHOD_ALPHA_TEST,
-            self::RENDER_METHOD_BLEND->value => self::RENDER_METHOD_BLEND,
-            self::RENDER_METHOD_OPAQUE->value => self::RENDER_METHOD_OPAQUE,
+            self::ALPHA_TEST->value => self::ALPHA_TEST,
+            self::BLEND->value => self::BLEND,
+            self::OPAQUE->value => self::OPAQUE,
             default => null,
         };
     }

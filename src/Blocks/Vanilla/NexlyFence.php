@@ -9,18 +9,6 @@ use pocketmine\block\utils\SupportType;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\math\Facing;
 
-/**
- * Class NexlyFence
- *
- * A custom fence block that extends the base Fence class and includes additional functionality
- * for reading state from the world, recalculating connections, and handling nearby block changes.
- *
- * @package Nexly\Blocks\Vanilla
- *
- * Minecraft does not allow us to reproduce identical fences.
- * In certain patterns, you will be able to pass through them because we cannot create collision boxes other than squares/rectangles.
- * @deprecated
- */
 class NexlyFence extends Fence
 {
     /**

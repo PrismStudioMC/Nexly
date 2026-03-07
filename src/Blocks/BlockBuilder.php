@@ -8,6 +8,7 @@ use Nexly\Blocks\Components\BlockComponent;
 use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
+use Nexly\Blocks\Components\ConnectionRuleComponent;
 use Nexly\Blocks\Components\CustomComponentsBlockComponent;
 use Nexly\Blocks\Components\DestructibleByExplosionBlockComponent;
 use Nexly\Blocks\Components\DestructibleByMiningBlockComponent;
@@ -48,15 +49,17 @@ use pocketmine\block\Door;
 use pocketmine\block\Farmland;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
+use pocketmine\block\Flowable;
 use pocketmine\block\Flower;
 use pocketmine\block\GlassPane;
 use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
 use pocketmine\block\Lever;
-use pocketmine\block\Liquid;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\block\Slab;
+use pocketmine\block\Slime;
+use pocketmine\block\Stair;
 use pocketmine\block\tile\Container;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\Wall;
@@ -84,8 +87,6 @@ use pocketmine\utils\AssumptionFailedError;
 use pocketmine\world\format\io\GlobalBlockStateHandlers as BlockStateHandlers;
 use pocketmine\world\format\io\GlobalItemDataHandlers as ItemDataHandlers;
 use ReflectionClass;
-
-use function Opis\Closure\init;
 
 class BlockBuilder
 {
@@ -521,7 +522,7 @@ class BlockBuilder
                 ->setTag("block_id", new IntTag(BlockMappings::getInstance()->nextRuntimeId()))
                 ->setTag("material", new StringTag($this->material->value))
             )
-            ->setTag("molangVersion", new IntTag(12));
+            ->setTag("molangVersion", new IntTag(13));
     }
 
     /**
@@ -641,10 +642,16 @@ class BlockBuilder
             $this->addComponent(new DestructibleByMiningBlockComponent($block->getBreakInfo()->getHardness() * 3.33334));
             $this->addComponent(new DisplayNameBlockComponent("tile." . $this->getStringId() . ".name"));
             $this->addComponent(new FrictionBlockComponent(max(0, 1 - $block->getFrictionFactor())));
-            $this->addComponent(new LightEmissionBlockComponent($block->getLightLevel()));
+            if (($lightLevel = $block->getLightLevel()) > 0) {
+                $this->addComponent(new LightEmissionBlockComponent($lightLevel));
+            }
             //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
-            $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: $block->isTransparent() ? MaterialRenderMethod::ALPHA_TEST : MaterialRenderMethod::OPAQUE)]));
+            $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: $block->isTransparent() ? MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED : MaterialRenderMethod::OPAQUE)]));
             $this->addComponent(new OnPlayerPlacingBlockComponent());
+
+            if ($block instanceof Flowable) {
+                $this->addComponent(new ConnectionRuleComponent());
+            }
 
             $tile = $block->getIdInfo()->getTileClass();
             if ($tile !== null && is_a($tile, Container::class, true)) {
@@ -692,7 +699,7 @@ class BlockBuilder
 
         ItemMappings::getInstance()->registerMapping($builder, new ItemTypeEntry(
             $stringId,
-            $builder->getNumericId(),
+            255 - $builder->getNumericId(),
             $builder->getVersion()->equals(ItemVersion::DATA_DRIVEN),
             $builder->getVersion()->getValue(),
             new CacheableNbt($builder->toNBT())
@@ -711,7 +718,7 @@ class BlockBuilder
         $stringId = $this->getStringId();
 
         StringToItemParser::getInstance()->registerBlock($name, fn () => clone $block);
-        LegacyItemIdToStringIdMap::getInstance()->add($name, $this->getNumericId());
+        LegacyItemIdToStringIdMap::getInstance()->add($name, 255 - $this->getNumericId());
 
         $blockItemIdMap = BlockItemIdMap::getInstance();
         $reflection = new ReflectionClass($blockItemIdMap);
@@ -758,6 +765,7 @@ class BlockBuilder
         match (true) {
             $block instanceof Crops => NexlyPermutations::makeCrop($this, $block),
             $block instanceof NetherWartPlant => NexlyPermutations::makeNetherPlant($this, $block),
+            $block instanceof Stair => NexlyPermutations::makeStair($this, $block),
             $block instanceof Slab => NexlyPermutations::makeSlab($this, $block),
             $block instanceof Door => NexlyPermutations::makeDoor($this, $block),
             $block instanceof Fence => NexlyPermutations::makeFence($this, $block),
@@ -771,6 +779,7 @@ class BlockBuilder
             $block instanceof Flower => NexlyPermutations::makeFlower($this, $block),
             $block instanceof GlassPane => NexlyPermutations::makeGlassPane($this, $block),
             $block instanceof Lever => NexlyPermutations::makeLever($this, $block),
+            $block instanceof Slime => NexlyPermutations::makeSlime($this, $block),
             default => null,
         };
     }

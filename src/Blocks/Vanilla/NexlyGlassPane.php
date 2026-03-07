@@ -3,8 +3,6 @@
 namespace Nexly\Blocks\Vanilla;
 
 use pocketmine\block\Block;
-use pocketmine\block\Fence;
-use pocketmine\block\FenceGate;
 use pocketmine\block\GlassPane;
 use pocketmine\block\Thin;
 use pocketmine\block\utils\SupportType;
@@ -12,18 +10,6 @@ use pocketmine\block\Wall;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\math\Facing;
 
-/**
- * Class NexlyGlassPane
- *
- * A custom glass pane block that extends the base GlassPane class and includes additional functionality
- * for reading state from the world, recalculating connections, and handling nearby block changes.
- *
- * @package Nexly\Blocks\Vanilla
- *
- * Minecraft does not allow us to reproduce identical glass panes.
- * In certain patterns, you will be able to pass through them because we cannot create collision boxes other than squares/rectangles.
- * @deprecated
- */
 class NexlyGlassPane extends GlassPane
 {
     /**
