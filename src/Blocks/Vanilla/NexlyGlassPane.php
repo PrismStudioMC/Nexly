@@ -3,6 +3,8 @@
 namespace Nexly\Blocks\Vanilla;
 
 use pocketmine\block\Block;
+use pocketmine\block\Fence;
+use pocketmine\block\FenceGate;
 use pocketmine\block\GlassPane;
 use pocketmine\block\Thin;
 use pocketmine\block\utils\SupportType;
@@ -10,6 +12,18 @@ use pocketmine\block\Wall;
 use pocketmine\data\runtime\RuntimeDataDescriber;
 use pocketmine\math\Facing;
 
+/**
+ * Class NexlyGlassPane
+ *
+ * A custom glass pane block that extends the base GlassPane class and includes additional functionality
+ * for reading state from the world, recalculating connections, and handling nearby block changes.
+ *
+ * @package Nexly\Blocks\Vanilla
+ *
+ * Minecraft does not allow us to reproduce identical glass panes.
+ * In certain patterns, you will be able to pass through them because we cannot create collision boxes other than squares/rectangles.
+ * @deprecated
+ */
 class NexlyGlassPane extends GlassPane
 {
     /**
@@ -35,7 +49,7 @@ class NexlyGlassPane extends GlassPane
             $block = $this->getSide($facing);
             if ($block instanceof Thin || $block instanceof Wall || $block->getSupportType(Facing::opposite($facing)) === SupportType::FULL) {
                 if (!isset($this->connections[$facing])) {
-                    $this->connections[$facing] = $facing;
+                    $this->connections[$facing] = true;
                     $changed++;
                 }
             } elseif (isset($this->connections[$facing])) {
@@ -54,11 +68,9 @@ class NexlyGlassPane extends GlassPane
      */
     protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
     {
-        foreach ($this->connections as $facing => $zebi) {
-            $this->connections[$facing] = $facing;
-        }
-
-        $w->horizontalFacingFlags($this->connections);
+        $faces = array_keys($this->connections);
+        $w->horizontalFacingFlags($faces);
+        $this->connections = array_fill_keys(array_values($faces), true);
     }
 
     /**

@@ -13,7 +13,7 @@ class LightEmissionBlockComponent extends BlockComponent
         private readonly int $value,
     ) {
         if ($value < 0 || $value > 15) {
-            throw new \InvalidArgumentException("Light dampening value must be between 0 and 15");
+            throw new \InvalidArgumentException("Light emission value must be between 0 and 15");
         }
     }
 

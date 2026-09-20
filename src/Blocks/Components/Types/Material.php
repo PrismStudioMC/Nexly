@@ -15,11 +15,15 @@ final class Material
         private readonly string               $texture,
         private readonly MaterialTarget       $target = MaterialTarget::ALL,
         private readonly MaterialRenderMethod $renderMethod = MaterialRenderMethod::OPAQUE,
-        private readonly string               $tint_method = "none",
+        private readonly string               $tintMethod = "none",
         private readonly float                $ambientOcclusion = 1.0,
         private readonly bool                 $faceDimming = true,
+        private readonly bool                 $isotropic = false,
         private readonly bool                 $packedBools = false,
     ) {
+        if ($ambientOcclusion < 0.0) {
+            throw new \InvalidArgumentException("Ambient occlusion cannot be negative.");
+        }
     }
 
     /**
@@ -41,6 +45,7 @@ final class Material
             ->setTag("render_method", new StringTag($this->renderMethod->getValue()))
             ->setTag("texture", new StringTag($this->texture))
             ->setTag("face_dimming", new ByteTag($this->faceDimming ? 1 : 0))
-            ->setTag("tint_method", new StringTag($this->tint_method));
+            ->setTag("isotropic", new ByteTag($this->isotropic ? 1 : 0))
+            ->setTag("tint_method", new StringTag($this->tintMethod));
     }
 }

@@ -6,6 +6,7 @@ enum BlockComponentIds: string
 {
     case BREATHABILITY = "minecraft:breathability";
     case COLLISION_BOX = "minecraft:collision_box";
+    case CONNECTION_RULE = "minecraft:connection_rule";
     case DESTRUCTIBLE_BY_EXPLOSION = "minecraft:destructible_by_explosion";
     case DESTRUCTIBLE_BY_MINING = "minecraft:destructible_by_mining";
     case DISPLAY_NAME = "minecraft:display_name";

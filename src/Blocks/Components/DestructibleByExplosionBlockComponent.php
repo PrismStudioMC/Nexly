@@ -12,6 +12,9 @@ class DestructibleByExplosionBlockComponent extends BlockComponent
     public function __construct(
         private readonly float $resistance = 0.0,
     ) {
+        if ($resistance < 0.0) {
+            throw new \InvalidArgumentException("Explosion resistance cannot be negative.");
+        }
     }
 
     /**

@@ -5,6 +5,8 @@ namespace Nexly\Blocks\Components\Types;
 enum MinecraftGeometry: string
 {
     case FULL_BLOCK = "minecraft:geometry.full_block";
+    case FULL_BLOCK_V1 = "minecraft:geometry.full_block_v1";
+    case FULL_CUBE = "minecraft:geometry.full_cube";
     case CROSS = "minecraft:geometry.cross";
     case BEACON = "minecraft:geometry.beacon";
     case BIG_DRIPLEAF = "minecraft:geometry.big_dripleaf";
