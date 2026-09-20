@@ -644,7 +644,9 @@ class BlockBuilder
             $this->addComponent(new DestructibleByMiningBlockComponent($block->getBreakInfo()->getHardness() * 3.33334));
             $this->addComponent(new DisplayNameBlockComponent("tile." . $this->getStringId() . ".name"));
             $this->addComponent(new FrictionBlockComponent(max(0, 1 - $block->getFrictionFactor())));
-            if(($lightLevel = $block->getLightLevel()) > 0) $this->addComponent(new LightEmissionBlockComponent($lightLevel));
+            if (($lightLevel = $block->getLightLevel()) > 0) {
+                $this->addComponent(new LightEmissionBlockComponent($lightLevel));
+            }
             //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
             $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: $block->isTransparent() ? MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED : MaterialRenderMethod::OPAQUE)]));
             $this->addComponent(new OnPlayerPlacingBlockComponent());

@@ -114,12 +114,13 @@ final class NexlyPermutations
     public static function makeStair(Builder $builder, Stair $block): void
     {
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static function (Stair $block) use($stringId) {
+        $builder->setSerializer(static function (Stair $block) use ($stringId) {
             return (new Writer($stringId))
                 ->writeBool(BlockStateNames::UPSIDE_DOWN_BIT, $block->isUpsideDown())
                 ->write5MinusHorizontalFacing($block->getFacing());
         });
-        $builder->setDeserializer(static fn (Reader $in) => (clone $block)
+        $builder->setDeserializer(
+            static fn (Reader $in) => (clone $block)
             ->setUpsideDown($in->readBool(BlockStateNames::UPSIDE_DOWN_BIT))
             ->setFacing($in->read5MinusHorizontalFacing())
         );
@@ -391,8 +392,10 @@ final class NexlyPermutations
                         (new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString()))
                         ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
                         ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0")
-                    )->addComponent(new CollisionBoxBlockComponent(!$open, [BoxCollision::FENCE_GATE()])
-                    )->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FENCE_GATE()])
+                    )->addComponent(
+                        new CollisionBoxBlockComponent(!$open, [BoxCollision::FENCE_GATE()])
+                    )->addComponent(
+                        new SelectionBoxBlockComponent(true, [BoxCollision::FENCE_GATE()])
                     )->addComponent(new TransformationBlockComponent(match ($dir) {
                         StateValues::MC_CARDINAL_DIRECTION_NORTH => new Vector3(0, 0, 0),
                         StateValues::MC_CARDINAL_DIRECTION_SOUTH => new Vector3(0, 180, 0),
@@ -849,7 +852,7 @@ final class NexlyPermutations
                     "q.block_state('" . StateNames::LEVER_DIRECTION . "') == '$dir' && " .
                     "q.block_state('" . StateNames::OPEN_BIT . "') == $open";
 
-                if(in_array($dir, [
+                if (in_array($dir, [
                     StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH,
                     StateValues::LEVER_DIRECTION_UP_EAST_WEST,
                     StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH,
@@ -862,18 +865,18 @@ final class NexlyPermutations
 
                 $permutation = Permutation::create($expr);
                 $permutation->addComponent(new TransformationBlockComponent(
-                        match ($dir) {
-                            StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => new Vector3(0, 0, 0),
-                            StateValues::LEVER_DIRECTION_UP_EAST_WEST => new Vector3(0, 90, 0),
-                            StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => new Vector3(180, 0, 0),
-                            StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => new Vector3(180, 90, 0),
-                            StateValues::LEVER_DIRECTION_NORTH => new Vector3(90, 180, 0),
-                            StateValues::LEVER_DIRECTION_SOUTH => new Vector3(90, 0, 0),
-                            StateValues::LEVER_DIRECTION_EAST => new Vector3(90, 90, 0),
-                            StateValues::LEVER_DIRECTION_WEST => new Vector3(90, 270, 0),
-                            default => throw new RuntimeException("Invalid lever direction"),
-                        }
-                    ));
+                    match ($dir) {
+                        StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => new Vector3(0, 0, 0),
+                        StateValues::LEVER_DIRECTION_UP_EAST_WEST => new Vector3(0, 90, 0),
+                        StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => new Vector3(180, 0, 0),
+                        StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => new Vector3(180, 90, 0),
+                        StateValues::LEVER_DIRECTION_NORTH => new Vector3(90, 180, 0),
+                        StateValues::LEVER_DIRECTION_SOUTH => new Vector3(90, 0, 0),
+                        StateValues::LEVER_DIRECTION_EAST => new Vector3(90, 90, 0),
+                        StateValues::LEVER_DIRECTION_WEST => new Vector3(90, 270, 0),
+                        default => throw new RuntimeException("Invalid lever direction"),
+                    }
+                ));
 
                 $builder->addPermutation($permutation);
             }
