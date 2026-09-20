@@ -1,16 +1,14 @@
-# Prism Studio - Nexly
+# Nexly
 
 <p>
     <a><img src="https://img.shields.io/badge/php-^8.1.0-informational" alt="Version"></a>
-    <a href="https://github.com/pmmp/PrismStudioMC/Nexly/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/PrismStudioMC/Nexly?label=release&sort=semver"></a>
-    <a href="https://github.com/pmmp/PocketMine-MP/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/pmmp/PocketMine-MP/total?label=download%40PocketMine-MP"></a>	
-    <a href="https://discord.gg/RUwn4Amj8G"><img src="https://img.shields.io/discord/1405284443358236862?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+    <a href="https://github.com/pmmp/Zwuiix-cmd/Nexly/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/Zwuiix-cmd/Nexly?label=release&sort=semver"></a>
 </p>
 
 Nexly is a **PocketMine-MP 5.35.0+** (PHP 8.1+) plugin that simplifies custom item and block creation for Minecraft Bedrock Edition. 
 Focus on your game logic and visual design while Nexly handles the complex technical implementation details.
 
-### [Advanced documentation](https://deepwiki.com/PrismStudioMC/Nexly)
+### [Advanced documentation](https://deepwiki.com/Zwuiix-cmd/Nexly)
 
 ## Why Nexly?
 
@@ -36,4 +34,6 @@ Focus on your game logic and visual design while Nexly handles the complex techn
 - **Documentation**: Detailed API documentation and usage guides
 
 # Servers using Nexly
-- [Érodia](https://discord.gg/JS3nk6QV) - A French PvP-Faction server with custom items and blocks.
+- [Érodia](https://discord.gg/JS3nk6QV)
+- [Lyno](https://discord.gg/HcThsXajFf)
+- [Linésia](https://discord.gg/jqHm4Xkhnd)
