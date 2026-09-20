@@ -16,6 +16,7 @@ use Nexly\Blocks\Components\DisplayNameBlockComponent;
 use Nexly\Blocks\Components\FrictionBlockComponent;
 use Nexly\Blocks\Components\LightEmissionBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
+use Nexly\Blocks\Components\OnInteractBlockComponent;
 use Nexly\Blocks\Components\OnPlayerPlacingBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\Types\BreathabilityType;
@@ -44,6 +45,7 @@ use Nexly\Recipes\NexlyRecipes;
 use Nexly\Recipes\Types\Recipe;
 use pocketmine\block\block;
 use pocketmine\block\BlockTypeIds;
+use pocketmine\block\Cactus;
 use pocketmine\block\Crops;
 use pocketmine\block\Door;
 use pocketmine\block\Farmland;
@@ -308,7 +310,7 @@ class BlockBuilder
     /**
      * Get a BlockComponent by its name.
      *
-     * @param BlockComponentIds $name
+     * @param BlockComponentIds|string $name
      * @return BlockComponent|null
      */
     public function getComponent(BlockComponentIds|string $name): ?BlockComponent
@@ -532,7 +534,7 @@ class BlockBuilder
      * @param bool $autoload
      * @return $this
      */
-    public function register(bool $creative = true, bool $autoload = true, Closure $init = null): self
+    public function register(bool $creative = true, bool $autoload = true): self
     {
         if (!isset($this->block)) {
             throw new \RuntimeException("Block instance is not set. Use setBlock() to set it before registering.");
@@ -642,9 +644,7 @@ class BlockBuilder
             $this->addComponent(new DestructibleByMiningBlockComponent($block->getBreakInfo()->getHardness() * 3.33334));
             $this->addComponent(new DisplayNameBlockComponent("tile." . $this->getStringId() . ".name"));
             $this->addComponent(new FrictionBlockComponent(max(0, 1 - $block->getFrictionFactor())));
-            if (($lightLevel = $block->getLightLevel()) > 0) {
-                $this->addComponent(new LightEmissionBlockComponent($lightLevel));
-            }
+            if(($lightLevel = $block->getLightLevel()) > 0) $this->addComponent(new LightEmissionBlockComponent($lightLevel));
             //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
             $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: $block->isTransparent() ? MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED : MaterialRenderMethod::OPAQUE)]));
             $this->addComponent(new OnPlayerPlacingBlockComponent());
@@ -655,7 +655,7 @@ class BlockBuilder
 
             $tile = $block->getIdInfo()->getTileClass();
             if ($tile !== null && is_a($tile, Container::class, true)) {
-                $this->addComponent(new CustomComponentsBlockComponent());
+                $this->addComponent(new OnInteractBlockComponent());
             }
 
             $this->addComponent(new SelectionBoxBlockComponent(true));
@@ -780,6 +780,7 @@ class BlockBuilder
             $block instanceof GlassPane => NexlyPermutations::makeGlassPane($this, $block),
             $block instanceof Lever => NexlyPermutations::makeLever($this, $block),
             $block instanceof Slime => NexlyPermutations::makeSlime($this, $block),
+            $block instanceof Cactus => NexlyPermutations::makeCactus($this, $block),
             default => null,
         };
     }

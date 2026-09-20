@@ -55,6 +55,7 @@ use pocketmine\item\ItemBlock;
 use pocketmine\item\Pickaxe;
 use pocketmine\item\Record;
 use pocketmine\item\Shovel;
+use pocketmine\item\SpawnEgg;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\Sword;
 
@@ -154,7 +155,7 @@ class NexlyCreative
             $item instanceof Record => new CreativeInfo(null, CreativeGroup::GROUP_RECORD),
             $item instanceof GoatHorn => new CreativeInfo(null, CreativeGroup::GROUP_GOAT_HORN),
             $item instanceof Banner => new CreativeInfo(null, CreativeGroup::GROUP_BANNER),
-            //$item instanceof SpawnEgg => new CreativeInfo(null, CreativeGroup::GROUP_MOB_EGGS),
+            //$item instanceof SpawnEgg => new CreativeInfo(null, CreativeGroup::GROUP_MOB_EGG),
             !$item->getBlock() instanceof Air => self::detectCreativeInfoFromBlock($item->getBlock()),
             default => new CreativeInfo(CreativeCategory::ITEMS),
         };
