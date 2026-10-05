@@ -624,7 +624,7 @@ class BlockBuilder
             }
         }
 
-        if ($creative) {
+        if ($creative && !$creativeInfo->isHidden()) {
             NexlyCreative::add($block->asItem(), $creativeInfo?->getCategory(), $creativeInfo?->getGroup());
         }
         return $this;
