@@ -4,6 +4,7 @@ namespace Nexly\Items\Components\Legacy;
 
 use Nexly\Items\ItemBuilder;
 use Nexly\Items\ItemVersion;
+use pocketmine\block\BlockTypeTags;
 use pocketmine\block\Crops;
 use pocketmine\block\Flower;
 use pocketmine\block\NetherWartPlant;
@@ -137,7 +138,7 @@ class LegacyItemBuilder extends ItemBuilder
         } elseif ($block instanceof NetherWartPlant) {
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::SOUL_SAND()));
         } elseif ($block instanceof Flower || $block instanceof Sapling) {
-            $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::GRASS(), VanillaBlocks::DIRT(), VanillaBlocks::PODZOL(), VanillaBlocks::MYCELIUM()));
+            $this->addComponent(SeedComponent::fromTags($block, [BlockTypeTags::DIRT, BlockTypeTags::MUD, BlockTypeTags::NYLIUM]));
         }
         return $this;
     }

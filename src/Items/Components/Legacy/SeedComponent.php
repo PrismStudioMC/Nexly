@@ -5,6 +5,7 @@ namespace Nexly\Items\Components\Legacy;
 use Attribute;
 use Nexly\Items\Components\Legacy\Types\LegacyFace;
 use pocketmine\block\Block;
+use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -37,6 +38,31 @@ class SeedComponent extends LegacyItemComponent
         return new self(
             GlobalBlockStateHandlers::getSerializer()->serialize($result->getStateId())->getName(),
             array_map(fn (Block $block) => GlobalBlockStateHandlers::getSerializer()->serialize($block->getStateId())->getName(), $blocks),
+        );
+    }
+
+    /**
+     * Create a SeedComponent from tags.
+     *
+     * @param Block $result
+     * @param array $tags
+     * @return self
+     */
+    public static function fromTags(Block $result, array $tags): self
+    {
+        $blocks = [];
+        foreach (RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state) {
+            foreach ($tags as $tag) {
+                if ($state->hasTypeTag($tag)) {
+                    $blocks[] = $state->getStateId();
+                    break;
+                }
+            }
+        }
+
+        return new self(
+            GlobalBlockStateHandlers::getSerializer()->serialize($result->getStateId())->getName(),
+            array_map(fn (int $stateId) => GlobalBlockStateHandlers::getSerializer()->serialize($stateId)->getName(), $blocks),
         );
     }
 
