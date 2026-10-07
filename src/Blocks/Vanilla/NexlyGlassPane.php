@@ -3,8 +3,6 @@
 namespace Nexly\Blocks\Vanilla;
 
 use pocketmine\block\Block;
-use pocketmine\block\Fence;
-use pocketmine\block\FenceGate;
 use pocketmine\block\GlassPane;
 use pocketmine\block\Thin;
 use pocketmine\block\utils\SupportType;

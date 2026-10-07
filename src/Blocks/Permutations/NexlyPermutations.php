@@ -35,10 +35,13 @@ use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Flower;
 use pocketmine\block\GlassPane;
+use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
+use pocketmine\block\Leaves;
 use pocketmine\block\Lever;
 use pocketmine\block\NetherWartPlant;
+use pocketmine\block\Sapling;
 use pocketmine\block\Slab;
 use pocketmine\block\Slime;
 use pocketmine\block\Stair;
@@ -47,13 +50,14 @@ use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\SlabType;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\block\Wall;
-use pocketmine\data\bedrock\block\BlockStateNames;
+use pocketmine\block\Wood;
 use pocketmine\data\bedrock\block\BlockStateNames as StateNames;
 use pocketmine\data\bedrock\block\BlockStateStringValues as StateValues;
 use pocketmine\data\bedrock\block\convert\BlockStateDeserializerHelper as DeserializerHelper;
 use pocketmine\data\bedrock\block\convert\BlockStateReader as Reader;
 use pocketmine\data\bedrock\block\convert\BlockStateSerializerHelper as SerializerHelper;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter as Writer;
+use pocketmine\math\Axis;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
@@ -105,6 +109,134 @@ final class NexlyPermutations
     }
 
     /**
+     * Create permutations for Wood blocks.
+     *
+     * @param Builder $builder
+     * @param Wood $block
+     * @return void
+     */
+    public static function makeWood(Builder $builder, Wood $block): void
+    {
+        $stringId = $builder->getStringId();
+
+        $builder->setSerializer(static fn (Wood $block) : Writer => (new Writer($stringId))->writePillarAxis($block->getAxis()));
+        $builder->setDeserializer(static fn (Reader $in) : Wood => (clone $block)->setAxis($in->readPillarAxis())->setStripped($block->isStripped()));
+
+        $builder->addComponent(new GeometryBlockComponent(MinecraftGeometry::FULL_BLOCK->toString()));
+
+        $propertyValues = [StateValues::PILLAR_AXIS_X, StateValues::PILLAR_AXIS_Y, StateValues::PILLAR_AXIS_Z];
+        $builder->addProperty(new BlockProperty(StateNames::PILLAR_AXIS, $propertyValues));
+
+        foreach ([Axis::X, Axis::Y, Axis::Z] as $v) {
+            $str = Axis::toString($v);
+            $expression = "q.block_state('" . StateNames::PILLAR_AXIS . "') == '{$str}'";
+
+            $builder->addPermutation(Permutation::create($expression)
+                ->addComponent(new TransformationBlockComponent(rotation: match ($v) {
+                    Axis::X => new Vector3(0, 0, 90),
+                    Axis::Y => new Vector3(0, 0, 0),
+                    Axis::Z => new Vector3(90, 0, 0),
+                    default => throw new RuntimeException("Invalid axis"),
+                })))
+                ->addComponent(new MaterialInstancesBlockComponent([
+                    new Material(
+                        texture: $builder->getName() . "_top",
+                        target: MaterialTarget::UP,
+                        renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                    ),
+                    new Material(
+                        texture: $builder->getName() . "_top",
+                        target: MaterialTarget::DOWN,
+                        renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                    ),
+                    new Material(
+                        texture: $builder->getName() . "_side",
+                        target: MaterialTarget::ALL,
+                        renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                    )
+                ]));
+        }
+    }
+
+    /**
+     * Create permutations for Leaves blocks.
+     *
+     * @param Builder $builder
+     * @param Leaves $block
+     * @return void
+     */
+    public static function makeLeaves(Builder $builder, Leaves $block): void
+    {
+        $stringId = $builder->getStringId();
+
+        $builder->setSerializer(static fn (Leaves $block) : Writer => SerializerHelper::encodeLeaves($block, new Writer($stringId)));
+        $builder->setDeserializer(static fn (Reader $in) : Leaves => DeserializerHelper::decodeLeaves((clone $block), $in));
+
+        $builder->addProperty(new BlockProperty(StateNames::PERSISTENT_BIT, [false, true]));
+        $builder->addProperty(new BlockProperty(StateNames::UPDATE_BIT, [false, true]));
+
+        $builder->addComponent(new MaterialInstancesBlockComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST)]));
+    }
+
+    /**
+     * Create permutations for Grass Path blocks.
+     *
+     * @param Builder $builder
+     * @param GrassPath $block
+     * @return void
+     */
+    public static function makeGrassPath(Builder $builder, GrassPath $block): void
+    {
+        $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::FARMLAND->toString()));
+        $builder->addComponent(new MaterialInstancesBlockComponent([
+            new Material(
+                texture: $builder->getName() . "_top",
+                target: MaterialTarget::UP,
+                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+            ),
+            new Material(
+                texture: $builder->getName() . "_bottom",
+                target: MaterialTarget::DOWN,
+                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+            ),
+            new Material(
+                texture: $builder->getName() . "_side",
+                target: MaterialTarget::ALL,
+                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+            )
+        ]));
+        $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
+        $builder->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
+    }
+
+
+    /**
+     * Create permutations for Sapling blocks.
+     *
+     * @param Builder $builder
+     * @param Sapling $block
+     * @return void
+     */
+    public static function makeSapling(Builder $builder, Sapling $block): void
+    {
+        $stringId = $builder->getStringId();
+
+        $builder->setSerializer(static fn (Sapling $block) : Writer => SerializerHelper::encodeSapling($block, new Writer($stringId)));
+        $builder->setDeserializer(static fn (Reader $in) : Sapling => DeserializerHelper::decodeSapling((clone $block), $in));
+
+        $builder->addProperty(new BlockProperty(StateNames::AGE_BIT, [false, true]));
+        $builder->addComponent($geometry = new GeometryBlockComponent(MinecraftGeometry::CROSS->toString()));
+        $builder->addComponent($material = new MaterialInstancesBlockComponent([
+            new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)
+        ]));
+
+        $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
+
+        $builder->addComponent(new FlowerPottableBlockComponent());
+        $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
+    }
+
+    /**
      * Create permutations for stair blocks (e.g., stone stairs, wooden stairs).
      *
      * @param Builder $builder
@@ -116,11 +248,11 @@ final class NexlyPermutations
         $stringId = $builder->getStringId();
         $builder->setSerializer(static function (Stair $block) use($stringId) {
             return (new Writer($stringId))
-                ->writeBool(BlockStateNames::UPSIDE_DOWN_BIT, $block->isUpsideDown())
+                ->writeBool(StateNames::UPSIDE_DOWN_BIT, $block->isUpsideDown())
                 ->write5MinusHorizontalFacing($block->getFacing());
         });
         $builder->setDeserializer(static fn (Reader $in) => (clone $block)
-            ->setUpsideDown($in->readBool(BlockStateNames::UPSIDE_DOWN_BIT))
+            ->setUpsideDown($in->readBool(StateNames::UPSIDE_DOWN_BIT))
             ->setFacing($in->read5MinusHorizontalFacing())
         );
 

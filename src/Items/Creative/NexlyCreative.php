@@ -23,6 +23,7 @@ use pocketmine\block\Flower;
 use pocketmine\block\Glass;
 use pocketmine\block\GlassPane;
 use pocketmine\block\GlazedTerracotta;
+use pocketmine\block\Leaves;
 use pocketmine\block\MobHead;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Planks;
@@ -34,7 +35,6 @@ use pocketmine\block\Slab;
 use pocketmine\block\Stair;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\Wall;
-use pocketmine\block\WallSign;
 use pocketmine\block\Wood;
 use pocketmine\block\Wool;
 use pocketmine\inventory\ArmorInventory;
@@ -55,7 +55,6 @@ use pocketmine\item\ItemBlock;
 use pocketmine\item\Pickaxe;
 use pocketmine\item\Record;
 use pocketmine\item\Shovel;
-use pocketmine\item\SpawnEgg;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\Sword;
 
@@ -180,7 +179,8 @@ class NexlyCreative
             $block instanceof Button => new CreativeInfo(null, CreativeGroup::GROUP_BUTTONS),
             $block instanceof Door => new CreativeInfo(null, CreativeGroup::GROUP_DOOR),
             $block instanceof Trapdoor => new CreativeInfo(null, CreativeGroup::GROUP_TRAPDOOR),
-            $block instanceof WallSign => new CreativeInfo(null, CreativeGroup::GROUP_HANDGING_SIGN),
+            $block instanceof Leaves => new CreativeInfo(null, CreativeGroup::GROUP_LEAVES),
+            //$block instanceof WallSign => new CreativeInfo(null, CreativeGroup::GROUP_HANDGING_SIGN),
             $block instanceof BaseSign => new CreativeInfo(null, CreativeGroup::GROUP_SIGN),
             $block instanceof Chest => new CreativeInfo(null, CreativeGroup::GROUP_CHEST),
             $block instanceof Anvil => new CreativeInfo(null, CreativeGroup::GROUP_ANVIL),

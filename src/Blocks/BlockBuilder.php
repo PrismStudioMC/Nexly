@@ -9,7 +9,6 @@ use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
 use Nexly\Blocks\Components\ConnectionRuleComponent;
-use Nexly\Blocks\Components\CustomComponentsBlockComponent;
 use Nexly\Blocks\Components\DestructibleByExplosionBlockComponent;
 use Nexly\Blocks\Components\DestructibleByMiningBlockComponent;
 use Nexly\Blocks\Components\DisplayNameBlockComponent;
@@ -55,17 +54,21 @@ use pocketmine\block\FenceGate;
 use pocketmine\block\Flowable;
 use pocketmine\block\Flower;
 use pocketmine\block\GlassPane;
+use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
+use pocketmine\block\Leaves;
 use pocketmine\block\Lever;
 use pocketmine\block\NetherWartPlant;
 use pocketmine\block\RuntimeBlockStateRegistry;
+use pocketmine\block\Sapling;
 use pocketmine\block\Slab;
 use pocketmine\block\Slime;
 use pocketmine\block\Stair;
 use pocketmine\block\tile\Container;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\Wall;
+use pocketmine\block\Wood;
 use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
@@ -767,6 +770,10 @@ class BlockBuilder
         match (true) {
             $block instanceof Crops => NexlyPermutations::makeCrop($this, $block),
             $block instanceof NetherWartPlant => NexlyPermutations::makeNetherPlant($this, $block),
+            $block instanceof Wood => NexlyPermutations::makeWood($this, $block),
+            $block instanceof Leaves => NexlyPermutations::makeLeaves($this, $block),
+            $block instanceof GrassPath => NexlyPermutations::makeGrassPath($this, $block),
+            $block instanceof Sapling => NexlyPermutations::makeSapling($this, $block),
             $block instanceof Stair => NexlyPermutations::makeStair($this, $block),
             $block instanceof Slab => NexlyPermutations::makeSlab($this, $block),
             $block instanceof Door => NexlyPermutations::makeDoor($this, $block),

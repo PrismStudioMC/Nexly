@@ -7,6 +7,7 @@ use Nexly\Items\ItemVersion;
 use pocketmine\block\Crops;
 use pocketmine\block\Flower;
 use pocketmine\block\NetherWartPlant;
+use pocketmine\block\Sapling;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\FoodSource;
 use pocketmine\item\ConsumableItem;
@@ -135,7 +136,7 @@ class LegacyItemBuilder extends ItemBuilder
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::FARMLAND()));
         } elseif ($block instanceof NetherWartPlant) {
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::SOUL_SAND()));
-        } elseif ($block instanceof Flower) {
+        } elseif ($block instanceof Flower || $block instanceof Sapling) {
             $this->addComponent(SeedComponent::fromBlocks($block, VanillaBlocks::GRASS(), VanillaBlocks::DIRT(), VanillaBlocks::PODZOL(), VanillaBlocks::MYCELIUM()));
         }
         return $this;
