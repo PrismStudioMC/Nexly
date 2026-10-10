@@ -5,12 +5,13 @@ namespace Nexly\Blocks\Permutations;
 use Nexly\Blocks\BlockBuilder as Builder;
 use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
-use Nexly\Blocks\Components\CustomComponentsBlockComponent;
 use Nexly\Blocks\Components\EmbeddedVisualBlockComponent;
 use Nexly\Blocks\Components\FlowerPottableBlockComponent;
 use Nexly\Blocks\Components\GeometryBlockComponent;
 use Nexly\Blocks\Components\ItemVisualBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
+use Nexly\Blocks\Components\OnInteractBlockComponent;
+use Nexly\Blocks\Components\PlacementFilterBlockComponent;
 use Nexly\Blocks\Components\RandomOffsetBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\TransformationBlockComponent;
@@ -85,6 +86,9 @@ final class NexlyPermutations
         $builder->setDeserializer(static fn (Reader $in) => DeserializerHelper::decodeCrops(clone $block, $in));
         $builder->addProperty(new BlockProperty(StateNames::GROWTH, $ages = range(0, $block::MAX_AGE)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::CROP->toString()));
+
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
+
         foreach ($ages as $age) {
             $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::GROWTH . "') == {$age}")
                 ->addComponent(SelectionBoxBlockComponent::fromCrops($block, $age))
@@ -104,8 +108,11 @@ final class NexlyPermutations
         $stringId = $builder->getStringId();
         $builder->setSerializer(static fn (NetherWartPlant $block) => (new Writer($stringId))->writeInt(StateNames::AGE, $block->getAge()));
         $builder->setDeserializer(static fn (Reader $in) => (clone $block)->setAge($in->readBoundedInt(StateNames::AGE, 0, 3)));
+
         $builder->addProperty(new BlockProperty(StateNames::AGE, $ages = range(0, $block::MAX_AGE)));
+
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::NETHER_WART->toString()));
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
         foreach ($ages as $age) {
             $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::AGE . "') == {$age}")
                 ->addComponent(SelectionBoxBlockComponent::fromCrops($block, $age))
@@ -252,6 +259,7 @@ final class NexlyPermutations
         ]));
 
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
 
         $builder->addComponent(new FlowerPottableBlockComponent());
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
@@ -383,7 +391,9 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::DOOR_HINGE_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
 
-        $builder->addComponent(new CustomComponentsBlockComponent());
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
+
+        $builder->addComponent(new OnInteractBlockComponent());
         $builder->addComponent((new GeometryBlockComponent(ExtendedGeometry::DOOR->toString()))
             ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
             ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0"));
@@ -530,7 +540,7 @@ final class NexlyPermutations
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString() . "_render"), $material));
-        $builder->addComponent(new CustomComponentsBlockComponent());
+        $builder->addComponent(new OnInteractBlockComponent());
         foreach ($facings as $dir) {
             foreach (range(0, 1) as $open) {
                 foreach (range(0, 1) as $inWall) {
@@ -648,7 +658,7 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, range(0, 1)));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, range(0, 1)));
 
-        $builder->addComponent(new CustomComponentsBlockComponent());
+        $builder->addComponent(new OnInteractBlockComponent());
         $builder->addComponent($material = new MaterialInstancesBlockComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED)]));
         $builder->addComponent(new ItemVisualBlockComponent((new GeometryBlockComponent(ExtendedGeometry::TRAPDOOR->toString()))
             ->add("open", "false")
@@ -846,6 +856,8 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(2, 5)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LADDER->toString()));
 
+        $builder->addComponent(new PlacementFilterBlockComponent(Facing::HORIZONTAL));
+
         foreach ($facings as $dir) {
             $builder->addPermutation(
                 Permutation::create("q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir")
@@ -892,7 +904,7 @@ final class NexlyPermutations
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::FARMLAND()]));
-        $builder->addComponent(new CustomComponentsBlockComponent(true));
+        $builder->addComponent(new OnInteractBlockComponent());
     }
 
     /**
@@ -910,6 +922,7 @@ final class NexlyPermutations
         ]));
 
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
 
         $builder->addComponent(new FlowerPottableBlockComponent());
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
@@ -1051,7 +1064,7 @@ final class NexlyPermutations
         ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0"));
 
         $builder->addComponent(new CollisionBoxBlockComponent(false));
-        $builder->addComponent(new CustomComponentsBlockComponent());
+        $builder->addComponent(new OnInteractBlockComponent());
 
         foreach ($facings as $dir) {
             foreach (range(0, 1) as $open) {
@@ -1120,6 +1133,7 @@ final class NexlyPermutations
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
+        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
     }
 
     /**

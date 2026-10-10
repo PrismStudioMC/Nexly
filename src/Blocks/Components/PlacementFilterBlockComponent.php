@@ -3,9 +3,11 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
+use pocketmine\math\Facing;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class PlacementFilterBlockComponent extends BlockComponent
@@ -13,7 +15,8 @@ class PlacementFilterBlockComponent extends BlockComponent
     public function __construct(
         private readonly array $allowedFaces = [],
         private readonly array $blockFilter = [],
-    ) {
+    )
+    {
     }
 
     /**
@@ -35,7 +38,11 @@ class PlacementFilterBlockComponent extends BlockComponent
     {
         return CompoundTag::create()
             ->setTag("conditions", CompoundTag::create()
-            ->setTag("allowed_faces", new ListTag($this->allowedFaces, NBT::TAG_Int)))
-            ->setTag("block_filter", new ListTag($this->blockFilter, NBT::TAG_String));
+                ->setTag("allowed_faces", new ListTag(array_map(function (mixed $face) {
+                    return new StringTag(is_int($face) ? Facing::toString($face) : (string)$face);
+                }, $this->allowedFaces), NBT::TAG_String)))
+                ->setTag("block_filter", new ListTag(array_map(function (string $block) {
+                    return new StringTag($block);
+                }, $this->allowedFaces), NBT::TAG_String));
     }
 }
