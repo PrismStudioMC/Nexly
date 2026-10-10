@@ -27,6 +27,8 @@ use Nexly\Blocks\Permutations\Impl\WallPermutation;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Blocks\Vanilla\NexlyFence;
 use Nexly\Blocks\Vanilla\NexlyGlassPane;
+use Nexly\Blocks\Vanilla\NexlyStainedGlassPane;
+use pocketmine\block\Block;
 use pocketmine\block\Cactus;
 use pocketmine\block\Crops;
 use pocketmine\block\Door;
@@ -34,6 +36,7 @@ use pocketmine\block\Farmland;
 use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Flower;
+use pocketmine\block\Furnace;
 use pocketmine\block\GlassPane;
 use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
@@ -46,11 +49,13 @@ use pocketmine\block\Slab;
 use pocketmine\block\Slime;
 use pocketmine\block\Stair;
 use pocketmine\block\Trapdoor;
+use pocketmine\block\utils\Colored;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\SlabType;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
+use pocketmine\block\Wool;
 use pocketmine\data\bedrock\block\BlockStateNames as StateNames;
 use pocketmine\data\bedrock\block\BlockStateStringValues as StateValues;
 use pocketmine\data\bedrock\block\convert\BlockStateDeserializerHelper as DeserializerHelper;
@@ -119,7 +124,23 @@ final class NexlyPermutations
     {
         $stringId = $builder->getStringId();
 
-        $builder->setSerializer(static fn (Wood $block) : Writer => (new Writer($stringId))->writePillarAxis($block->getAxis()));
+        if (str_contains($stringId, '_stripped_')) {
+            $strippedId = $stringId;
+            $unstrippedId = str_replace('_stripped_', '_', $stringId);
+        } else {
+            $unstrippedId = $stringId;
+            $lastUnderscorePos = strrpos($stringId, '_');
+            if ($lastUnderscorePos !== false) {
+                $strippedId = substr_replace($stringId, '_stripped_', $lastUnderscorePos, 1);
+            } else {
+                $strippedId = $stringId . "_stripped";
+            }
+        }
+
+        $builder->setSerializer(static function (Wood $block) use($unstrippedId, $strippedId) : Writer {
+            $out = (new Writer($block->isStripped() ? $strippedId : $unstrippedId));
+            return $out->writePillarAxis($block->getAxis());
+        });
         $builder->setDeserializer(static fn (Reader $in) : Wood => (clone $block)->setAxis($in->readPillarAxis())->setStripped($block->isStripped()));
 
         $builder->addComponent(new GeometryBlockComponent(MinecraftGeometry::FULL_BLOCK->toString()));
@@ -683,13 +704,13 @@ final class NexlyPermutations
         $stringId = $builder->getStringId();
         $builder->setSerializer(
             static fn (Hopper $block) => (new Writer($stringId))
-            ->writeInt(StateNames::TOGGLE_BIT, $block->isPowered())
-            ->writeFacingWithoutUp($block->getFacing())
+                ->writeInt(StateNames::TOGGLE_BIT, $block->isPowered())
+                ->writeFacingWithoutUp($block->getFacing())
         );
         $builder->setDeserializer(
             static fn (Reader $in) => (clone $block)
-            ->setPowered($in->readInt(StateNames::TOGGLE_BIT))
-            ->setFacing($in->readFacingWithoutUp())
+                ->setPowered($in->readInt(StateNames::TOGGLE_BIT))
+                ->setFacing($in->readFacingWithoutUp())
         );
 
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, range(0, 5))); // 0: Down, 2: North, 3: South, 4: West, 5: East
@@ -697,11 +718,11 @@ final class NexlyPermutations
 
         $builder->addComponent(
             (new GeometryBlockComponent(ExtendedGeometry::HOPPER->toString()))
-            ->add("ground", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 0")
-            ->add("north", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 2")
-            ->add("south", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 3")
-            ->add("west", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 4")
-            ->add("east", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 5")
+                ->add("ground", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 0")
+                ->add("north", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 2")
+                ->add("south", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 3")
+                ->add("west", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 4")
+                ->add("east", "q.block_state('" . StateNames::FACING_DIRECTION . "') == 5")
         );
         $builder->addComponent(new MaterialInstancesBlockComponent([
             new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED),
@@ -710,6 +731,52 @@ final class NexlyPermutations
             new Material($builder->getName() . "_outside", target: MaterialTarget::SOUTH, renderMethod: MaterialRenderMethod::ALPHA_TEST),
             new Material($builder->getName() . "_outside", target: MaterialTarget::WEST, renderMethod: MaterialRenderMethod::ALPHA_TEST),
             new Material($builder->getName() . "_outside", target: MaterialTarget::EAST, renderMethod: MaterialRenderMethod::ALPHA_TEST)
+        ]));
+    }
+
+    /**
+     * Create permutations for furnace blocks.
+     *
+     * @param Builder $builder
+     * @param Furnace $block
+     * @return void
+     */
+    public static function makeFurnace(Builder $builder, Furnace $block): void
+    {
+        $stringId = $builder->getStringId();
+
+        if (str_contains($stringId, 'lit_')) {
+            $litId = $stringId;
+            $unlitId = str_replace('lit_', '', $stringId);
+        } else {
+            $unlitId = $stringId;
+
+            $parts = explode(':', $stringId);
+            $namespace = $parts[0];
+            $name = $parts[1] ?? '';
+
+            $nameParts = explode('_', $name, 2);
+
+            if (count($nameParts) === 2) {
+                $litId = $namespace . ':' . $nameParts[0] . '_lit_' . $nameParts[1];
+            } else {
+                $litId = $namespace . ':lit_' . $name;
+            }
+        }
+
+        $builder->setSerializer(static function (Furnace $b) use ($unlitId, $litId): Writer {
+            return (new Writer($b->isLit() ? $litId : $unlitId))
+                ->writeCardinalHorizontalFacing($b->getFacing());
+        });
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block)
+            ->setFacing($in->readCardinalHorizontalFacing())
+        );
+
+        $builder->addProperty(new BlockProperty(StateNames::MC_CARDINAL_DIRECTION, [
+            StateValues::MC_CARDINAL_DIRECTION_NORTH,
+            StateValues::MC_CARDINAL_DIRECTION_SOUTH,
+            StateValues::MC_CARDINAL_DIRECTION_WEST,
+            StateValues::MC_CARDINAL_DIRECTION_EAST
         ]));
     }
 
@@ -863,11 +930,22 @@ final class NexlyPermutations
         }
 
         $stringId = $builder->getStringId();
-        $builder->setSerializer(static function (GlassPane $block) use ($stringId): Writer {
+
+
+        $isStained = $block instanceof NexlyStainedGlassPane;
+        $originalColorStr = $isStained ? strtolower($block->getColor()->name) : "";
+
+        $builder->setSerializer(static function (GlassPane $block) use ($stringId, $isStained, $originalColorStr): Writer {
+            $newId = $stringId;
+
+            if ($isStained && $block instanceof NexlyStainedGlassPane) {
+                $newId = str_replace($originalColorStr, strtolower($block->getColor()->name), $stringId);
+            }
+
             $reflection = new ReflectionClass(GlassPane::class);
             $connections = $reflection->getProperty("connections");
             $co = $connections->getValue($block);
-            return (new Writer($stringId))
+            return (new Writer($newId))
                 ->writeInt("mc:n", isset($co[Facing::NORTH]))
                 ->writeInt("mc:s", isset($co[Facing::SOUTH]))
                 ->writeInt("mc:w", isset($co[Facing::WEST]))
@@ -1042,5 +1120,25 @@ final class NexlyPermutations
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
+    }
+
+    /**
+     * Create permutations for colored blocks.
+     *
+     * @param Builder $builder
+     * @param Wool $block
+     * @return void
+     */
+    public static function makeSimpleColored(Builder $builder, Block $block): void
+    {
+        $stringId = $builder->getStringId();
+        $originalColorStr = strtolower($block->getColor()->name);
+
+        $builder->setSerializer(static function (Colored $state) use ($stringId, $originalColorStr): Writer {
+            $stateColorStr = strtolower($state->getColor()->name);
+            $newId = str_replace($originalColorStr, $stateColorStr, $stringId);
+            return new Writer($newId);
+        });
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block));
     }
 }

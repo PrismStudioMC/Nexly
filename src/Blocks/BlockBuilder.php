@@ -53,6 +53,7 @@ use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Flowable;
 use pocketmine\block\Flower;
+use pocketmine\block\Furnace;
 use pocketmine\block\GlassPane;
 use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
@@ -67,8 +68,10 @@ use pocketmine\block\Slime;
 use pocketmine\block\Stair;
 use pocketmine\block\tile\Container;
 use pocketmine\block\Trapdoor;
+use pocketmine\block\utils\Colored;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
+use pocketmine\block\Wool;
 use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
@@ -782,6 +785,7 @@ class BlockBuilder
             $block instanceof Wall => NexlyPermutations::makeWall($this, $block),
             $block instanceof Trapdoor => NexlyPermutations::makeTrapdoor($this, $block),
             $block instanceof Hopper => NexlyPermutations::makeHopper($this, $block),
+            $block instanceof Furnace => NexlyPermutations::makeFurnace($this, $block),
             $block instanceof HeadBlock => NexlyPermutations::makeHead($this, $block),
             $block instanceof Ladder => NexlyPermutations::makeLadder($this, $block),
             $block instanceof Farmland => NexlyPermutations::makeFarmland($this, $block),
@@ -790,6 +794,7 @@ class BlockBuilder
             $block instanceof Lever => NexlyPermutations::makeLever($this, $block),
             $block instanceof Slime => NexlyPermutations::makeSlime($this, $block),
             $block instanceof Cactus => NexlyPermutations::makeCactus($this, $block),
+            $block instanceof Colored => NexlyPermutations::makeSimpleColored($this, $block),
             default => null,
         };
     }

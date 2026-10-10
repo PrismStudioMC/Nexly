@@ -38,6 +38,20 @@ abstract class ItemBuilder
     }
 
     /**
+     * @return string
+     * @internal
+     */
+    public function getName(): string
+    {
+        $itemName = $this->getStringId();
+        if (str_contains($itemName, ":")) {
+            [, $itemName] = explode(":", $itemName, 2);
+        }
+
+        return $itemName;
+    }
+
+    /**
      * Set the string identifier for the item.
      *
      * @param string $stringId
