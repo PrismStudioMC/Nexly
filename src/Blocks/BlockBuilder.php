@@ -9,9 +9,11 @@ use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
 use Nexly\Blocks\Components\ConnectionRuleComponent;
+use Nexly\Blocks\Components\CustomComponentsBlockComponent;
 use Nexly\Blocks\Components\DestructibleByExplosionBlockComponent;
 use Nexly\Blocks\Components\DestructibleByMiningBlockComponent;
 use Nexly\Blocks\Components\DisplayNameBlockComponent;
+use Nexly\Blocks\Components\FlammableBlockComponent;
 use Nexly\Blocks\Components\FrictionBlockComponent;
 use Nexly\Blocks\Components\LightDampeningBlockComponent;
 use Nexly\Blocks\Components\LightEmissionBlockComponent;
@@ -61,6 +63,7 @@ use pocketmine\block\Ladder;
 use pocketmine\block\Leaves;
 use pocketmine\block\Lever;
 use pocketmine\block\NetherWartPlant;
+use pocketmine\block\Opaque;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\block\Sapling;
 use pocketmine\block\Slab;
@@ -71,7 +74,6 @@ use pocketmine\block\Trapdoor;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
-use pocketmine\block\Wool;
 use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
@@ -328,12 +330,12 @@ class BlockBuilder
     /**
      * Add a BlockComponent to the builder.
      *
-     * @param string $name
+     * @param BlockComponentIds $id
      * @return bool
      */
-    public function hasComponent(string $name): bool
+    public function hasComponent(BlockComponentIds $id): bool
     {
-        return isset($this->components[$name]);
+        return isset($this->components[$id->value]);
     }
 
     /**
@@ -652,11 +654,18 @@ class BlockBuilder
             $this->addComponent(new DisplayNameBlockComponent("tile." . $this->getStringId() . ".name"));
             $this->addComponent(new FrictionBlockComponent(max(0, 1 - $block->getFrictionFactor())));
             $this->addComponent(new LightEmissionBlockComponent($block->getLightLevel()));
-            $this->addComponent(new LightDampeningBlockComponent($block->getLightFilter()));
-            //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
-            $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: $block->isTransparent() ? MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED : MaterialRenderMethod::ALPHA_TEST_TO_OPAQUE)]));
-            $this->addComponent(new OnPlayerPlacingBlockComponent());
+            $this->addComponent(new LightDampeningBlockComponent(max(0, 1 - $block->getLightFilter())));
 
+            //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
+            $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: match(true) {
+                $block->isTransparent() => MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED,
+                $block instanceof Opaque => MaterialRenderMethod::OPAQUE,
+                default => MaterialRenderMethod::BLEND,
+            })]));
+
+            if($block->getFlammability() > 0){
+                $this->addComponent(new FlammableBlockComponent($block->getFlameEncouragement()));
+            }
             if ($block instanceof Flowable) {
                 $this->addComponent(new ConnectionRuleComponent());
             }
@@ -666,7 +675,14 @@ class BlockBuilder
                 $this->addComponent(new OnInteractBlockComponent());
             }
 
+            if ($this->hasComponent(BlockComponentIds::ON_INTERACT)) {
+                $this->addComponent(new CustomComponentsBlockComponent(
+                    hasPlayerInteract: $this->hasComponent(BlockComponentIds::ON_INTERACT),
+                ));
+            }
+
             $this->addComponent(new SelectionBoxBlockComponent(true));
+            $this->addComponent(new OnPlayerPlacingBlockComponent());
         }
 
         $ev = new BlockLoaderEvent($this, $block);
