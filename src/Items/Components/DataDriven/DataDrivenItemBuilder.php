@@ -17,7 +17,7 @@ use Nexly\Items\Components\DataDriven\Property\ShouldDespawnProperty;
 use Nexly\Items\Components\DataDriven\Property\StackedByDataProperty;
 use Nexly\Items\Components\DataDriven\Property\UseAnimationProperty;
 use Nexly\Items\Components\DataDriven\Property\UseDurationProperty;
-use Nexly\Items\Components\DataDriven\Types\IgnoreBlockVisual;
+use Nexly\Items\Components\DataDriven\Types\ItemBlockVisual;
 use Nexly\Items\Components\DataDriven\Types\ItemEnchantSlot;
 use Nexly\Items\Components\DataDriven\Types\ItemRepair;
 use Nexly\Items\Components\DataDriven\Types\ItemSlot;
@@ -204,7 +204,7 @@ class DataDrivenItemBuilder extends ItemBuilder
         }
 
         $block = $item->getBlock();
-        if (!($block instanceof Air) && empty($reflection->getAttributes(IgnoreBlockVisual::class))) {
+        if (!($block instanceof Air) && empty($reflection->getAttributes(ItemBlockVisual::class))) {
             $this->addProperty(BlockProperty::from($block));
         }
 
@@ -226,6 +226,8 @@ class DataDrivenItemBuilder extends ItemBuilder
     public function loadComponents(): self
     {
         $item = $this->getItem();
+        $reflection = new \ReflectionClass($item);
+
         $this->addComponent(new DisplayNameItemComponent("item." . $this->getStringId() . ".name"));
         $this->addComponent(new EnchantableItemComponent(ItemEnchantSlot::fromItem($item), $item->getEnchantability()));
         $this->addComponent(new FireResistantItemComponent($item->isFireProof()));
@@ -271,7 +273,9 @@ class DataDrivenItemBuilder extends ItemBuilder
 
         $block = $item->getBlock();
         if (!($block instanceof Air)) {
-            $this->addComponent(BlockPlacerItemComponent::from($block));
+            $this->addComponent(BlockPlacerItemComponent::make(
+                block: $block,
+            ));
         }
 
         $cooldown = $item->getCooldownTicks();

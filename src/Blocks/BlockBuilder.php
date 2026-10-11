@@ -56,6 +56,7 @@ use pocketmine\block\FenceGate;
 use pocketmine\block\Flowable;
 use pocketmine\block\Flower;
 use pocketmine\block\Furnace;
+use pocketmine\block\Glass;
 use pocketmine\block\GlassPane;
 use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
@@ -598,6 +599,7 @@ class BlockBuilder
                 "state" => [
                     "cardinal" => $trait->getState()->isCardinal(),
                     "facing" => $trait->getState()->isFacing(),
+                    "sixteenWayRotation" => $trait->getState()->isSixteenWayRotation(),
                 ],
             ], $this->traits), JSON_THROW_ON_ERROR),
             $serializer,
@@ -806,6 +808,7 @@ class BlockBuilder
             $block instanceof Ladder => NexlyPermutations::makeLadder($this, $block),
             $block instanceof Farmland => NexlyPermutations::makeFarmland($this, $block),
             $block instanceof Flower => NexlyPermutations::makeFlower($this, $block),
+            $block instanceof Glass => NexlyPermutations::makeGlass($this, $block),
             $block instanceof GlassPane => NexlyPermutations::makeGlassPane($this, $block),
             $block instanceof Lever => NexlyPermutations::makeLever($this, $block),
             $block instanceof Slime => NexlyPermutations::makeSlime($this, $block),

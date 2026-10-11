@@ -3,7 +3,7 @@
 namespace Nexly\Blocks;
 
 use Nexly\Items\Components\DataDriven\DataDriven;
-use Nexly\Items\Components\DataDriven\Types\IgnoreBlockVisual;
+use Nexly\Items\Components\DataDriven\Types\ItemBlockVisual;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIdentifier;
@@ -15,7 +15,7 @@ trait DataDrivenItemBlockTrait
      */
     public function asItem(): Item
     {
-        return new #[DataDriven] #[IgnoreBlockVisual] class (new ItemIdentifier(-$this->getTypeId()), $this->getName(), clone $this) extends Item {
+        return new #[DataDriven] #[ItemBlockVisual] class (new ItemIdentifier(-$this->getTypeId()), $this->getName(), clone $this) extends Item {
             public function __construct(
                 ItemIdentifier $identifier,
                 string                         $name,

@@ -11,11 +11,11 @@ use Nexly\Blocks\Components\GeometryBlockComponent;
 use Nexly\Blocks\Components\ItemVisualBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
 use Nexly\Blocks\Components\OnInteractBlockComponent;
-use Nexly\Blocks\Components\PlacementFilterBlockComponent;
 use Nexly\Blocks\Components\RandomOffsetBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\TransformationBlockComponent;
 use Nexly\Blocks\Components\Types\BoxCollision;
+use Nexly\Blocks\Components\Types\Culling;
 use Nexly\Blocks\Components\Types\ExtendedGeometry;
 use Nexly\Blocks\Components\Types\Material;
 use Nexly\Blocks\Components\Types\MaterialRenderMethod;
@@ -38,6 +38,7 @@ use pocketmine\block\Fence;
 use pocketmine\block\FenceGate;
 use pocketmine\block\Flower;
 use pocketmine\block\Furnace;
+use pocketmine\block\Glass;
 use pocketmine\block\GlassPane;
 use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
@@ -48,11 +49,13 @@ use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Sapling;
 use pocketmine\block\Slab;
 use pocketmine\block\Slime;
+use pocketmine\block\StainedGlass;
 use pocketmine\block\Stair;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\utils\LeverFacing;
 use pocketmine\block\utils\SlabType;
+use pocketmine\block\utils\StairShape;
 use pocketmine\block\utils\WallConnectionType;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
@@ -87,8 +90,6 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::GROWTH, $ages = range(0, $block::MAX_AGE)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::CROP->toString()));
 
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
-
         foreach ($ages as $age) {
             $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::GROWTH . "') == {$age}")
                 ->addComponent(SelectionBoxBlockComponent::fromCrops($block, $age))
@@ -112,7 +113,6 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::AGE, $ages = range(0, $block::MAX_AGE)));
 
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::NETHER_WART->toString()));
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
         foreach ($ages as $age) {
             $builder->addPermutation(Permutation::create("q.block_state('" . StateNames::AGE . "') == {$age}")
                 ->addComponent(SelectionBoxBlockComponent::fromCrops($block, $age))
@@ -259,7 +259,6 @@ final class NexlyPermutations
         ]));
 
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
 
         $builder->addComponent(new FlowerPottableBlockComponent());
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
@@ -278,17 +277,48 @@ final class NexlyPermutations
         $builder->setSerializer(static function (Stair $block) use($stringId) {
             return (new Writer($stringId))
                 ->writeBool(StateNames::UPSIDE_DOWN_BIT, $block->isUpsideDown())
-                ->write5MinusHorizontalFacing($block->getFacing());
+                ->write5MinusHorizontalFacing($block->getFacing())
+                ->writeString(StateNames::MC_CORNER, match($block->getShape()) {
+                    StairShape::INNER_LEFT => StateValues::MC_CORNER_INNER_LEFT,
+                    StairShape::INNER_RIGHT => StateValues::MC_CORNER_INNER_RIGHT,
+                    StairShape::OUTER_LEFT => StateValues::MC_CORNER_OUTER_LEFT,
+                    StairShape::OUTER_RIGHT => StateValues::MC_CORNER_OUTER_RIGHT,
+                    default => StateValues::MC_CORNER_NONE,
+                });
         });
         $builder->setDeserializer(static fn (Reader $in) => (clone $block)
             ->setUpsideDown($in->readBool(StateNames::UPSIDE_DOWN_BIT))
             ->setFacing($in->read5MinusHorizontalFacing())
+            ->setShape(match($in->readString(StateNames::MC_CORNER)) {
+                StateValues::MC_CORNER_INNER_LEFT => StairShape::INNER_LEFT(),
+                StateValues::MC_CORNER_INNER_RIGHT => StairShape::INNER_RIGHT(),
+                StateValues::MC_CORNER_OUTER_LEFT => StairShape::OUTER_LEFT(),
+                StateValues::MC_CORNER_OUTER_RIGHT => StairShape::OUTER_RIGHT(),
+                default => StairShape::STRAIGHT,
+            })
         );
 
-        $builder->addProperty(new BlockProperty(StateNames::DIRECTION, $facings = [0, 1, 2, 3]));
-        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, [false, true]));
+        $coners = [
+            StateValues::MC_CORNER_NONE,
+            StateValues::MC_CORNER_INNER_LEFT,
+            StateValues::MC_CORNER_INNER_RIGHT,
+            StateValues::MC_CORNER_OUTER_LEFT,
+            StateValues::MC_CORNER_OUTER_RIGHT,
+        ];
 
-        $builder->addComponent(($geometry = new GeometryBlockComponent(ExtendedGeometry::STAIR->toString())));
+        $facings = [0, 1, 2, 3];
+        $builder->addProperty(new BlockProperty(StateNames::DIRECTION, $facings));
+        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, [false, true]));
+        $builder->addProperty(new BlockProperty(StateNames::MC_CORNER, $coners));
+
+        $geometry = (new GeometryBlockComponent(ExtendedGeometry::STAIR->toString()))
+            ->add("base", "1")
+            ->add("top_nw", "q.block_state('" . StateNames::MC_CORNER . "') != '" . StateValues::MC_CORNER_OUTER_LEFT . "'") // Inversé
+            ->add("top_ne", "q.block_state('" . StateNames::MC_CORNER . "') != '" . StateValues::MC_CORNER_OUTER_RIGHT . "'") // Inversé
+            ->add("top_sw", "q.block_state('" . StateNames::MC_CORNER . "') == '" . StateValues::MC_CORNER_INNER_RIGHT . "'") // Inversé
+            ->add("top_se", "q.block_state('" . StateNames::MC_CORNER . "') == '" . StateValues::MC_CORNER_INNER_LEFT . "'"); // Inversé
+
+        $builder->addComponent($geometry);
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
@@ -296,27 +326,43 @@ final class NexlyPermutations
 
         foreach ([false, true] as $upsideDown) {
             foreach ($facings as $direction) {
-                $expr =
-                    "q.block_state('" . StateNames::UPSIDE_DOWN_BIT . "') == " . ($upsideDown ? "1" : "0") . " && " .
-                    "q.block_state('" . StateNames::DIRECTION . "') == {$direction}";
+                foreach ($coners as $coner) {
+                    $expr =
+                        "q.block_state('" . StateNames::UPSIDE_DOWN_BIT . "') == " . ($upsideDown ? "1" : "0") . " && " .
+                        "q.block_state('" . StateNames::DIRECTION . "') == {$direction}" . " && " .
+                        "q.block_state('" . StateNames::MC_CORNER . "') == '{$coner}'";
 
-                $permutation = Permutation::create($expr);
-                $permutation->addComponent(new TransformationBlockComponent(
-                    rotation: new Vector3($upsideDown ? 180 : 0, match($direction) {
-                        !$upsideDown ? 0 : 1 => 270,    // East
-                        !$upsideDown ? 1 : 0 => 90,  // West
-                        !$upsideDown ? 2 : 3 => 180,   // South
-                        !$upsideDown ? 3 : 2 => 0,  // North
-                        default => throw new RuntimeException("Invalid direction"),
-                    }, 0),
-                ));
+                    $permutation = Permutation::create($expr);
+                    $permutation->addComponent(new TransformationBlockComponent(
+                        rotation: new Vector3($upsideDown ? 180 : 0, match($direction) {
+                            !$upsideDown ? 0 : 1 => 270,    // East
+                            !$upsideDown ? 1 : 0 => 90,     // West
+                            !$upsideDown ? 2 : 3 => 180,    // South
+                            !$upsideDown ? 3 : 2 => 0,      // North
+                            default => throw new RuntimeException("Invalid direction"),
+                        }, 0),
+                    ));
 
-                $permutation->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 8, 16)),
-                    new BoxCollision(new Vector3(-8, 8, -8), new Vector3(16, 8, 8))
-                ]));
+                    $collisions = [
+                        new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 8, 16))
+                    ];
 
-                $builder->addPermutation($permutation);
+                    if ($coner !== StateValues::MC_CORNER_OUTER_LEFT) {
+                        $collisions[] = new BoxCollision(new Vector3(-8, 8, -8), new Vector3(8, 8, 8)); // top_nw
+                    }
+                    if ($coner !== StateValues::MC_CORNER_OUTER_RIGHT) {
+                        $collisions[] = new BoxCollision(new Vector3(0, 8, -8), new Vector3(8, 8, 8)); // top_ne
+                    }
+                    if ($coner === StateValues::MC_CORNER_INNER_RIGHT) {
+                        $collisions[] = new BoxCollision(new Vector3(-8, 8, 0), new Vector3(8, 8, 8)); // top_sw
+                    }
+                    if ($coner === StateValues::MC_CORNER_INNER_LEFT) {
+                        $collisions[] = new BoxCollision(new Vector3(0, 8, 0), new Vector3(8, 8, 8)); // top_se
+                    }
+
+                    $permutation->addComponent(new CollisionBoxBlockComponent(true, $collisions));
+                    $builder->addPermutation($permutation);
+                }
             }
         }
     }
@@ -344,11 +390,11 @@ final class NexlyPermutations
             default => throw new RuntimeException("Invalid slab type"),
         }));
 
-        $builder->addComponent($geometry = new GeometryBlockComponent(ExtendedGeometry::SLAB->toString()));
+        $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::SLAB->toString()));
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
-        $builder->addComponent(new ItemVisualBlockComponent($geometry, $material));
+        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::SLAB->toString() . "_carried"), $material));
         $builder->addProperty(new BlockProperty(StateNames::MC_VERTICAL_HALF, [StateValues::MC_VERTICAL_HALF_BOTTOM, StateValues::MC_VERTICAL_HALF_TOP, "double"]))
             ->addPermutation(
                 Permutation::create("q.block_state('" . StateNames::MC_VERTICAL_HALF . "') == '" . StateValues::MC_VERTICAL_HALF_BOTTOM . "'")
@@ -390,8 +436,6 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::UPPER_BLOCK_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::DOOR_HINGE_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
-
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
 
         $builder->addComponent(new OnInteractBlockComponent());
         $builder->addComponent((new GeometryBlockComponent(ExtendedGeometry::DOOR->toString()))
@@ -448,25 +492,25 @@ final class NexlyPermutations
             $connections = $reflection->getProperty("connections");
             $co = $connections->getValue($block);
             return (new Writer($stringId))
-                ->writeBool("mc:n", isset($co[Facing::NORTH]))
-                ->writeBool("mc:s", isset($co[Facing::SOUTH]))
-                ->writeBool("mc:w", isset($co[Facing::WEST]))
-                ->writeBool("mc:e", isset($co[Facing::EAST]));
+                ->writeBool("minecraft:connection_north", isset($co[Facing::NORTH]))
+                ->writeBool("minecraft:connection_south", isset($co[Facing::SOUTH]))
+                ->writeBool("minecraft:connection_west", isset($co[Facing::WEST]))
+                ->writeBool("minecraft:connection_east", isset($co[Facing::EAST]));
         });
         $builder->setDeserializer(static function (Reader $in) use ($block): Fence {
             $cloned = clone $block;
             $co = [];
 
-            if ($in->readBool("mc:n")) {
+            if ($in->readBool("minecraft:connection_north")) {
                 $co[Facing::NORTH] = Facing::NORTH;
             }
-            if ($in->readBool("mc:s")) {
+            if ($in->readBool("minecraft:connection_south")) {
                 $co[Facing::SOUTH] = Facing::SOUTH;
             }
-            if ($in->readBool("mc:w")) {
+            if ($in->readBool("minecraft:connection_west")) {
                 $co[Facing::WEST] = Facing::WEST;
             }
-            if ($in->readBool("mc:e")) {
+            if ($in->readBool("minecraft:connection_east")) {
                 $co[Facing::EAST] = Facing::EAST;
             }
 
@@ -475,20 +519,23 @@ final class NexlyPermutations
             $connections->setValue($cloned, $co);
             return $cloned;
         });
-        $builder->addProperty(new BlockProperty("mc:n", [false, true]))
-            ->addProperty(new BlockProperty("mc:s", [false, true]))
-            ->addProperty(new BlockProperty("mc:w", [false, true]))
-            ->addProperty(new BlockProperty("mc:e", [false, true]));
+        $builder->addProperty(new BlockProperty("minecraft:connection_north", [false, true]))
+            ->addProperty(new BlockProperty("minecraft:connection_south", [false, true]))
+            ->addProperty(new BlockProperty("minecraft:connection_west", [false, true]))
+            ->addProperty(new BlockProperty("minecraft:connection_east", [false, true]));
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
-        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE->toString() . "_render"), $material));
+        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE->toString() . "_carried"), $material));
         $builder->addComponent(
-            (new GeometryBlockComponent(ExtendedGeometry::FENCE->toString()))
-            ->add("n", "q.block_state('mc:n') == 1")
-            ->add("s", "q.block_state('mc:s') == 1")
-            ->add("w", "q.block_state('mc:w') == 1")
-            ->add("e", "q.block_state('mc:e') == 1")
+            (new GeometryBlockComponent(
+                identifier: ExtendedGeometry::FENCE->toString(),
+                culling: Culling::FENCE->toString()
+            ))
+            ->add("north_rails", "q.block_state('minecraft:connection_north') == 1")
+            ->add("south_rails", "q.block_state('minecraft:connection_south') == 1")
+            ->add("west_rails", "q.block_state('minecraft:connection_west') == 1")
+            ->add("east_rails", "q.block_state('minecraft:connection_east') == 1")
         );
 
         FencePermutation::create($builder)->apply();
@@ -504,68 +551,79 @@ final class NexlyPermutations
     public static function makeFenceGate(Builder $builder, FenceGate $block): void
     {
         $stringId = $builder->getStringId();
+
         $builder->setSerializer(
             static fn (FenceGate $block) => (new Writer($stringId))
-            ->writeString(StateNames::MC_CARDINAL_DIRECTION, match ($block->getFacing()) {
-                Facing::NORTH => StateValues::MC_CARDINAL_DIRECTION_NORTH,
-                Facing::SOUTH => StateValues::MC_CARDINAL_DIRECTION_SOUTH,
-                Facing::WEST => StateValues::MC_CARDINAL_DIRECTION_WEST,
-                Facing::EAST => StateValues::MC_CARDINAL_DIRECTION_EAST,
-                default => throw new RuntimeException("Invalid facing direction"),
-            })
-            ->writeBool(StateNames::IN_WALL_BIT, $block->isInWall())
-            ->writeBool(StateNames::OPEN_BIT, $block->isOpen())
+                ->writeString(StateNames::MC_CARDINAL_DIRECTION, match ($block->getFacing()) {
+                    Facing::NORTH => StateValues::MC_CARDINAL_DIRECTION_NORTH,
+                    Facing::SOUTH => StateValues::MC_CARDINAL_DIRECTION_SOUTH,
+                    Facing::WEST => StateValues::MC_CARDINAL_DIRECTION_WEST,
+                    Facing::EAST => StateValues::MC_CARDINAL_DIRECTION_EAST,
+                    default => throw new RuntimeException("Invalid facing direction"),
+                })
+                ->writeBool(StateNames::IN_WALL_BIT, $block->isInWall())
+                ->writeBool(StateNames::OPEN_BIT, $block->isOpen())
         );
+
         $builder->setDeserializer(
             static fn (Reader $in) => (clone $block)
-            ->setFacing(match ($in->readString(StateNames::MC_CARDINAL_DIRECTION)) {
-                StateValues::MC_CARDINAL_DIRECTION_NORTH => Facing::NORTH,
-                StateValues::MC_CARDINAL_DIRECTION_SOUTH => Facing::SOUTH,
-                StateValues::MC_CARDINAL_DIRECTION_WEST => Facing::WEST,
-                StateValues::MC_CARDINAL_DIRECTION_EAST => Facing::EAST,
-                default => throw new RuntimeException("Invalid facing direction"),
-            })
-            ->setInWall($in->readBool(StateNames::IN_WALL_BIT))
-            ->setOpen($in->readBool(StateNames::OPEN_BIT))
+                ->setFacing(match ($in->readString(StateNames::MC_CARDINAL_DIRECTION)) {
+                    StateValues::MC_CARDINAL_DIRECTION_NORTH => Facing::NORTH,
+                    StateValues::MC_CARDINAL_DIRECTION_SOUTH => Facing::SOUTH,
+                    StateValues::MC_CARDINAL_DIRECTION_WEST => Facing::WEST,
+                    StateValues::MC_CARDINAL_DIRECTION_EAST => Facing::EAST,
+                    default => throw new RuntimeException("Invalid facing direction"),
+                })
+                ->setInWall($in->readBool(StateNames::IN_WALL_BIT))
+                ->setOpen($in->readBool(StateNames::OPEN_BIT))
         );
-        $builder->addProperty(new BlockProperty(StateNames::MC_CARDINAL_DIRECTION, $facings = [
+
+        $facings = [
             StateValues::MC_CARDINAL_DIRECTION_NORTH,
             StateValues::MC_CARDINAL_DIRECTION_SOUTH,
             StateValues::MC_CARDINAL_DIRECTION_WEST,
             StateValues::MC_CARDINAL_DIRECTION_EAST
-        ]));
+        ];
+        $builder->addProperty(new BlockProperty(StateNames::MC_CARDINAL_DIRECTION, $facings));
         $builder->addProperty(new BlockProperty(StateNames::IN_WALL_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
 
         /** @var MaterialInstancesBlockComponent $material */
         $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
-        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString() . "_render"), $material));
+
+        $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString() . "_carried"), $material));
         $builder->addComponent(new OnInteractBlockComponent());
         foreach ($facings as $dir) {
-            foreach (range(0, 1) as $open) {
-                foreach (range(0, 1) as $inWall) {
+            foreach ([false, true] as $open) {
+                foreach ([false, true] as $inWall) {
+
+                    $openStr = $open ? 'true' : 'false';
+                    $inWallStr = $inWall ? 'true' : 'false';
+
                     $expr =
-                        "q.block_state('" . StateNames::OPEN_BIT . "') == $open && " .
-                        "q.block_state('" . StateNames::IN_WALL_BIT . "') == $inWall && " .
+                        "q.block_state('" . StateNames::OPEN_BIT . "') == $openStr && " .
+                        "q.block_state('" . StateNames::IN_WALL_BIT . "') == $inWallStr && " .
                         "q.block_state('" . StateNames::MC_CARDINAL_DIRECTION . "') == '$dir'";
 
                     $permutation = Permutation::create($expr);
+
                     $permutation->addComponent(
                         (new GeometryBlockComponent(ExtendedGeometry::FENCE_GATE->toString()))
-                        ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
-                        ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0")
-                    )->addComponent(new CollisionBoxBlockComponent(!$open, [BoxCollision::FENCE_GATE()])
-                    )->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FENCE_GATE()])
-                    )->addComponent(new TransformationBlockComponent(match ($dir) {
-                        StateValues::MC_CARDINAL_DIRECTION_NORTH => new Vector3(0, 0, 0),
-                        StateValues::MC_CARDINAL_DIRECTION_SOUTH => new Vector3(0, 180, 0),
-                        StateValues::MC_CARDINAL_DIRECTION_EAST => new Vector3(0, 270, 0),
-                        StateValues::MC_CARDINAL_DIRECTION_WEST => new Vector3(0, 90, 0),
-                        default => throw new RuntimeException("Invalid direction")
-                    }, translation: match ($inWall) {
-                        0 => new Vector3(0, 0, 0),
-                        1 => new Vector3(0, -0.187, 0),
-                    }));
+                            ->add("open_doors", "q.block_state('" . StateNames::OPEN_BIT . "') == true")
+                            ->add("closed_doors", "q.block_state('" . StateNames::OPEN_BIT . "') == false")
+                    )
+                        ->addComponent(new CollisionBoxBlockComponent(!$open, [BoxCollision::FENCE_GATE()]))
+                        ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FENCE_GATE()]))
+                        ->addComponent(new TransformationBlockComponent(match ($dir) {
+                            StateValues::MC_CARDINAL_DIRECTION_NORTH => new Vector3(0, 0, 0),
+                            StateValues::MC_CARDINAL_DIRECTION_SOUTH => new Vector3(0, 180, 0),
+                            StateValues::MC_CARDINAL_DIRECTION_EAST => new Vector3(0, 270, 0),
+                            StateValues::MC_CARDINAL_DIRECTION_WEST => new Vector3(0, 90, 0),
+                            default => throw new RuntimeException("Invalid direction")
+                        }, translation: match ($inWall) {
+                            false => new Vector3(0, 0, 0),
+                            true => new Vector3(0, -0.187, 0),
+                        }));
 
                     $builder->addPermutation($permutation);
                 }
@@ -641,61 +699,78 @@ final class NexlyPermutations
     public static function makeTrapdoor(Builder $builder, Trapdoor $block): void
     {
         $stringId = $builder->getStringId();
+
         $builder->setSerializer(
             static fn (Trapdoor $block) => (new Writer($stringId))
-            ->write5MinusHorizontalFacing($block->getFacing())
-            ->writeInt(StateNames::UPSIDE_DOWN_BIT, $block->isTop())
-            ->writeInt(StateNames::OPEN_BIT, $block->isOpen())
-        );
-        $builder->setDeserializer(
-            static fn (Reader $in) => (clone $block)
-            ->setFacing($in->read5MinusHorizontalFacing())
-            ->setTop($in->readInt(StateNames::UPSIDE_DOWN_BIT))
-            ->setOpen($in->readInt(StateNames::OPEN_BIT))
+                ->write5MinusHorizontalFacing($block->getFacing())
+                ->writeBool(StateNames::UPSIDE_DOWN_BIT, $block->isTop())
+                ->writeBool(StateNames::OPEN_BIT, $block->isOpen())
         );
 
-        $builder->addProperty(new BlockProperty(StateNames::DIRECTION, $facings = [0, 1, 2, 3])); // 0: East, 1: West, 2: South, 3: North
-        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, range(0, 1)));
-        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, range(0, 1)));
+        $builder->setDeserializer(
+            static fn (Reader $in) => (clone $block)
+                ->setFacing($in->read5MinusHorizontalFacing())
+                ->setTop($in->readBool(StateNames::UPSIDE_DOWN_BIT))
+                ->setOpen($in->readBool(StateNames::OPEN_BIT))
+        );
+
+        $facings = [0, 1, 2, 3];
+        $builder->addProperty(new BlockProperty(StateNames::DIRECTION, $facings));
+        $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, [false, true]));
+        $builder->addProperty(new BlockProperty(StateNames::OPEN_BIT, [false, true]));
 
         $builder->addComponent(new OnInteractBlockComponent());
         $builder->addComponent($material = new MaterialInstancesBlockComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED)]));
-        $builder->addComponent(new ItemVisualBlockComponent((new GeometryBlockComponent(ExtendedGeometry::TRAPDOOR->toString()))
-            ->add("open", "false")
-            ->add("close", "true"), $material));
 
-        $builder->addComponent(
-            (new GeometryBlockComponent(ExtendedGeometry::TRAPDOOR->toString()))
-            ->add("open", "q.block_state('" . StateNames::OPEN_BIT . "') == 1")
-            ->add("close", "q.block_state('" . StateNames::OPEN_BIT . "') == 0")
-        );
+        $builder->addComponent($geometry = (new GeometryBlockComponent(
+            identifier: ExtendedGeometry::TRAPDOOR->toString(),
+            culling: Culling::TRAPDOOR->toString()
+        )));
+        $builder->addComponent(new ItemVisualBlockComponent($geometry, $material));
+
+        $box = new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 2.92, 16));
+        $builder->addComponent(new CollisionBoxBlockComponent(true, [$box]));
+        $builder->addComponent(new SelectionBoxBlockComponent(true, [$box]));
 
         foreach ($facings as $dir) {
-            foreach (range(0, 1) as $open) {
-                foreach (range(0, 1) as $top) {
+            foreach ([false, true] as $open) {
+                foreach ([false, true] as $top) {
+
+                    $openStr = $open ? 'true' : 'false';
+                    $topStr = $top ? 'true' : 'false';
+
                     $expr =
                         "q.block_state('" . StateNames::DIRECTION . "') == $dir && " .
-                        "q.block_state('" . StateNames::OPEN_BIT . "') == $open && " .
-                        "q.block_state('" . StateNames::UPSIDE_DOWN_BIT . "') == $top";
+                        "q.block_state('" . StateNames::OPEN_BIT . "') == $openStr && " .
+                        "q.block_state('" . StateNames::UPSIDE_DOWN_BIT . "') == $topStr";
 
                     $permutation = Permutation::create($expr);
 
-                    $box = !$open ?
-                        new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 3, 16)) :
-                        new BoxCollision(new Vector3(-8, 0, -8), new Vector3(3, 16, 16));
+                    $rotation = match (true) {
+                        !$top && !$open && $dir == 3 => new Vector3(0, 0, 0),      // North
+                        !$top && !$open && $dir == 2 => new Vector3(0, 180, 0),    // South
+                        !$top && !$open && $dir == 1 => new Vector3(0, 90, 0),     // West
+                        !$top && !$open && $dir == 0 => new Vector3(0, -90, 0),    // East
 
-                    $translation = $top && !$open ? new Vector3(0, 0.813, 0) : new Vector3(0, 0, 0);
+                        !$top && $open && $dir == 3 => new Vector3(90, 180, 0),    // North
+                        !$top && $open && $dir == 2 => new Vector3(90, 0, 0),      // South
+                        !$top && $open && $dir == 1 => new Vector3(0, -90, 90),    // West
+                        !$top && $open && $dir == 0 => new Vector3(180, 90, 90),   // East
 
-                    $permutation->addComponent(new CollisionBoxBlockComponent(true, [$box]))
-                        ->addComponent(new SelectionBoxBlockComponent(true, [$box]))
-                        ->addComponent(new TransformationBlockComponent(match ($dir) {
-                            0 => new Vector3(0, 180, 0),    // East
-                            1 => new Vector3(0, 0, 0),  // West
-                            2 => new Vector3(0, 90, 0),   // South
-                            3 => new Vector3(0, 270, 0),  // North
-                            default => throw new RuntimeException("Invalid direction")
-                        }, translation: $translation));
+                        $top && !$open && $dir == 3 => new Vector3(0, 0, 180),     // North
+                        $top && !$open && $dir == 2 => new Vector3(180, 0, 0),     // South
+                        $top && !$open && $dir == 1 => new Vector3(180, -90, 0),   // West
+                        $top && !$open && $dir == 0 => new Vector3(180, 90, 0),    // East
 
+                        $top && $open && $dir == 3 => new Vector3(90, 180, 0),    // North
+                        $top && $open && $dir == 2 => new Vector3(90, 0, 180),     // South
+                        $top && $open && $dir == 1 => new Vector3(0, 90, 90),      // West
+                        $top && $open && $dir == 0 => new Vector3(180, -90, 90),   // East
+
+                        default => throw new RuntimeException("Invalid direction state")
+                    };
+
+                    $permutation->addComponent(new TransformationBlockComponent(rotation: $rotation));
                     $builder->addPermutation($permutation);
                 }
             }
@@ -800,6 +875,7 @@ final class NexlyPermutations
     public static function makeHead(Builder $builder, HeadBlock $block): void
     {
         $stringId = $builder->getStringId();
+
         $builder->setSerializer(static function (HeadBlock $b) use ($stringId): Writer {
             return (new Writer($stringId))
                 ->writeFacingWithoutDown($b->getFacing())
@@ -807,33 +883,42 @@ final class NexlyPermutations
         });
         $builder->setDeserializer(static function (Reader $in) use ($block): HeadBlock {
             return (clone $block)
-                ->setFacing($in->readFacingWithoutDown())
-                ->setRotation($in->readInt(StateNames::ROTATION));
+                ->setRotation($in->readInt(StateNames::ROTATION))
+                ->setFacing($in->readFacingWithoutDown());
         });
 
-        $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = [1, 2, 3, 4, 5])); // 1: Up, 2: North, 3: South, 4: West, 5: East
-        $builder->addProperty(new BlockProperty(StateNames::ROTATION, $rotations = range($block::MIN_ROTATION, $block::MAX_ROTATION))); // 0-15
-        $builder->addComponent($geometry = (new GeometryBlockComponent(ExtendedGeometry::MOBHEAD->toString())));
+        $facings = range(1, 5);  // 1: Up, 2: North, 3: South, 4: West, 5: East
+        $rotations = range($block::MIN_ROTATION, $block::MAX_ROTATION); // 0-15
+        $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings));
+        $builder->addProperty(new BlockProperty(StateNames::ROTATION, $rotations));
+
+        $geometry = new GeometryBlockComponent(identifier: ExtendedGeometry::HEAD_BLOCK->toString());
+        foreach ($rotations as $rot) {
+            $geometry->add("bone_$rot", "q.block_state('" . StateNames::ROTATION . "') == $rot");
+        }
+
+        $builder->addComponent($geometry);
         $builder->addComponent($material = new MaterialInstancesBlockComponent([new Material($block->getTexture(), renderMethod: MaterialRenderMethod::BLEND)]));
         $builder->addComponent(new ItemVisualBlockComponent($geometry, $material));
+
         foreach ($facings as $dir) {
             foreach ($rotations as $rot) {
                 $expr =
                     "q.block_state('" . StateNames::FACING_DIRECTION . "') == $dir && " .
                     "q.block_state('" . StateNames::ROTATION . "') == $rot";
 
+                $translation = match($dir) {
+                    2 => new Vector3(0, 0.25, 0.24),
+                    3 => new Vector3(0, 0.25, -0.24),
+                    4 => new Vector3(0.24, 0.25, 0),
+                    5 => new Vector3(-0.24, 0.25, 0),
+                    default => new Vector3(0, 0, 0)
+                };
+
                 $permutation = Permutation::create($expr);
                 $permutation->addComponent(new CollisionBoxBlockComponent(true, [BoxCollision::MOBHEAD()]))
                     ->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::MOBHEAD()]))
-                    ->addComponent(new TransformationBlockComponent(translation: new Vector3($dir !== 1 ? match($dir) {
-                        4 => 0.24,
-                        5 => -0.24,
-                        default => 0
-                    } : 0, $dir !== 1 ? 0.25 : 0, $dir !== 1 ? match($dir) {
-                        2 => 0.24,
-                        3 => -0.24,
-                        default => 0
-                    } : 0)));
+                    ->addComponent(new TransformationBlockComponent(translation: $translation));
 
                 $builder->addPermutation($permutation);
             }
@@ -855,8 +940,6 @@ final class NexlyPermutations
 
         $builder->addProperty(new BlockProperty(StateNames::FACING_DIRECTION, $facings = range(2, 5)));
         $builder->addComponent(new GeometryBlockComponent(ExtendedGeometry::LADDER->toString()));
-
-        $builder->addComponent(new PlacementFilterBlockComponent(Facing::HORIZONTAL));
 
         foreach ($facings as $dir) {
             $builder->addPermutation(
@@ -922,7 +1005,6 @@ final class NexlyPermutations
         ]));
 
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
 
         $builder->addComponent(new FlowerPottableBlockComponent());
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
@@ -944,7 +1026,6 @@ final class NexlyPermutations
 
         $stringId = $builder->getStringId();
 
-
         $isStained = $block instanceof NexlyStainedGlassPane;
         $originalColorStr = $isStained ? strtolower($block->getColor()->name) : "";
 
@@ -959,25 +1040,25 @@ final class NexlyPermutations
             $connections = $reflection->getProperty("connections");
             $co = $connections->getValue($block);
             return (new Writer($newId))
-                ->writeInt("mc:n", isset($co[Facing::NORTH]))
-                ->writeInt("mc:s", isset($co[Facing::SOUTH]))
-                ->writeInt("mc:w", isset($co[Facing::WEST]))
-                ->writeInt("mc:e", isset($co[Facing::EAST]));
+                ->writeInt("minecraft:connection_north", isset($co[Facing::NORTH]))
+                ->writeInt("minecraft:connection_south", isset($co[Facing::SOUTH]))
+                ->writeInt("minecraft:connection_west", isset($co[Facing::WEST]))
+                ->writeInt("minecraft:connection_east", isset($co[Facing::EAST]));
         });
         $builder->setDeserializer(static function (Reader $in) use ($block): GlassPane {
             $cloned = clone $block;
             $co = [];
 
-            if ($in->readInt("mc:n")) {
+            if ($in->readInt("minecraft:connection_north")) {
                 $co[Facing::NORTH] = Facing::NORTH;
             }
-            if ($in->readInt("mc:s")) {
+            if ($in->readInt("minecraft:connection_south")) {
                 $co[Facing::SOUTH] = Facing::SOUTH;
             }
-            if ($in->readInt("mc:w")) {
+            if ($in->readInt("minecraft:connection_west")) {
                 $co[Facing::WEST] = Facing::WEST;
             }
-            if ($in->readInt("mc:e")) {
+            if ($in->readInt("minecraft:connection_east")) {
                 $co[Facing::EAST] = Facing::EAST;
             }
 
@@ -986,20 +1067,20 @@ final class NexlyPermutations
             $connections->setValue($cloned, $co);
             return $cloned;
         });
-        $builder->addProperty(new BlockProperty("mc:n", range(0, 1)))
-            ->addProperty(new BlockProperty("mc:s", range(0, 1)))
-            ->addProperty(new BlockProperty("mc:w", range(0, 1)))
-            ->addProperty(new BlockProperty("mc:e", range(0, 1)));
+        $builder->addProperty(new BlockProperty("minecraft:connection_north", range(0, 1)))
+            ->addProperty(new BlockProperty("minecraft:connection_south", range(0, 1)))
+            ->addProperty(new BlockProperty("minecraft:connection_west", range(0, 1)))
+            ->addProperty(new BlockProperty("minecraft:connection_east", range(0, 1)));
 
         $builder->addComponent(
             $geometry = (new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString()))
-                ->add("n", "q.block_state('mc:n') == 1")
-                ->add("s", "q.block_state('mc:s') == 1")
-                ->add("w", "q.block_state('mc:w') == 1")
-                ->add("e", "q.block_state('mc:e') == 1")
+                ->add("n", "q.block_state('minecraft:connection_north') == 1")
+                ->add("s", "q.block_state('minecraft:connection_south') == 1")
+                ->add("w", "q.block_state('minecraft:connection_west') == 1")
+                ->add("e", "q.block_state('minecraft:connection_east') == 1")
         );
         $builder->addComponent($material = new MaterialInstancesBlockComponent([
-            new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED)
+            new Material($builder->getName(), renderMethod: MaterialRenderMethod::BLEND)
         ]));
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(ExtendedGeometry::GLASS_PANE->toString() . "_render"), $material));
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometry, $material));
@@ -1133,7 +1214,34 @@ final class NexlyPermutations
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
-        $builder->addComponent(new PlacementFilterBlockComponent([Facing::UP]));
+    }
+
+    /**
+     * @param Builder $builder
+     * @param Glass $block
+     * @return void
+     */
+    public static function makeGlass(Builder $builder, Glass $block): void
+    {
+        $stringId = $builder->getStringId();
+
+        $isStained = $block instanceof StainedGlass;
+        $originalColorStr = $isStained ? strtolower($block->getColor()->name) : "";
+
+        $builder->setSerializer(static function (Glass $block) use ($stringId, $isStained, $originalColorStr): Writer {
+            $newId = $stringId;
+
+            if ($isStained && $block instanceof StainedGlass) {
+                $newId = str_replace($originalColorStr, strtolower($block->getColor()->name), $stringId);
+            }
+            return new Writer($newId);
+        });
+        $builder->setDeserializer(static fn (Reader $in) => (clone $block));
+
+        $builder->addComponent(new GeometryBlockComponent(
+            identifier: ExtendedGeometry::GLASS->toString(),
+            culling: Culling::GLASS->toString()
+        ));
     }
 
     /**
@@ -1148,8 +1256,8 @@ final class NexlyPermutations
         $stringId = $builder->getStringId();
         $originalColorStr = strtolower($block->getColor()->name);
 
-        $builder->setSerializer(static function (Colored $state) use ($stringId, $originalColorStr): Writer {
-            $stateColorStr = strtolower($state->getColor()->name);
+        $builder->setSerializer(static function (Colored $block) use ($stringId, $originalColorStr): Writer {
+            $stateColorStr = strtolower($block->getColor()->name);
             $newId = str_replace($originalColorStr, $stateColorStr, $stringId);
             return new Writer($newId);
         });
