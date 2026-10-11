@@ -2,10 +2,10 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum MovementType: string
+class MovementType
 {
-    case PUSH_PULL = 'push_pull';
-    case PUSH = 'push';
-    case POPPED = 'popped';
-    case IMMOVABLE = 'immovable';
+    public const PUSH_PULL = 'push_pull';
+    public const PUSH = 'push';
+    public const POPPED = 'popped';
+    public const IMMOVABLE = 'immovable';
 }

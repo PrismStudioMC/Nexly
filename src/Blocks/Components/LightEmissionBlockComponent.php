@@ -24,7 +24,7 @@ class LightEmissionBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::LIGHT_EMISSION->getValue();
+        return BlockComponentIds::LIGHT_EMISSION;
     }
 
     /**

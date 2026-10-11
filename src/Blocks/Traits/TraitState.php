@@ -2,6 +2,7 @@
 
 namespace Nexly\Blocks\Traits;
 
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 
 class TraitState
@@ -20,21 +21,11 @@ class TraitState
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getEnabledTraits(): array
     {
         return $this->enabledTraits;
-    }
-
-    /**
-     * @param array $values
-     * @return self
-     */
-    public static function fromArray(array $values): self
-    {
-        $enums = array_map(fn ($v) => TraitStateId::from($v), $values);
-        return new self(...$enums);
     }
 
     /**
@@ -71,13 +62,33 @@ class TraitState
     }
 
     /**
+     * @param CompoundTag $nbt
+     * @return self
+     */
+    public static function fromNBT(CompoundTag $nbt): self
+    {
+        $enums = [];
+
+        foreach ($nbt->getValue() as $key => $tag) {
+            if ($tag instanceof ByteTag && $tag->getValue() === 1) {
+                $enum = TraitStateId::tryFrom($key);
+                if ($enum !== null) {
+                    $enums[] = $enum;
+                }
+            }
+        }
+
+        return new self(...$enums);
+    }
+
+    /**
      * @return CompoundTag
      */
     public function toNBT(): CompoundTag
     {
         $nbt = CompoundTag::create()
-            ->setByte("cardinal_direction", $this->isCardinal())
-            ->setByte("facing_direction", $this->isFacing());
+            ->setByte("cardinal_direction", (int) $this->isCardinal()) // Sécurité PHP 8
+            ->setByte("facing_direction", (int) $this->isFacing());
 
         foreach ($this->enabledTraits as $stateValue) {
             $nbt->setByte($stateValue, 1);

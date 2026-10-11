@@ -19,7 +19,7 @@ class PlacementCondition
     ) {
         $filters = [];
         foreach ($blockFilter as $filter) {
-            $filters[] = $filter instanceof BlockNbtDescriptor ? $filter : new BlockNbtDescriptor($filter);
+            $filters[] = $filter instanceof NbtDescriptor ? $filter : new NbtDescriptor($filter);
         }
         $this->blockFilter = $filters;
     }
@@ -31,16 +31,15 @@ class PlacementCondition
     {
         $condition = CompoundTag::create();
 
-        if ($this->allowedFaces !== []) {
+        if (!empty($this->allowedFaces)) {
             $condition->setTag('allowed_faces', new ListTag(
                 array_map(fn (string $face) => new StringTag($face), $this->allowedFaces),
                 NBT::TAG_String
             ));
         }
-
-        if ($this->blockFilter !== []) {
+        if (!empty($this->blockFilter)) {
             $condition->setTag('block_filter', new ListTag(
-                array_map(fn (BlockNbtDescriptor $filter) => $filter->toNBT(), $this->blockFilter),
+                array_map(fn (NbtDescriptor $filter) => $filter->toNBT(), $this->blockFilter),
                 NBT::TAG_Compound
             ));
         }

@@ -16,7 +16,7 @@ use pocketmine\nbt\tag\StringTag;
 class SupportBlockComponent extends BlockComponent
 {
     public function __construct(
-        protected SupportShape $shape,
+        protected string $shape = SupportShape::NONE,
     ) {
     }
 
@@ -25,7 +25,7 @@ class SupportBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::SUPPORT->getValue();
+        return BlockComponentIds::SUPPORT;
     }
 
     /**
@@ -36,6 +36,6 @@ class SupportBlockComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("shape", new StringTag(strtolower($this->shape->getName())));
+            ->setTag("shape", new StringTag(strtolower($this->shape)));
     }
 }

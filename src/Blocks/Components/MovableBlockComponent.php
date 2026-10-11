@@ -12,12 +12,12 @@ use pocketmine\nbt\tag\CompoundTag;
 class MovableBlockComponent extends BlockComponent
 {
     /**
-     * @param MovementType $movementType
-     * @param StickyType|null $sticky
+     * @param string $movementType
+     * @param string|null $sticky
      */
     public function __construct(
-        protected MovementType $movementType = MovementType::PUSH_PULL,
-        protected ?StickyType $sticky = null
+        protected string $movementType = MovementType::PUSH_PULL,
+        protected ?string $sticky = null
     ) {
         if ($sticky === StickyType::SAME && $movementType !== MovementType::PUSH_PULL) {
             throw new InvalidArgumentException('Sticky type SAME only works with push_pull movement.');
@@ -29,7 +29,7 @@ class MovableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::MOVABLE->value;
+        return BlockComponentIds::MOVABLE;
     }
 
     /**
@@ -37,9 +37,9 @@ class MovableBlockComponent extends BlockComponent
      */
     public function toNBT(): CompoundTag
     {
-        $tag = CompoundTag::create()->setString('movement_type', $this->movementType->value);
+        $tag = CompoundTag::create()->setString('movement_type', $this->movementType);
         if ($this->sticky !== null) {
-            $tag->setString('sticky', $this->sticky->value);
+            $tag->setString('sticky', $this->sticky);
         }
         return $tag;
     }

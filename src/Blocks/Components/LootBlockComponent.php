@@ -21,7 +21,7 @@ class LootBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::LOOT->value;
+        return BlockComponentIds::LOOT;
     }
 
     /**

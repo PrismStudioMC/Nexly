@@ -2,14 +2,9 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum ConnectionType: string
+class ConnectionType
 {
-    case ALL = "all";
-    case NONE = "none";
-    case ONLY_FENCES = "only_fences";
-
-    public function getValue(): string
-    {
-        return $this->value;
-    }
+    public const ALL = "all";
+    public const NONE = "none";
+    public const ONLY_FENCES = "only_fences";
 }

@@ -25,7 +25,7 @@ class LeashableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::LEASHABLE->value;
+        return BlockComponentIds::LEASHABLE;
     }
 
     /**

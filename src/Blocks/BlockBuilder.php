@@ -5,25 +5,32 @@ namespace Nexly\Blocks;
 use Closure;
 use Generator;
 use Nexly\Blocks\Components\BlockComponent;
-use Nexly\Blocks\Components\BlockComponentIds;
+use Nexly\Blocks\Components\BlockEntityBlockComponent;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
 use Nexly\Blocks\Components\ConnectionRuleComponent;
+use Nexly\Blocks\Components\CraftingTableBlockComponent;
 use Nexly\Blocks\Components\DestructibleByExplosionBlockComponent;
 use Nexly\Blocks\Components\DestructibleByMiningBlockComponent;
 use Nexly\Blocks\Components\DisplayNameBlockComponent;
+use Nexly\Blocks\Components\EntityFallOnBlockComponent;
 use Nexly\Blocks\Components\FlammableBlockComponent;
 use Nexly\Blocks\Components\FrictionBlockComponent;
+use Nexly\Blocks\Components\InstrumentSoundBlockComponent;
 use Nexly\Blocks\Components\LightDampeningBlockComponent;
 use Nexly\Blocks\Components\LightEmissionBlockComponent;
+use Nexly\Blocks\Components\MapColorBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
 use Nexly\Blocks\Components\OnInteractBlockComponent;
 use Nexly\Blocks\Components\OnPlayerPlacingBlockComponent;
+use Nexly\Blocks\Components\ReplaceableBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\Types\BreathabilityType;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialRenderMethod;
 use Nexly\Blocks\Components\Types\MaterialType;
+use Nexly\Blocks\Components\Types\NoteInstrument;
+use Nexly\Blocks\Components\Types\RenderMethod;
+use Nexly\Blocks\Components\Types\TintMethod;
 use Nexly\Blocks\Mappers\BlockMapper;
 use Nexly\Blocks\Permutations\BlockProperty;
 use Nexly\Blocks\Permutations\CartesianProduct;
@@ -47,6 +54,7 @@ use Nexly\Recipes\Types\Recipe;
 use pocketmine\block\block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\Cactus;
+use pocketmine\block\CraftingTable;
 use pocketmine\block\Door;
 use pocketmine\block\Farmland;
 use pocketmine\block\Fence;
@@ -56,6 +64,7 @@ use pocketmine\block\Flower;
 use pocketmine\block\Furnace;
 use pocketmine\block\Glass;
 use pocketmine\block\GlassPane;
+use pocketmine\block\Grass;
 use pocketmine\block\GrassPath;
 use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
@@ -68,6 +77,8 @@ use pocketmine\block\Slab;
 use pocketmine\block\Slime;
 use pocketmine\block\Stair;
 use pocketmine\block\tile\Container;
+use pocketmine\block\tile\Tile;
+use pocketmine\block\tile\TileFactory;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\utils\Ageable;
 use pocketmine\block\utils\Colored;
@@ -80,6 +91,7 @@ use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\item\ItemBlock;
 use pocketmine\item\StringToItemParser;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -105,7 +117,7 @@ class BlockBuilder
     protected ?Closure $serializer = null;
     protected ?Closure $deserializer = null;
     protected ?CreativeInfo $creativeInfo = null;
-    protected MaterialType $material = MaterialType::Dirt;
+    protected string $material = MaterialType::Dirt;
 
     /** @var array<string> */
     protected array $tags = [];
@@ -186,10 +198,12 @@ class BlockBuilder
 
     /**
      * @param array $tags
+     * @return self
      */
-    public function setTags(array $tags): void
+    public function setTags(array $tags): self
     {
         $this->tags = $tags;
+        return $this;
     }
 
     /**
@@ -290,8 +304,8 @@ class BlockBuilder
         $returnType = $ref->getReturnType();
         if ($returnType !== null) {
             $returnTypeName = $returnType->getName();
-            if ($returnTypeName !== Block::class && !is_subclass_of($returnTypeName, Block::class)) {
-                throw new \InvalidArgumentException("Deserializer return type must be an instance of " . Block::class . ".");
+            if (!is_a($returnTypeName, Block::class, true)) {
+                throw new \InvalidArgumentException("Deserializer return type must be an instance of " . Block::class . ", got " . $returnTypeName . ".");
             }
         }
 
@@ -322,19 +336,21 @@ class BlockBuilder
     }
 
     /**
-     * @return MaterialType
+     * @return string
      */
-    public function getMaterial(): MaterialType
+    public function getMaterial(): string
     {
         return $this->material;
     }
 
     /**
-     * @param MaterialType $material
+     * @param string $material
+     * @return self
      */
-    public function setMaterial(MaterialType $material): void
+    public function setMaterial(string $material): self
     {
         $this->material = $material;
+        return $this;
     }
 
     /**
@@ -350,23 +366,23 @@ class BlockBuilder
     /**
      * Get a BlockComponent by its name.
      *
-     * @param BlockComponentIds|string $name
+     * @param string $component
      * @return BlockComponent|null
      */
-    public function getComponent(BlockComponentIds|string $name): ?BlockComponent
+    public function getComponent(string $component): ?BlockComponent
     {
-        return $this->components[$name?->getValue() ?? $name] ?? null;
+        return $this->components[$component] ?? null;
     }
 
     /**
      * Add a BlockComponent to the builder.
      *
-     * @param BlockComponentIds $id
+     * @param string $component
      * @return bool
      */
-    public function hasComponent(BlockComponentIds $id): bool
+    public function hasComponent(string $component): bool
     {
-        return isset($this->components[$id->value]);
+        return isset($this->components[$component]);
     }
 
     /**
@@ -385,11 +401,12 @@ class BlockBuilder
      * Remove a component by its name.
      *
      * @param string $name
-     * @return void
+     * @return self
      */
-    public function removeComponent(string $name): void
+    public function removeComponent(string $name): self
     {
         unset($this->components[$name]);
+        return $this;
     }
 
     /**
@@ -568,7 +585,7 @@ class BlockBuilder
                 "vanilla_block_data",
                 CompoundTag::create()
                 ->setTag("block_id", new IntTag(BlockMappings::getInstance()->nextRuntimeId()))
-                ->setTag("material", new StringTag($this->material->value))
+                ->setTag("material", new StringTag($this->material))
             )
             ->setTag("molangVersion", new IntTag(13));
     }
@@ -648,7 +665,7 @@ class BlockBuilder
             json_encode(array_map(fn (BlockTrait $trait) => [
                 "identifier" => $trait->getId()->value,
                 "rotationOffset" => $trait->getRotationOffset(),
-                "state" => $trait->getState()->toArray(),
+                "state" => base64_encode((new CacheableNbt($trait->getState()->toNBT()))->getEncodedNbt()),
             ], $this->traits), JSON_THROW_ON_ERROR),
             $serializer,
             $deserializer,
@@ -705,24 +722,50 @@ class BlockBuilder
             $this->addComponent(new FrictionBlockComponent(max(0, 1 - $block->getFrictionFactor())));
             $this->addComponent(new LightEmissionBlockComponent($block->getLightLevel()));
             $this->addComponent(new LightDampeningBlockComponent(max(0, 1 - $block->getLightFilter())));
-
-            //$this->addComponent(new LiquidDetectionComponent(false)); // TODO: PMMP Implement Liquid Layer
+            $this->addComponent(new EntityFallOnBlockComponent(3));
+            $this->addComponent(new InstrumentSoundBlockComponent(NoteInstrument::from($block)));
             $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: match(true) {
-                $block->isTransparent() => MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED,
-                $block instanceof Opaque => MaterialRenderMethod::OPAQUE,
-                default => MaterialRenderMethod::BLEND,
+                $block->isTransparent() => RenderMethod::ALPHA_TEST_SINGLE_SIDED,
+                $block instanceof Opaque => RenderMethod::OPAQUE,
+                default => RenderMethod::BLEND,
             })]));
 
             if ($block->getFlammability() > 0) {
                 $this->addComponent(new FlammableBlockComponent($block->getFlameEncouragement()));
             }
+            if ($block->canBeReplaced()) {
+                $this->addComponent(new ReplaceableBlockComponent());
+            }
+
             if ($block instanceof Flowable) {
                 $this->addComponent(new ConnectionRuleComponent());
             }
+            if ($block instanceof CraftingTable) {
+                $this->addComponent(new CraftingTableBlockComponent(["crafting_table"]));
+            }
+            if ($block instanceof Grass) {
+                $this->addComponent(new MapColorBlockComponent("#7CBA46", TintMethod::from($this)));
+            } else if ($block instanceof Colored) {
+                $color = $block->getColor()->getRgbValue();
+                $this->addComponent(new MapColorBlockComponent([$color->getR(), $color->getG(), $color->getB()], TintMethod::from($this)));
+            }
 
             $tile = $block->getIdInfo()->getTileClass();
-            if ($tile !== null && is_a($tile, Container::class, true)) {
-                $this->addComponent(new OnInteractBlockComponent());
+            if ($tile !== null) {
+                if (!TileFactory::getInstance()->isRegistered($tile)) {
+                    throw new \InvalidArgumentException("Tile class '{$tile}' is not registered");
+                }
+
+                $containerSlotCount = null;
+
+                /** @var Tile $tile */
+                $tile = new $tile(Server::getInstance()->getWorldManager()->getDefaultWorld(), Vector3::zero());
+                if ($tile instanceof Container) {
+                    $containerSlotCount = $tile->getInventory()->getSize();
+                    $this->addComponent(new OnInteractBlockComponent());
+                }
+
+                $this->addComponent(new BlockEntityBlockComponent(true, $containerSlotCount));
             }
 
             $this->addComponent(new SelectionBoxBlockComponent(true));

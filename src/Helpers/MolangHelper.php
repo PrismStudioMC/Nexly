@@ -4,20 +4,8 @@ namespace Nexly\Helpers;
 
 class MolangHelper
 {
-    /**
-     * @return string
-     */
-    public static function true(): string
+    private function __construct()
     {
-        return "1";
-    }
-
-    /**
-     * @return string
-     */
-    public static function false(): string
-    {
-        return "0";
     }
 
     /**
@@ -93,6 +81,42 @@ class MolangHelper
     }
 
     /**
+     * @param string $propertyName
+     * @return string
+     */
+    public static function blockProperty(string $propertyName): string
+    {
+        return self::query('block_property', $propertyName);
+    }
+
+    /**
+     * @param string ...$tags
+     * @return string
+     */
+    public static function anyTag(string ...$tags): string
+    {
+        return self::query('any_tag', ...$tags);
+    }
+
+    /**
+     * @param string ...$tags
+     * @return string
+     */
+    public static function allTags(string ...$tags): string
+    {
+        return self::query('all_tags', ...$tags);
+    }
+
+    /**
+     * @param string ...$names
+     * @return string
+     */
+    public static function isItemNameAny(string ...$names): string
+    {
+        return self::query('is_item_name_any', ...$names);
+    }
+
+    /**
      * @param string $expression
      * @param mixed $value
      * @return string
@@ -139,12 +163,8 @@ class MolangHelper
     public static function and(string ...$expressions): string
     {
         $filtered = array_filter($expressions, fn (string $expr) => $expr !== "");
-        if (count($filtered) === 0) {
-            return "";
-        }
-        if (count($filtered) === 1) {
-            return reset($filtered);
-        }
+        if (count($filtered) === 0) return "";
+        if (count($filtered) === 1) return reset($filtered);
 
         return "(" . implode(") && (", $filtered) . ")";
     }
@@ -156,12 +176,8 @@ class MolangHelper
     public static function or(string ...$expressions): string
     {
         $filtered = array_filter($expressions, fn (string $expr) => $expr !== "");
-        if (count($filtered) === 0) {
-            return "";
-        }
-        if (count($filtered) === 1) {
-            return reset($filtered);
-        }
+        if (count($filtered) === 0) return "";
+        if (count($filtered) === 1) return reset($filtered);
 
         return "(" . implode(") || (", $filtered) . ")";
     }
@@ -172,9 +188,7 @@ class MolangHelper
      */
     public static function not(string $expression): string
     {
-        if ($expression === "") {
-            return "";
-        }
+        if ($expression === "") return "";
         return "!(" . $expression . ")";
     }
 
@@ -245,5 +259,63 @@ class MolangHelper
     public static function round(mixed $value): string
     {
         return self::math('round', $value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    public static function floor(mixed $value): string
+    {
+        return self::math('floor', $value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    public static function ceil(mixed $value): string
+    {
+        return self::math('ceil', $value);
+    }
+
+    /**
+     * @param mixed $value
+     * @param mixed $denominator
+     * @return string
+     */
+    public static function mod(mixed $value, mixed $denominator): string
+    {
+        return self::math('mod', $value, $denominator);
+    }
+
+    /**
+     * @param mixed $base
+     * @param mixed $exponent
+     * @return string
+     */
+    public static function pow(mixed $base, mixed $exponent): string
+    {
+        return self::math('pow', $base, $exponent);
+    }
+
+    /**
+     * @param mixed $min
+     * @param mixed $max
+     * @return string
+     */
+    public static function random(mixed $min, mixed $max): string
+    {
+        return self::math('random', $min, $max);
+    }
+
+    /**
+     * @param mixed $min
+     * @param mixed $max
+     * @return string
+     */
+    public static function randomInteger(mixed $min, mixed $max): string
+    {
+        return self::math('random_integer', $min, $max);
     }
 }

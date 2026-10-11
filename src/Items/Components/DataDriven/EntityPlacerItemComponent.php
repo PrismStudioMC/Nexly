@@ -3,7 +3,7 @@
 namespace Nexly\Items\Components\DataDriven;
 
 use Attribute;
-use Nexly\Blocks\Components\Types\BlockNbtDescriptor;
+use Nexly\Blocks\Components\Types\NbtDescriptor;
 use pocketmine\block\Block;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
@@ -16,8 +16,8 @@ class EntityPlacerItemComponent extends DataDrivenItemComponent
 {
     /**
      * @param string $entity
-     * @param BlockNbtDescriptor[] $dispenseOn
-     * @param BlockNbtDescriptor[] $useOn
+     * @param NbtDescriptor[] $dispenseOn
+     * @param NbtDescriptor[] $useOn
      */
     public function __construct(
         protected string $entity = "none",
@@ -62,7 +62,7 @@ class EntityPlacerItemComponent extends DataDrivenItemComponent
     {
         return CompoundTag::create()
             ->setTag("entity", new StringTag($this->entity))
-            ->setTag("dispense_on", new ListTag(array_map(fn (BlockNbtDescriptor $descriptor) => $descriptor->toNBT(), $this->dispenseOn), NBT::TAG_Compound))
-            ->setTag("use_on", new ListTag(array_map(fn (BlockNbtDescriptor $descriptor) => $descriptor->toNBT(), $this->useOn), NBT::TAG_Compound));
+            ->setTag("dispense_on", new ListTag(array_map(fn (NbtDescriptor $descriptor) => $descriptor->toNBT(), $this->dispenseOn), NBT::TAG_Compound))
+            ->setTag("use_on", new ListTag(array_map(fn (NbtDescriptor $descriptor) => $descriptor->toNBT(), $this->useOn), NBT::TAG_Compound));
     }
 }

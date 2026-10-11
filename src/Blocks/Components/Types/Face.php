@@ -2,20 +2,21 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum Face: string
+class Face
 {
-    case DOWN = "down";
-    case UP = "up";
-    case NORTH = "north";
-    case SOUTH = "south";
-    case WEST = "west";
-    case EAST = "east";
+    public const DOWN = "down";
+    public const UP = "up";
+    public const NORTH = "north";
+    public const SOUTH = "south";
+    public const WEST = "west";
+    public const EAST = "east";
 
-    /**
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
+    public const ALL = [
+        self::DOWN,
+        self::UP,
+        self::NORTH,
+        self::SOUTH,
+        self::WEST,
+        self::EAST,
+    ];
 }

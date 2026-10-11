@@ -14,6 +14,7 @@ use pmmp\thread\ThreadSafeArray;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
+use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
 use pocketmine\scheduler\AsyncTask;
 
 class AsyncRegisterBlocksTask extends AsyncTask
@@ -98,7 +99,11 @@ class AsyncRegisterBlocksTask extends AsyncTask
                     throw new \InvalidArgumentException("Invalid state for trait " . $state);
                 }
 
-                $builder->addTrait(new BlockTrait(TraitId::fromString($identifier), TraitState::fromArray($state)));
+                $builder->addTrait(new BlockTrait(
+                    TraitId::fromString($identifier),
+                    TraitState::fromNBT((new NetworkNbtSerializer())->read(base64_decode($state))->getTag()),
+                    $rotationOffset
+                ));
             }
 
             $builder->register(false, false);

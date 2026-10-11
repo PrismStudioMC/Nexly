@@ -61,7 +61,7 @@ class SelectionBoxBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::SELECTION_BOX->getValue();
+        return BlockComponentIds::SELECTION_BOX;
     }
 
     /**

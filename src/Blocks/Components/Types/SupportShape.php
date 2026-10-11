@@ -2,16 +2,9 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum SupportShape
+class SupportShape
 {
-    case FENCE;
-    case STAIR;
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
+    public const FENCE = "fence";
+    public const STAIR = "stair";
+    public const NONE = "none";
 }

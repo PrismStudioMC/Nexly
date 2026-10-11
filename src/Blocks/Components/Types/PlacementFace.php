@@ -2,14 +2,14 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum PlacementFace: string
+class PlacementFace
 {
-    case DOWN = 'down';
-    case UP = 'up';
-    case NORTH = 'north';
-    case SOUTH = 'south';
-    case WEST = 'west';
-    case EAST = 'east';
-    case SIDE = 'side';
-    case ALL = 'all';
+    public const DOWN = 'down';
+    public const UP = 'up';
+    public const NORTH = 'north';
+    public const SOUTH = 'south';
+    public const WEST = 'west';
+    public const EAST = 'east';
+    public const SIDE = 'side';
+    public const ALL = 'all';
 }

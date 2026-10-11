@@ -2,57 +2,47 @@
 
 namespace Nexly\Blocks\Components;
 
-enum BlockComponentIds: string
+class BlockComponentIds
 {
-    case BREATHABILITY = "minecraft:breathability";
-    case COLLISION_BOX = "minecraft:collision_box";
-    case CONNECTION_RULE = "minecraft:connection_rule";
-    case DESTRUCTIBLE_BY_EXPLOSION = "minecraft:destructible_by_explosion";
-    case DESTRUCTIBLE_BY_MINING = "minecraft:destructible_by_mining";
-    case DISPLAY_NAME = "minecraft:display_name";
-    case EMBEDDED_VISUAL = "minecraft:embedded_visual";
-    case FLAMMABLE = "minecraft:flammable";
-    case FRICTION = "minecraft:friction";
-    case GEOMETRY = "minecraft:geometry";
-    case ITEM_VISUAL = "minecraft:item_visual";
-    case LIGHT_DAMPENING = "minecraft:light_dampening";
-    case LIGHT_EMISSION = "minecraft:light_emission";
-    case LIQUID_DETECTION = "minecraft:liquid_detection";
-    case MATERIAL_INSTANCES = "minecraft:material_instances";
-    case ON_INTERACT = "minecraft:on_interact";
-    case ON_PLAYER_PLACING = "minecraft:on_player_placing";
-    case PLACEMENT_FILTER = "minecraft:placement_filter";
-    case REPLACEABLE = "minecraft:replaceable";
-    case SELECTION_BOX = "minecraft:selection_box";
-    case TRANSFORMATION = "minecraft:transformation";
-    case CUSTOM_COMPONENTS = "minecraft:custom_components";
-    case FLOWER_POTTABLE = "minecraft:flower_pottable";
-    case RANDOM_OFFSET = "minecraft:random_offset";
-    case SUPPORT = "minecraft:support";
-    case PRECIPITATION_INTERACTIONS = "minecraft:precipitation_interactions";
-    case CHEST_OBSTRUCTION = "minecraft:chest_obstruction";
-    case SOUND = "minecraft:sound";
-    case BLOCK_ENTITY = "minecraft:block_entity";
-    case INSTRUMENT_SOUND = "minecraft:instrument_sound";
-    case CRAFTING_TABLE = "minecraft:crafting_table";
-    case DESTRUCTION_PARTICLES = "minecraft:destruction_particles";
-    case LOOT = "minecraft:loot";
-    case MAP_COLOR = "minecraft:map_color";
-    case MOVABLE = "minecraft:movable";
-    case REDSTONE_CONDUCTIVITY = "minecraft:redstone_conductivity";
-    case REDSTONE_CONSUMER = "minecraft:redstone_consumer";
-    case REDSTONE_PRODUCER = "minecraft:redstone_producer";
-    case TICK = "minecraft:tick";
-    case ENTITY_FALL_ON = "minecraft:entity_fall_on";
-    case LEASHABLE = "minecraft:leashable";
-
-    /**
-     * Returns the name of the component.
-     *
-     * @return string The name of the component.
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
+    public const BREATHABILITY = "minecraft:breathability";
+    public const COLLISION_BOX = "minecraft:collision_box";
+    public const CONNECTION_RULE = "minecraft:connection_rule";
+    public const DESTRUCTIBLE_BY_EXPLOSION = "minecraft:destructible_by_explosion";
+    public const DESTRUCTIBLE_BY_MINING = "minecraft:destructible_by_mining";
+    public const DISPLAY_NAME = "minecraft:display_name";
+    public const EMBEDDED_VISUAL = "minecraft:embedded_visual";
+    public const FLAMMABLE = "minecraft:flammable";
+    public const FRICTION = "minecraft:friction";
+    public const GEOMETRY = "minecraft:geometry";
+    public const ITEM_VISUAL = "minecraft:item_visual";
+    public const LIGHT_DAMPENING = "minecraft:light_dampening";
+    public const LIGHT_EMISSION = "minecraft:light_emission";
+    public const LIQUID_DETECTION = "minecraft:liquid_detection";
+    public const MATERIAL_INSTANCES = "minecraft:material_instances";
+    public const ON_INTERACT = "minecraft:on_interact";
+    public const ON_PLAYER_PLACING = "minecraft:on_player_placing";
+    public const PLACEMENT_FILTER = "minecraft:placement_filter";
+    public const REPLACEABLE = "minecraft:replaceable";
+    public const SELECTION_BOX = "minecraft:selection_box";
+    public const TRANSFORMATION = "minecraft:transformation";
+    public const CUSTOM_COMPONENTS = "minecraft:custom_components";
+    public const FLOWER_POTTABLE = "minecraft:flower_pottable";
+    public const RANDOM_OFFSET = "minecraft:random_offset";
+    public const SUPPORT = "minecraft:support";
+    public const PRECIPITATION_INTERACTIONS = "minecraft:precipitation_interactions";
+    public const CHEST_OBSTRUCTION = "minecraft:chest_obstruction";
+    public const SOUND = "minecraft:sound";
+    public const BLOCK_ENTITY = "minecraft:block_entity";
+    public const INSTRUMENT_SOUND = "minecraft:instrument_sound";
+    public const CRAFTING_TABLE = "minecraft:crafting_table";
+    public const DESTRUCTION_PARTICLES = "minecraft:destruction_particles";
+    public const LOOT = "minecraft:loot";
+    public const MAP_COLOR = "minecraft:map_color";
+    public const MOVABLE = "minecraft:movable";
+    public const REDSTONE_CONDUCTIVITY = "minecraft:redstone_conductivity";
+    public const REDSTONE_CONSUMER = "minecraft:redstone_consumer";
+    public const REDSTONE_PRODUCER = "minecraft:redstone_producer";
+    public const TICK = "minecraft:tick";
+    public const ENTITY_FALL_ON = "minecraft:entity_fall_on";
+    public const LEASHABLE = "minecraft:leashable";
 }

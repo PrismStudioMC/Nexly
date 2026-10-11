@@ -2,19 +2,9 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum CullingType: string
+class CullingType
 {
-    case FENCE = "nexly:culling.fence";
-    case TRAPDOOR = "nexly:culling.trapdoor";
-    case GLASS = "nexly:culling.glass";
-
-    /**
-     * Returns the enum value as a string.
-     *
-     * @return string
-     */
-    public function toString(): string
-    {
-        return $this->value;
-    }
+    public const FENCE = "nexly:culling.fence";
+    public const TRAPDOOR = "nexly:culling.trapdoor";
+    public const GLASS = "nexly:culling.glass";
 }

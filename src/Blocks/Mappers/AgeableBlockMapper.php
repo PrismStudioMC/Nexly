@@ -6,7 +6,7 @@ use Nexly\Blocks\BlockBuilder as Builder;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialRenderMethod;
+use Nexly\Blocks\Components\Types\RenderMethod;
 use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Helpers\MolangHelper;
 use pocketmine\block\Block;
@@ -27,7 +27,7 @@ class AgeableBlockMapper extends BlockMapper
         return Permutation::create(MolangHelper::stateEquals(StateNames::AGE, $age))
             ->addComponent(SelectionBoxBlockComponent::fromCrops($block, $age))
             ->addComponent(new MaterialInstancesBlockComponent([
-                new Material($builder->getName() . "_{$age}", renderMethod: MaterialRenderMethod::ALPHA_TEST)
+                new Material($builder->getName() . "_{$age}", renderMethod: RenderMethod::ALPHA_TEST)
             ]));
     }
 }

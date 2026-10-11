@@ -7,7 +7,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 
-final readonly class BlockNbtDescriptor
+class NbtDescriptor
 {
     /**
      * @param string|null $name
@@ -33,7 +33,7 @@ final readonly class BlockNbtDescriptor
         if ($this->tags !== null) {
             $nbt->setString('tags', $this->tags);
         }
-        if ($this->states !== []) {
+        if (empty($this->states)) {
             $states = CompoundTag::create();
             foreach ($this->states as $name => $value) {
                 $states->setTag($name, match (true) {

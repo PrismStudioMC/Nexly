@@ -26,7 +26,7 @@ class MaterialInstancesBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::MATERIAL_INSTANCES->getValue();
+        return BlockComponentIds::MATERIAL_INSTANCES;
     }
 
     /**
@@ -38,7 +38,7 @@ class MaterialInstancesBlockComponent extends BlockComponent
     {
         $materials = CompoundTag::create();
         foreach ($this->materials as $material) {
-            $materials->setTag($material->getTarget()->getValue(), $material->toNBT());
+            $materials->setTag($material->getTarget(), $material->toNBT());
         }
 
         return CompoundTag::create()

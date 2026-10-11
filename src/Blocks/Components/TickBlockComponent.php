@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-final class TickBlockComponent extends BlockComponent
+class TickBlockComponent extends BlockComponent
 {
     /**
      * @param int $min
@@ -28,7 +28,7 @@ final class TickBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::TICK->value;
+        return BlockComponentIds::TICK;
     }
 
     /**

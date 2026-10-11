@@ -23,7 +23,7 @@ class CustomComponentsBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::CUSTOM_COMPONENTS->getValue();
+        return BlockComponentIds::CUSTOM_COMPONENTS;
     }
 
     /**

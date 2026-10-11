@@ -14,10 +14,10 @@ use pocketmine\nbt\tag\StringTag;
 class ConnectionRuleComponent extends BlockComponent
 {
     /**
-     * @param list<HorizontalFace> $enabledDirections
+     * @param list<string> $enabledDirections
      */
     public function __construct(
-        protected ConnectionType $from = ConnectionType::ALL,
+        protected string $from = ConnectionType::ALL,
         protected array $enabledDirections = [HorizontalFace::SOUTH, HorizontalFace::NORTH, HorizontalFace::EAST, HorizontalFace::WEST],
     ) {
     }
@@ -29,7 +29,7 @@ class ConnectionRuleComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::CONNECTION_RULE->getValue();
+        return BlockComponentIds::CONNECTION_RULE;
     }
 
     /**
@@ -40,7 +40,7 @@ class ConnectionRuleComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("accepts_connections_from", new StringTag($this->from->getValue()))
-            ->setTag("enabled_directions", new ListTag(array_map(fn (HorizontalFace $direction): StringTag => new StringTag($direction->getValue()), $this->enabledDirections), NBT::TAG_String));
+            ->setTag("accepts_connections_from", new StringTag($this->from))
+            ->setTag("enabled_directions", new ListTag(array_map(fn (string $direction): StringTag => new StringTag($direction), $this->enabledDirections), NBT::TAG_String));
     }
 }

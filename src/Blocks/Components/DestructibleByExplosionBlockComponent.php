@@ -24,7 +24,7 @@ class DestructibleByExplosionBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::DESTRUCTIBLE_BY_EXPLOSION->getValue();
+        return BlockComponentIds::DESTRUCTIBLE_BY_EXPLOSION;
     }
 
     /**

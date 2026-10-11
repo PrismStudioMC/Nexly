@@ -2,8 +2,8 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum CullingShape: string
+class CullingShape
 {
-    case EMPTY = "minecraft:empty";
-    case UNIT_CUBE = "minecraft:unit_cube";
+    public const EMPTY = "minecraft:empty";
+    public const UNIT_CUBE = "minecraft:unit_cube";
 }

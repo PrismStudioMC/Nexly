@@ -29,7 +29,7 @@ class RandomOffsetBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::RANDOM_OFFSET->getValue();
+        return BlockComponentIds::RANDOM_OFFSET;
     }
 
     /**
