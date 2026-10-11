@@ -15,8 +15,8 @@ use pocketmine\nbt\tag\StringTag;
 class ArmorItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly OreTextureType $textureType,
-        private readonly ?int           $protection = null,
+        protected OreTextureType $textureType,
+        protected ?int           $protection = null,
     ) {
     }
 

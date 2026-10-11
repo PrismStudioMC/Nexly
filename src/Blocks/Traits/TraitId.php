@@ -2,7 +2,7 @@
 
 namespace Nexly\Blocks\Traits;
 
-enum TraitIds: string
+enum TraitId: string
 {
     case PLACEMENT_DIRECTION = "minecraft:placement_direction";
     case PLACEMENT_POSITION = "minecraft:placement_position";

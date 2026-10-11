@@ -10,9 +10,9 @@ use pocketmine\nbt\tag\IntTag;
 class DurabilityItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly int $durability,
-        private readonly int $min = 0,
-        private readonly int $max = 0,
+        protected int $durability,
+        protected int $min = 0,
+        protected int $max = 0,
     ) {
         if ($durability < 1) {
             throw new \InvalidArgumentException("Durability must be at least 1");

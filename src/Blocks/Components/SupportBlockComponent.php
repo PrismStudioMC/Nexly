@@ -16,7 +16,7 @@ use pocketmine\nbt\tag\StringTag;
 class SupportBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly SupportShape $shape,
+        protected SupportShape $shape,
     ) {
     }
 

@@ -15,9 +15,9 @@ use pocketmine\nbt\tag\StringTag;
 class SwingSoundsItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly string $hit,
-        private readonly string $miss,
-        private readonly string $critical,
+        protected string $hit,
+        protected string $miss,
+        protected string $critical,
     ) {
     }
 

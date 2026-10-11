@@ -16,9 +16,9 @@ class RecordItemComponent extends DataDrivenItemComponent
      * @param int $signal
      */
     public function __construct(
-        private readonly string $sound,
-        private readonly int $duration = 20,
-        private readonly int $signal = 1
+        protected string $sound,
+        protected int $duration = 20,
+        protected int $signal = 1
     ) {
     }
 

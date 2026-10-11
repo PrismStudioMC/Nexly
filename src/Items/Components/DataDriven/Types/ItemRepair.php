@@ -17,8 +17,8 @@ class ItemRepair
      * @param string[] $items
      */
     public function __construct(
-        private float|string   $amount,
-        private readonly array $items,
+        protected float|string   $amount,
+        protected array $items,
     ) {
         if (is_double($this->amount)) {
             $this->amount = strval($this->amount);

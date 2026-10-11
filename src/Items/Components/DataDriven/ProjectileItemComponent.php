@@ -15,8 +15,8 @@ class ProjectileItemComponent extends DataDrivenItemComponent
      * @param string $entity
      */
     public function __construct(
-        private readonly string $entity = "",
-        private readonly float $minimumCriticalPower = 1.25,
+        protected string $entity = "",
+        protected float $minimumCriticalPower = 1.25,
     ) {
     }
 

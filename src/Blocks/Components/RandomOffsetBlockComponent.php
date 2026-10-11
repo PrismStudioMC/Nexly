@@ -3,6 +3,7 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
+use InvalidArgumentException;
 use Nexly\Blocks\Components\Types\RangeOffset;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\FloatTag;
@@ -13,9 +14,12 @@ use pocketmine\network\mcpe\protocol\types\BlockPosition;
 class RandomOffsetBlockComponent extends BlockComponent
 {
     public function __construct(
-        private BlockPosition $steps,
-        private RangeOffset   $offset,
+        protected BlockPosition $steps,
+        protected RangeOffset   $offset,
     ) {
+        if ($steps->getX() < 0 || $steps->getY() < 0 || $steps->getZ() < 0) {
+            throw new InvalidArgumentException("Random offset steps cannot be negative (zero means continuous).");
+        }
     }
 
     /**

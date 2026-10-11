@@ -18,9 +18,9 @@ class ShapedRecipe implements Recipe
      * @param Item|string[] $outputs
      */
     public function __construct(
-        private MinecraftShape|array $shape,
-        private readonly array       $ingredients,
-        private readonly array       $outputs
+        protected MinecraftShape|array $shape,
+        protected array       $ingredients,
+        protected array       $outputs
     ) {
         if ($this->shape instanceof MinecraftShape) {
             $this->shape = $this->shape->toArray();

@@ -14,8 +14,8 @@ class UseModifiersItemComponent extends DataDrivenItemComponent
      * @param float|null $movementModifier
      */
     public function __construct(
-        private readonly float $duration,
-        private readonly ?float $movementModifier = null,
+        protected float $duration,
+        protected ?float $movementModifier = null,
     ) {
     }
 

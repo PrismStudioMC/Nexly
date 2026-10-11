@@ -13,7 +13,7 @@ class FireResistantItemComponent extends DataDrivenItemComponent
      * @param bool $value
      */
     public function __construct(
-        private readonly bool $value = true
+        protected bool $value = true
     ) {
     }
 

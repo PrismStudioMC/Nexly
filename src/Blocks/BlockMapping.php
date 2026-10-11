@@ -8,8 +8,8 @@ use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 class BlockMapping
 {
     public function __construct(
-        private BlockBuilder $builder,
-        private BlockPaletteEntry $entry,
+        protected BlockBuilder $builder,
+        protected BlockPaletteEntry $entry,
     ) {
     }
 

@@ -21,8 +21,8 @@ class SelectionBoxBlockComponent extends BlockComponent
      * @param BoxCollision[] $collisions
      */
     public function __construct(
-        private readonly bool $enabled,
-        private array $collisions = [],
+        protected bool $enabled,
+        protected array $collisions = [],
     ) {
         if (empty($this->collisions)) {
             $this->collisions[] = new BoxCollision(new Vector3(-8.0, 0.0, -8.0), new Vector3(16.0, 16.0, 16.0));

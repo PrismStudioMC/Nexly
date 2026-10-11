@@ -19,7 +19,7 @@ class HandEquippedComponent extends LegacyItemComponent
     }
 
     public function __construct(
-        private readonly bool $value = true
+        protected bool $value = true
     ) {
     }
 

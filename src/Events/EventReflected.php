@@ -8,13 +8,13 @@ use WeakReference;
 class EventReflected
 {
     public function __construct(
-        private \Closure           $closure,
-        private ReflectionFunction $ref,
-        private bool               $isStatic,
-        private ?WeakReference     $instanceRef,
-        private ?int               $instanceId,
-        private int                $priority,
-        private bool               $handleCancelled,
+        protected \Closure           $closure,
+        protected ReflectionFunction $ref,
+        protected bool               $isStatic,
+        protected ?WeakReference     $instanceRef,
+        protected ?int               $instanceId,
+        protected int                $priority,
+        protected bool               $handleCancelled,
     ) {
     }
 

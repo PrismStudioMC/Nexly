@@ -15,8 +15,8 @@ class BlockProperty
      * @param array $values
      */
     public function __construct(
-        private readonly string $name,
-        private readonly array $values
+        protected string $name,
+        protected array $values
     ) {
     }
 

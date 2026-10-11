@@ -19,7 +19,7 @@ class MaxStackSizeComponent extends LegacyItemComponent
     }
 
     public function __construct(
-        private readonly int $size
+        protected int $size
     ) {
     }
 

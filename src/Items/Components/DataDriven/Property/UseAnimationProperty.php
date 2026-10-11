@@ -13,7 +13,7 @@ use pocketmine\nbt\tag\IntTag;
 class UseAnimationProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly ItemAnimation $animation
+        protected ItemAnimation $animation
     ) {
     }
 

@@ -11,7 +11,7 @@ use pocketmine\nbt\tag\StringTag;
 class PrecipitationInteractionsBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly PrecipitationType $precipitation,
+        protected PrecipitationType $precipitation,
     ) {
     }
 

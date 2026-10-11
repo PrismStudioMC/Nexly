@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\IntTag;
 class EnchantableValueProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly int $value
+        protected int $value
     ) {
     }
 

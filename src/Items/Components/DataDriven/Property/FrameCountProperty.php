@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\IntTag;
 class FrameCountProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly int $frame
+        protected int $frame
     ) {
     }
 

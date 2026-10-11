@@ -11,8 +11,8 @@ use pocketmine\math\Vector3;
 
 class GlassPanePermutation
 {
-    private function __construct(
-        private Builder $builder
+    protected function __construct(
+        protected Builder $builder
     ) {
     }
 

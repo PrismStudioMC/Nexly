@@ -11,8 +11,8 @@ use pocketmine\nbt\tag\StringTag;
 class CooldownItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly float $duration,
-        private readonly string $category = ""
+        protected float $duration,
+        protected string $category = ""
     ) {
     }
 

@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\StringTag;
 class DyeableItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly string $color = "#ffffff",
+        protected string $color = "#ffffff",
     ) {
         if (!preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color)) {
             throw new \InvalidArgumentException("Invalid color format. Use hex format like #RRGGBB or #RGB.");

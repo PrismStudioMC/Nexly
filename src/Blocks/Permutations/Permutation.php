@@ -5,13 +5,13 @@ namespace Nexly\Blocks\Permutations;
 use Nexly\Blocks\Components\BlockComponent;
 use pocketmine\nbt\tag\CompoundTag;
 
-final class Permutation
+class Permutation
 {
     /*** @var BlockComponent[] */
-    private array $components = [];
+    protected array $components = [];
 
     public function __construct(
-        private string $condition
+        protected string $condition
     ) {
     }
 

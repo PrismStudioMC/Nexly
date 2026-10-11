@@ -11,7 +11,7 @@ use pocketmine\nbt\tag\StringTag;
 class BreathabilityBlockComponent extends BlockComponent
 {
     public function __construct(
-        private BreathabilityType $type,
+        protected BreathabilityType $type,
     ) {
     }
 

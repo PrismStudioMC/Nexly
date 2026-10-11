@@ -4,25 +4,24 @@ namespace Nexly\Items\Components\DataDriven;
 
 use Attribute;
 use pocketmine\block\Block;
-use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\world\format\io\GlobalBlockStateHandlers;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class DiggerItemComponent extends DataDrivenItemComponent
 {
+    /**
+     * @param CompoundTag[] $diggers
+     */
     public function __construct(
-        private readonly bool $efficiency,
-        private array $diggers
+        protected bool $efficiency = false,
+        protected array $diggers = []
     ) {
     }
 
     /**
-     * The name of the component.
-     *
      * @return string
      */
     public static function getName(): string
@@ -31,8 +30,6 @@ class DiggerItemComponent extends DataDrivenItemComponent
     }
 
     /**
-     * Add a block with its corresponding speed to the digger component.
-     *
      * @param Block $block
      * @param int $speed
      * @return $this
@@ -40,18 +37,15 @@ class DiggerItemComponent extends DataDrivenItemComponent
     public function addBlock(Block $block, int $speed): self
     {
         $blockName = GlobalBlockStateHandlers::getSerializer()->serialize($block->getStateId())->getName();
-        $this->diggers[] = CompoundTag::create()->setTag(
-            "block",
-            CompoundTag::create()
-            ->setTag("name", new StringTag($blockName))
-            ->setTag("speed", new IntTag($speed))
-        );
+
+        $this->diggers[] = CompoundTag::create()
+            ->setTag("block", CompoundTag::create()->setString("name", $blockName))
+            ->setInt("speed", $speed);
+
         return $this;
     }
 
     /**
-     * Add multiple blocks with the same speed to the digger component.
-     *
      * @param int $speed
      * @param Block ...$blocks
      * @return $this
@@ -65,30 +59,28 @@ class DiggerItemComponent extends DataDrivenItemComponent
     }
 
     /**
-     * Add a tag with its corresponding speed to the digger component.
-     *
-     * @param array|string $tags
-     * @param int $speed
-     * @return $this
+     * @param string[]|string $tags
      */
     public function addTag(array|string $tags, int $speed): self
     {
-        $this->diggers[] = CompoundTag::create()->setTag("block", CompoundTag::create()
-            ->setString("tags", "query.any_tag(" . (is_string($tags) ? "'$tags'" : implode(", ", array_map(fn (string $tag) => "'$tag'", $tags))) . ")"))
+        $tagsArray = is_string($tags) ? [$tags] : $tags;
+
+        $molang = "query.any_tag(" . implode(", ", array_map(fn (string $tag) => "'$tag'", $tagsArray)) . ")";
+        $this->diggers[] = CompoundTag::create()
+            ->setTag("block", CompoundTag::create()->setString("tags", $molang))
             ->setInt("speed", $speed);
+
         return $this;
     }
 
     /**
-     * Build the NBT tag for this component.
-     *
      * @return CompoundTag
      */
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
             ->setTag("on_dig", CompoundTag::create())
-            ->setTag("use_efficiency", new ByteTag($this->efficiency))
-            ->setTag("destroy_speeds", new ListTag($this->diggers, CompoundTag::class));
+            ->setByte("use_efficiency", (int) $this->efficiency) // On utilise (int) $this->efficiency
+            ->setTag("destroy_speeds", new ListTag($this->diggers, NBT::TAG_Compound));
     }
 }

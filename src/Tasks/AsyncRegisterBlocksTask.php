@@ -7,25 +7,25 @@ use Nexly\Blocks\Components\AsyncBlockComponent;
 use Nexly\Blocks\NexlyBlocks;
 use Nexly\Blocks\Permutations\BlockProperty;
 use Nexly\Blocks\Permutations\Permutation;
-use Nexly\Blocks\Traits\MinecraftTrait;
-use Nexly\Blocks\Traits\State;
-use Nexly\Blocks\Traits\TraitIds;
+use Nexly\Blocks\Traits\BlockTrait;
+use Nexly\Blocks\Traits\TraitId;
+use Nexly\Blocks\Traits\TraitState;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\scheduler\AsyncTask;
 
-final class AsyncRegisterBlocksTask extends AsyncTask
+class AsyncRegisterBlocksTask extends AsyncTask
 {
-    private ThreadSafeArray $numericIds;
-    private ThreadSafeArray $func;
-    private ThreadSafeArray $properties;
-    private ThreadSafeArray $permutations;
-    private ThreadSafeArray $components;
-    private ThreadSafeArray $traits;
-    private ThreadSafeArray $serializer;
-    private ThreadSafeArray $deserializer;
+    protected ThreadSafeArray $numericIds;
+    protected ThreadSafeArray $func;
+    protected ThreadSafeArray $properties;
+    protected ThreadSafeArray $permutations;
+    protected ThreadSafeArray $components;
+    protected ThreadSafeArray $traits;
+    protected ThreadSafeArray $serializer;
+    protected ThreadSafeArray $deserializer;
 
     /**
      * @param Closure[] $blocks
@@ -61,8 +61,8 @@ final class AsyncRegisterBlocksTask extends AsyncTask
             // the main thread.
             $builder = NexlyBlocks::buildComplex($stringId, $blockFunc)
                 ->setNumericId($this->numericIds[$stringId])
-                ->setSerializer($this->serializer[$stringId])
-                ->setDeserializer($this->deserializer[$stringId]);
+                ->mapSerializer($this->serializer[$stringId])
+                ->mapDeserializer($this->deserializer[$stringId]);
 
             foreach (json_decode($this->properties[$stringId], true) as $property) {
                 $builder->addProperty(new BlockProperty($property["name"], $property["values"]));
@@ -98,22 +98,7 @@ final class AsyncRegisterBlocksTask extends AsyncTask
                     throw new \InvalidArgumentException("Invalid state for trait " . $state);
                 }
 
-                $cardinal = $state["cardinal"] ?? null;
-                if (!is_bool($cardinal)) {
-                    throw new \InvalidArgumentException("Invalid cardinal for trait " . $cardinal);
-                }
-
-                $facing = $state["facing"] ?? null;
-                if (!is_bool($facing)) {
-                    throw new \InvalidArgumentException("Invalid facing for trait " . $facing);
-                }
-
-                $sixteenWayRotation = $state["sixteenWayRotation"] ?? null;
-                if (!is_bool($sixteenWayRotation)) {
-                    throw new \InvalidArgumentException("Invalid sixteenWayRotation for trait " . $facing);
-                }
-
-                $builder->addTrait(new MinecraftTrait(TraitIds::fromString($identifier), $rotationOffset, new State($cardinal, $facing)));
+                $builder->addTrait(new BlockTrait(TraitId::fromString($identifier), TraitState::fromArray($state)));
             }
 
             $builder->register(false, false);

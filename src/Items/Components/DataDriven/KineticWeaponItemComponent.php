@@ -17,15 +17,15 @@ use pocketmine\nbt\tag\IntTag;
 class KineticWeaponItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly float $hitboxMargin = 0.0,
-        private readonly int $min = 0,
-        private readonly int $max = 3,
-        private readonly float             $damageModifier = 0.0,
-        private readonly float             $damageMultiplier = 1.0,
-        private readonly int               $delay = 0,
-        private readonly ?DamageConditions $damageConditions = null,
-        private readonly ?DamageConditions $dismoutConditions = null,
-        private readonly ?DamageConditions $knockbackConditions = null,
+        protected float $hitboxMargin = 0.0,
+        protected int $min = 0,
+        protected int $max = 3,
+        protected float             $damageModifier = 0.0,
+        protected float             $damageMultiplier = 1.0,
+        protected int               $delay = 0,
+        protected ?DamageConditions $damageConditions = null,
+        protected ?DamageConditions $dismoutConditions = null,
+        protected ?DamageConditions $knockbackConditions = null,
     ) {
     }
 

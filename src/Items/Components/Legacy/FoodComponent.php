@@ -42,16 +42,16 @@ class FoodComponent extends LegacyItemComponent
      * @param int[] $removeEffects
      */
     public function __construct(
-        private readonly int                     $nutrition,
-        private readonly float                   $saturationModifier,
-        private readonly bool                    $canAlwaysEat = false,
-        private readonly LegacyItemCooldownType|\BackedEnum|string  $cooldownType = LegacyItemCooldownType::NONE,
-        private readonly int                     $cooldownTick = 0,
-        private string                           $usingConvertsTo = "air",
-        private readonly LegacyItemUseActionType $useActionType = LegacyItemUseActionType::NONE,
-        private readonly array                   $onUseRange = [],
-        private readonly array                   $effects = [],
-        private readonly array                   $removeEffects = [],
+        protected int                     $nutrition,
+        protected float                   $saturationModifier,
+        protected bool                    $canAlwaysEat = false,
+        protected LegacyItemCooldownType|\BackedEnum|string  $cooldownType = LegacyItemCooldownType::NONE,
+        protected int                     $cooldownTick = 0,
+        protected string                           $usingConvertsTo = "air",
+        protected LegacyItemUseActionType $useActionType = LegacyItemUseActionType::NONE,
+        protected array                   $onUseRange = [],
+        protected array                   $effects = [],
+        protected array                   $removeEffects = [],
     ) {
     }
 

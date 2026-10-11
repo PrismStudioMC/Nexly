@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\StringTag;
 class DisplayNameBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly string $name,
+        protected string $name,
     ) {
     }
 

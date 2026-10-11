@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\StringTag;
 class InteractButtonProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly bool|string $value
+        protected bool|string $value
     ) {
     }
 

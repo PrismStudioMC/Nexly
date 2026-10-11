@@ -13,8 +13,8 @@ class EmbeddedVisualBlockComponent extends BlockComponent
      * @param MaterialInstancesBlockComponent $material
      */
     public function __construct(
-        private readonly GeometryBlockComponent $geometry,
-        private readonly MaterialInstancesBlockComponent $material
+        protected GeometryBlockComponent $geometry,
+        protected MaterialInstancesBlockComponent $material
     ) {
     }
 

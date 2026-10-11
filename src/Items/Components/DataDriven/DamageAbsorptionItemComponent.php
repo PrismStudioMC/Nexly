@@ -3,7 +3,6 @@
 namespace Nexly\Items\Components\DataDriven;
 
 use Attribute;
-use Nexly\Items\Components\DataDriven\Types\DamageCause;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
@@ -12,10 +11,10 @@ use pocketmine\nbt\tag\ListTag;
 class DamageAbsorptionItemComponent extends DataDrivenItemComponent
 {
     /**
-     * @param DamageCause[] $causes
+     * @param string[] $causes
      */
     public function __construct(
-        private readonly array $causes,
+        protected array $causes,
     ) {
     }
 
@@ -37,6 +36,6 @@ class DamageAbsorptionItemComponent extends DataDrivenItemComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("absorbable_causes", new ListTag(array_map(fn (DamageCause $cause) => $cause->getValue(), $this->causes), NBT::TAG_String));
+            ->setTag("absorbable_causes", new ListTag($this->causes, NBT::TAG_String));
     }
 }

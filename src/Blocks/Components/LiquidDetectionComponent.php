@@ -15,7 +15,7 @@ class LiquidDetectionComponent extends BlockComponent
      * @param LiquidRule[] $rules
      */
     public function __construct(
-        private array $rules,
+        protected array $rules,
     ) {
     }
 

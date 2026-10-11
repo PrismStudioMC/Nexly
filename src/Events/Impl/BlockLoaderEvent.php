@@ -8,11 +8,11 @@ use pocketmine\block\Block;
 
 class BlockLoaderEvent extends Event
 {
-    private bool $affected = false;
+    protected bool $affected = false;
 
     public function __construct(
-        private BlockBuilder $builder,
-        private Block $block
+        protected BlockBuilder $builder,
+        protected Block $block
     ) {
     }
 

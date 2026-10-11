@@ -12,7 +12,7 @@ use pocketmine\nbt\tag\ListTag;
 class DurabilitySensorItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly array $thresholds,
+        protected array $thresholds,
     ) {
         if (empty($this->thresholds)) {
             throw new \InvalidArgumentException("Thresholds array cannot be empty.");

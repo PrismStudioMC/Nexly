@@ -20,10 +20,10 @@ class ShooterItemComponent extends DataDrivenItemComponent
      * @param bool $scalePowerByDrawDuration
      */
     public function __construct(
-        private readonly array $ammunitions = [],
-        private readonly bool  $chargeOnDraw = false,
-        private readonly float $maxDrawDuration = 0.0,
-        private readonly bool  $scalePowerByDrawDuration = true
+        protected array $ammunitions = [],
+        protected bool  $chargeOnDraw = false,
+        protected float $maxDrawDuration = 0.0,
+        protected bool  $scalePowerByDrawDuration = true
     ) {
     }
 

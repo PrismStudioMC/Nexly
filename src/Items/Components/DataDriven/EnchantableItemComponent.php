@@ -12,8 +12,8 @@ use pocketmine\nbt\tag\StringTag;
 class EnchantableItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly ItemEnchantSlot $slot,
-        private readonly int $value,
+        protected ItemEnchantSlot $slot,
+        protected int $value,
     ) {
         if ($value < 0) {
             throw new \InvalidArgumentException("Value must be non-negative");

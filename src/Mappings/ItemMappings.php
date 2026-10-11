@@ -15,7 +15,7 @@ class ItemMappings
     /**
      * @var array<string, array> Mapping of item string IDs to their numeric IDs.
      */
-    private array $mappings = [];
+    protected array $mappings = [];
 
     /**
      * @return array

@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\StringTag;
 class RarityProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly ItemRarity $rarity
+        protected ItemRarity $rarity
     ) {
     }
 

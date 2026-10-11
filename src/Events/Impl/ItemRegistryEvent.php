@@ -9,7 +9,7 @@ use pocketmine\item\Item;
 
 class ItemRegistryEvent extends Event
 {
-    private int $count = 0;
+    protected int $count = 0;
 
     /**
      * @param string $stringId

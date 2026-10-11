@@ -12,8 +12,8 @@ use pocketmine\nbt\tag\StringTag;
 class ChargeableItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly float $movementModifier,
-        private readonly string $onComplete = "",
+        protected float $movementModifier,
+        protected string $onComplete = "",
     ) {
     }
 

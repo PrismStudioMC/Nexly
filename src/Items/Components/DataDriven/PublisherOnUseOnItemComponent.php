@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\CompoundTag;
 class PublisherOnUseOnItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly bool $autoSucceedOnClient = true,
+        protected bool $autoSucceedOnClient = true,
     ) {
     }
 

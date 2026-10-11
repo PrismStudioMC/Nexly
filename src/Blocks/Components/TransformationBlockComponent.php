@@ -13,12 +13,12 @@ use pocketmine\nbt\tag\IntTag;
 class TransformationBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly Vector3 $rotation = new Vector3(0, 0, 0),
-        private readonly Vector3 $scale = new Vector3(1, 1, 1),
-        private readonly Vector3 $translation = new Vector3(0, 0, 0),
-        private readonly Vector3 $rotationPivot = new Vector3(0, 0, 0),
-        private readonly Vector3 $scalePivot = new Vector3(0, 0, 0),
-        private readonly bool $hasJsonVersionBeforeValidation = false,
+        protected Vector3 $rotation = new Vector3(0, 0, 0),
+        protected Vector3 $scale = new Vector3(1, 1, 1),
+        protected Vector3 $translation = new Vector3(0, 0, 0),
+        protected Vector3 $rotationPivot = new Vector3(0, 0, 0),
+        protected Vector3 $scalePivot = new Vector3(0, 0, 0),
+        protected bool $hasJsonVersionBeforeValidation = false,
     ) {
         foreach ([$rotation->getX(), $rotation->getY(), $rotation->getZ()] as $angle) {
             if (abs(fmod((float) $angle, 90.0)) > PHP_FLOAT_EPSILON) {
@@ -60,6 +60,6 @@ class TransformationBlockComponent extends BlockComponent
             ->setTag("SPX", new FloatTag($this->scalePivot->getX()))
             ->setTag("SPY", new FloatTag($this->scalePivot->getY()))
             ->setTag("SPZ", new FloatTag($this->scalePivot->getZ()))
-            ->setTag("hasJsonVersionBeforeValidation", new ByteTag($this->hasJsonVersionBeforeValidation ? 1 : 0));
+            ->setTag("hasJsonVersionBeforeValidation", new ByteTag($this->hasJsonVersionBeforeValidation));
     }
 }

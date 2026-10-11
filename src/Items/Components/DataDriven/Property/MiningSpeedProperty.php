@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\FloatTag;
 class MiningSpeedProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly float $speed
+        protected float $speed
     ) {
     }
 

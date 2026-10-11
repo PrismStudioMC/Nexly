@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\CompoundTag;
 class LightEmissionBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly int $value,
+        protected int $value,
     ) {
         if ($value < 0 || $value > 15) {
             throw new \InvalidArgumentException("Light emission value must be between 0 and 15");

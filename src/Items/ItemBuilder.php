@@ -20,12 +20,12 @@ use pocketmine\world\format\io\GlobalItemDataHandlers as ItemDataHandlers;
 
 abstract class ItemBuilder
 {
-    private string $stringId;
-    private ?int $numericId = null;
-    private Item $item;
-    private ?Closure $serializer = null;
-    private ?Closure $deserializer = null;
-    private ?CreativeInfo $creativeInfo = null;
+    protected string $stringId;
+    protected ?int $numericId = null;
+    protected Item $item;
+    protected ?Closure $serializer = null;
+    protected ?Closure $deserializer = null;
+    protected ?CreativeInfo $creativeInfo = null;
 
     /**
      * Get the string identifier for the item.

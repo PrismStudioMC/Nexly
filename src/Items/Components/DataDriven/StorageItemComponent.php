@@ -22,10 +22,10 @@ class StorageItemComponent extends DataDrivenItemComponent
      * @param array $bannedItems
      */
     public function __construct(
-        private readonly int $capacity,
-        private readonly bool $allowNested = true,
-        private readonly array $allowedItems = [],
-        private readonly array $bannedItems = [],
+        protected int $capacity,
+        protected bool $allowNested = true,
+        protected array $allowedItems = [],
+        protected array $bannedItems = [],
     ) {
         if ($this->capacity < 0) {
             throw new \InvalidArgumentException("Capacity must be a non-negative integer.");

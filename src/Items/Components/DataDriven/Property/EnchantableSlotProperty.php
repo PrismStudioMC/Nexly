@@ -11,7 +11,7 @@ use pocketmine\nbt\tag\StringTag;
 class EnchantableSlotProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly ItemEnchantSlot $slot
+        protected ItemEnchantSlot $slot
     ) {
     }
 

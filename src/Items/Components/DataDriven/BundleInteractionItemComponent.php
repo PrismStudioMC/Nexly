@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\IntTag;
 class BundleInteractionItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly int $capacity,
+        protected int $capacity,
     ) {
         if ($this->capacity < 1 || $this->capacity > 64) {
             throw new \InvalidArgumentException("Capacity must be between 1 and 64");

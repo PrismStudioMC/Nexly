@@ -46,9 +46,9 @@ use pocketmine\nbt\tag\StringTag;
 class DataDrivenItemBuilder extends ItemBuilder
 {
     /** @var PropertyItemComponent[] */
-    private array $properties = [];
+    protected array $properties = [];
     /** @var DataDrivenItemComponent[] */
-    private array $components = [];
+    protected array $components = [];
 
     public static function create(): DataDrivenItemBuilder
     {
@@ -226,7 +226,6 @@ class DataDrivenItemBuilder extends ItemBuilder
     public function loadComponents(): self
     {
         $item = $this->getItem();
-        $reflection = new \ReflectionClass($item);
 
         $this->addComponent(new DisplayNameItemComponent("item." . $this->getStringId() . ".name"));
         $this->addComponent(new EnchantableItemComponent(ItemEnchantSlot::fromItem($item), $item->getEnchantability()));
@@ -275,6 +274,7 @@ class DataDrivenItemBuilder extends ItemBuilder
         if (!($block instanceof Air)) {
             $this->addComponent(BlockPlacerItemComponent::make(
                 block: $block,
+                alignedPlacement: true,
             ));
         }
 
@@ -284,7 +284,8 @@ class DataDrivenItemBuilder extends ItemBuilder
         }
 
         if ($item instanceof Dye) {
-            $this->addComponent(new DyeableItemComponent(sprintf("%02X%02X%02X%02X", ($color = $item->getColor())->r, $color->g, $color->b, $color->a)));
+            $color = $item->getColor()->getRgbValue();
+            $this->addComponent(new DyeableItemComponent(sprintf("%02X%02X%02X%02X", $color->getR(), $color->getG(), $color->getB(), $color->getA())));
         }
 
         if ($item instanceof SpawnEgg) {

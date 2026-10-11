@@ -61,18 +61,18 @@ use pocketmine\item\Sword;
 class NexlyCreative
 {
     /** @var CreativeGroupPM[] */
-    private static array $groups = [];
+    protected static array $groups = [];
     /** @var CreativeCategory[]  */
-    private static array $groupToCategory = [];
+    protected static array $groupToCategory = [];
     /** @var CreativeGroup|\StringBackedEnum[]  */
-    private static array $categoryToGroups = [];
+    protected static array $categoryToGroups = [];
 
     /**
      * Load existing creative groups from the creative inventory.
      *
      * @return void
      */
-    private static function loadGroups(): void
+    protected static function loadGroups(): void
     {
         if (!empty(self::$categoryToGroups)) {
             return;
@@ -102,7 +102,7 @@ class NexlyCreative
      * @param CreativeGroup|BackedEnum|null $group
      * @return void
      */
-    public static function add(Item $item, CreativeCategory $category = null, CreativeGroup|BackedEnum $group = null): void
+    public static function add(Item $item, ?CreativeCategory $category = null, CreativeGroup|BackedEnum|null $group = null): void
     {
         self::loadGroups(); // Ensure groups are loaded
 

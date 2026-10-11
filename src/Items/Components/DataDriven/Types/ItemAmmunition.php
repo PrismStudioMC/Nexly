@@ -11,10 +11,10 @@ use pocketmine\network\mcpe\convert\TypeConverter;
 class ItemAmmunition
 {
     public function __construct(
-        private readonly string $item,
-        private readonly bool $searchInventory = true,
-        private readonly bool $useInCreative = true,
-        private readonly bool $useOffHand = true
+        protected string $item,
+        protected bool $searchInventory = true,
+        protected bool $useInCreative = true,
+        protected bool $useOffHand = true
     ) {
     }
 

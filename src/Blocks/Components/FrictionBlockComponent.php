@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\FloatTag;
 class FrictionBlockComponent extends BlockComponent
 {
     public function __construct(
-        private readonly float $value = 0.0,
+        protected float $value = 0.0,
     ) {
         if ($this->value < 0.0 || $this->value > 0.9) {
             throw new \InvalidArgumentException("Friction value must be between 0.0 and 0.9");

@@ -19,12 +19,12 @@ class LegacyEffect
      * @param float $chance
      */
     public function __construct(
-        private readonly int    $id,
-        private readonly string $name,
-        private readonly string $descriptionId,
-        private readonly int    $duration = -1,
-        private readonly int    $amplifier = 0,
-        private readonly float $chance = 100.0
+        protected int    $id,
+        protected string $name,
+        protected string $descriptionId,
+        protected int    $duration = -1,
+        protected int    $amplifier = 0,
+        protected float $chance = 100.0
     ) {
     }
 
@@ -39,10 +39,10 @@ class LegacyEffect
         return new self(
             EffectIdMap::getInstance()->toId($effectInstance->getType()),
             $effectInstance->getType()->getName(),
-            "", // Description ID is not available in EffectInstance
+            "",
             $effectInstance->getDuration(),
             $effectInstance->getAmplifier(),
-            100.0 // Default chance to 100%
+            100.0
         );
     }
 

@@ -7,10 +7,10 @@ use pocketmine\network\mcpe\protocol\serializer\NetworkNbtSerializer;
 
 class AsyncBlockComponent extends BlockComponent
 {
-    private Tag $nbt;
+    protected Tag $nbt;
 
     public function __construct(
-        private string $name,
+        protected string $name,
         string $nbt,
     ) {
         $this->nbt = (new NetworkNbtSerializer())->read(base64_decode($nbt))->getTag();

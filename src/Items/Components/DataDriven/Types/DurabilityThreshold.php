@@ -9,9 +9,9 @@ use pocketmine\nbt\tag\StringTag;
 class DurabilityThreshold
 {
     public function __construct(
-        private readonly int $durability,
-        private readonly ?string $sound = null,
-        private readonly ?string $particle = null,
+        protected int $durability,
+        protected ?string $sound = null,
+        protected ?string $particle = null,
     ) {
     }
 
