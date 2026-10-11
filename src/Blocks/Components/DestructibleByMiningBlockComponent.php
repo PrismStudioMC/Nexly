@@ -24,7 +24,7 @@ class DestructibleByMiningBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::DESTRUCTIBLE_BY_MINING->getValue();
+        return BlockComponentIds::DESTRUCTIBLE_BY_MINING;
     }
 
     /**

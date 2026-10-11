@@ -9,6 +9,7 @@ use Nexly\Blocks\Components\EmbeddedVisualBlockComponent;
 use Nexly\Blocks\Components\FlowerPottableBlockComponent;
 use Nexly\Blocks\Components\GeometryBlockComponent;
 use Nexly\Blocks\Components\ItemVisualBlockComponent;
+use Nexly\Blocks\Components\LeashableBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent as MaterialComponent;
 use Nexly\Blocks\Components\OnInteractBlockComponent;
 use Nexly\Blocks\Components\RandomOffsetBlockComponent;
@@ -17,10 +18,10 @@ use Nexly\Blocks\Components\Types\BoxCollision;
 use Nexly\Blocks\Components\Types\CullingType;
 use Nexly\Blocks\Components\Types\Geometry;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialRenderMethod;
 use Nexly\Blocks\Components\Types\MaterialTarget;
 use Nexly\Blocks\Components\Types\NexlyGeometry;
 use Nexly\Blocks\Components\Types\RangeOffset;
+use Nexly\Blocks\Components\Types\RenderMethod;
 use Nexly\Blocks\Mappers\AgeableBlockMapper;
 use Nexly\Blocks\Mappers\DoorBlockMapper;
 use Nexly\Blocks\Mappers\FarmlandBlockMapper;
@@ -142,7 +143,7 @@ class BlockCreator
         $builder->addProperty(new Property(StateNames::PERSISTENT_BIT, PropertyHelper::BOOL));
         $builder->addProperty(new Property(StateNames::UPDATE_BIT, PropertyHelper::BOOL));
 
-        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST)]));
+        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::ALPHA_TEST)]));
     }
 
     /**
@@ -158,17 +159,17 @@ class BlockCreator
             new Material(
                 texture: $builder->getName() . "_top",
                 target: MaterialTarget::UP,
-                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             ),
             new Material(
                 texture: $builder->getName() . "_bottom",
                 target: MaterialTarget::DOWN,
-                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             ),
             new Material(
                 texture: $builder->getName() . "_side",
                 target: MaterialTarget::ALL,
-                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ];
 
@@ -189,7 +190,7 @@ class BlockCreator
     public static function makeSapling(Builder $builder, Sapling $block): void
     {
         $stringId = $builder->getStringId();
-        $materials = [new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)];
+        $materials = [new Material($builder->getName(), renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)];
 
         $builder->mapSerializer(static fn (Sapling $block): Writer => PMSerializerHelper::encodeSapling($block, new Writer($stringId)));
         $builder->mapDeserializer(static fn (Reader $in): Sapling => PMDeserializerHelper::decodeSapling(clone $block, $in));
@@ -230,7 +231,7 @@ class BlockCreator
         $isInnerRight  = MolangHelper::stateEquals(StateNames::MC_CORNER, StateValues::MC_CORNER_INNER_RIGHT);
 
         $geometryComponent = (new GeometryBlockComponent(NexlyGeometry::STAIR))
-            ->add("base", MolangHelper::true())
+            ->add("base", true)
             ->add("top_nw", MolangHelper::ternary($ud, $notOuterRight, $notOuterLeft))
             ->add("top_ne", MolangHelper::ternary($ud, $notOuterLeft, $notOuterRight))
             ->add("top_sw", MolangHelper::ternary($ud, $isInnerLeft, $isInnerRight))
@@ -323,12 +324,13 @@ class BlockCreator
 
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(NexlyGeometry::FENCE . "_carried"), $material));
         $builder->addComponent(
-            (new GeometryBlockComponent(identifier: NexlyGeometry::FENCE, cullingType: CullingType::FENCE->toString()))
+            (new GeometryBlockComponent(identifier: NexlyGeometry::FENCE, cullingType: CullingType::FENCE))
                 ->add("north_rails", MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, true))
                 ->add("south_rails", MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, true))
                 ->add("west_rails", MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, true))
                 ->add("east_rails", MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, true))
         );
+        $builder->addComponent(new LeashableBlockComponent(new Vector3(0, 12, 0)));
 
         $builder->setMapper(FenceBlockMapper::class);
     }
@@ -407,6 +409,7 @@ class BlockCreator
                     MolangHelper::not(MolangHelper::or($isNS, $isWE))
                 ))
         );
+        $builder->addComponent(new LeashableBlockComponent(new Vector3(0, 12, 0)));
 
         $builder->setMapper(WallBlockMapper::class);
     }
@@ -433,7 +436,7 @@ class BlockCreator
 
         $builder->addComponent(new OnInteractBlockComponent());
 
-        $builder->addComponent($geometryComponent = (new GeometryBlockComponent(identifier: NexlyGeometry::TRAPDOOR, cullingType: CullingType::TRAPDOOR->toString())));
+        $builder->addComponent($geometryComponent = (new GeometryBlockComponent(identifier: NexlyGeometry::TRAPDOOR, cullingType: CullingType::TRAPDOOR)));
         $builder->addComponent(new ItemVisualBlockComponent($geometryComponent, $material));
 
         $box = new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 2.92, 16));
@@ -470,12 +473,12 @@ class BlockCreator
         );
 
         $builder->addComponent(new MaterialComponent([
-            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_inside", target: MaterialTarget::DOWN, renderMethod: MaterialRenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::NORTH, renderMethod: MaterialRenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::SOUTH, renderMethod: MaterialRenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::WEST, renderMethod: MaterialRenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::EAST, renderMethod: MaterialRenderMethod::ALPHA_TEST)
+            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_inside", target: MaterialTarget::DOWN, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: MaterialTarget::NORTH, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: MaterialTarget::SOUTH, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: MaterialTarget::WEST, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: MaterialTarget::EAST, renderMethod: RenderMethod::ALPHA_TEST)
         ]));
     }
 
@@ -506,8 +509,6 @@ class BlockCreator
     public static function makeHead(Builder $builder, HeadBlock $block): void
     {
         $stringId = $builder->getStringId();
-        /** @var MaterialComponent $material */
-        $material = $builder->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
 
         $builder->mapSerializer(static fn (HeadBlock $block): Writer => SerializerHelper::encodeHeadBlock($block, new Writer($stringId)));
         $builder->mapDeserializer(static fn (Reader $in): HeadBlock => DeserializerHelper::decodeHeadBlock(clone $block, $in));
@@ -522,6 +523,7 @@ class BlockCreator
             $geometryComponent->add("bone_$rot", MolangHelper::stateEquals(StateNames::ROTATION, $rot));
         }
         $builder->addComponent($geometryComponent);
+        $builder->addComponent($material = new MaterialComponent([new Material($block->getTexture(), renderMethod: RenderMethod::BLEND)]));
         $builder->addComponent(new ItemVisualBlockComponent($geometryComponent, $material));
 
         $builder->setMapper(HeadBlockMapper::class);
@@ -568,7 +570,7 @@ class BlockCreator
             new Material(
                 texture: $builder->getName() . "_side",
                 target: MaterialTarget::ALL,
-                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ]));
 
@@ -589,7 +591,7 @@ class BlockCreator
      */
     public static function makeFlower(Builder $builder, Flower $block): void
     {
-        $materials = [new Material($builder->getName(), renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)];
+        $materials = [new Material($builder->getName(), renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED, ambientOcclusion: 0.0, faceDimming: false)];
 
         $builder->addComponent(new SelectionBoxBlockComponent(true, [BoxCollision::FLOWER()]));
         $builder->addComponent($geometryComponent = new GeometryBlockComponent(Geometry::CROSS));
@@ -632,7 +634,7 @@ class BlockCreator
                 ->add("w", MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, true))
                 ->add("e", MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, true))
         );
-        $builder->addComponent($material = new MaterialComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::BLEND)]));
+        $builder->addComponent($material = new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::BLEND)]));
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(NexlyGeometry::GLASS_PANE . "_render"), $material));
         $builder->addComponent(new EmbeddedVisualBlockComponent($geometryComponent, $material));
         $builder->addComponent(new FlowerPottableBlockComponent());
@@ -678,7 +680,7 @@ class BlockCreator
     public static function makeSlime(Builder $builder, Slime $block): void
     {
         $builder->addComponent(new GeometryBlockComponent(NexlyGeometry::SLIME));
-        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: MaterialRenderMethod::BLEND)]));
+        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::BLEND)]));
     }
 
     /**
@@ -692,9 +694,9 @@ class BlockCreator
     {
         $builder->addComponent(new GeometryBlockComponent(NexlyGeometry::CACTUS));
         $builder->addComponent(new MaterialComponent([
-            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_bottom", target: MaterialTarget::DOWN, renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_side", target: MaterialTarget::ALL, renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_bottom", target: MaterialTarget::DOWN, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_side", target: MaterialTarget::ALL, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
@@ -716,7 +718,7 @@ class BlockCreator
         $builder->mapDeserializer(static fn (Reader $in): Glass => clone $block);
 
 
-        $builder->addComponent(new GeometryBlockComponent(identifier: NexlyGeometry::GLASS, cullingType: CullingType::GLASS->toString()));
+        $builder->addComponent(new GeometryBlockComponent(identifier: NexlyGeometry::GLASS, cullingType: CullingType::GLASS));
     }
 
     /**

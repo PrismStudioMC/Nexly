@@ -21,7 +21,7 @@ class DisplayNameBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::DISPLAY_NAME->getValue();
+        return BlockComponentIds::DISPLAY_NAME;
     }
 
     /**

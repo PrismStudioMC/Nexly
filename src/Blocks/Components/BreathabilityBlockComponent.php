@@ -3,7 +3,6 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
-use Nexly\Blocks\Components\Types\BreathabilityType;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 
@@ -11,18 +10,16 @@ use pocketmine\nbt\tag\StringTag;
 class BreathabilityBlockComponent extends BlockComponent
 {
     public function __construct(
-        protected BreathabilityType $type,
+        protected string $type,
     ) {
     }
 
     /**
-     * Determines whether the block is breathable by defining if the block is treated as a `solid` or as `air`. The default is `solid` if this component is omitted
-     *
      * @return string
      */
     public function getName(): string
     {
-        return BlockComponentIds::BREATHABILITY->getValue();
+        return BlockComponentIds::BREATHABILITY;
     }
 
     /**
@@ -33,6 +30,6 @@ class BreathabilityBlockComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("value", new StringTag($this->type->getValue()));
+            ->setTag("value", new StringTag($this->type));
     }
 }

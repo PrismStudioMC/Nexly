@@ -25,7 +25,7 @@ class EmbeddedVisualBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::EMBEDDED_VISUAL->getValue();
+        return BlockComponentIds::EMBEDDED_VISUAL;
     }
 
     /**

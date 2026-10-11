@@ -2,18 +2,10 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum PrecipitationType
+class PrecipitationType
 {
-    case OBRAIN;
-    case OBSTRUCT_RAIN_ACCUMULATE_SNOW;
-    case ACCUMULATE_SNOW;
-    case NONE;
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
+    public const OBRAIN = "obrain";
+    public const OBSTRUCT_RAIN_ACCUMULATE_SNOW = "obstrant_rain_accumulate_snow";
+    public const ACCUMULATE_SNOW = "accumulate_snow";
+    public const NONE  = "none";
 }

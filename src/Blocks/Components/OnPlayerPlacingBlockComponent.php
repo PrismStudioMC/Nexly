@@ -23,7 +23,7 @@ class OnPlayerPlacingBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::ON_PLAYER_PLACING->getValue();
+        return BlockComponentIds::ON_PLAYER_PLACING;
     }
 
     /**

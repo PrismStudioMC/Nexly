@@ -15,12 +15,12 @@ class DestructionParticlesBlockComponent extends BlockComponent
     /**
      * @param int $particleCount
      * @param string|null $texture
-     * @param TintMethod $tintMethod
+     * @param string $tintMethod
      */
     public function __construct(
         protected int $particleCount = 100,
         protected ?string $texture = null,
-        protected TintMethod $tintMethod = TintMethod::NONE,
+        protected string $tintMethod = TintMethod::NONE,
     ) {
         if ($particleCount < 0 || $particleCount > 255) {
             throw new InvalidArgumentException('Destruction particle count must be between 0 and 255.');
@@ -35,7 +35,7 @@ class DestructionParticlesBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::DESTRUCTION_PARTICLES->value;
+        return BlockComponentIds::DESTRUCTION_PARTICLES;
     }
 
     /**
@@ -45,7 +45,7 @@ class DestructionParticlesBlockComponent extends BlockComponent
     {
         $nbt = CompoundTag::create()
             ->setTag('particle_count', new IntTag($this->particleCount))
-            ->setTag('tint_method', new StringTag($this->tintMethod->value));
+            ->setTag('tint_method', new StringTag($this->tintMethod));
 
         if ($this->texture !== null) {
             $nbt->setTag('texture', new StringTag($this->texture));

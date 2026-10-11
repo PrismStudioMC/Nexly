@@ -2,9 +2,9 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum AxisRotation: string
+class AxisRotation
 {
-    case X = 'x';
-    case Y = 'y';
-    case Z = 'z';
+    public const X = 'x';
+    public const Y = 'y';
+    public const Z = 'z';
 }

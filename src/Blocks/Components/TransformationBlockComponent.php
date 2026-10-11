@@ -34,7 +34,7 @@ class TransformationBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::TRANSFORMATION->getValue();
+        return BlockComponentIds::TRANSFORMATION;
     }
 
     /**

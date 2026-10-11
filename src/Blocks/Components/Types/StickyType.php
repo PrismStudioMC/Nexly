@@ -2,8 +2,8 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum StickyType: string
+class StickyType
 {
-    case NONE = 'none';
-    case SAME = 'same';
+    public const NONE = 'none';
+    public const SAME = 'same';
 }

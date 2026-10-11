@@ -2,15 +2,10 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum HorizontalFace: string
+class HorizontalFace
 {
-    case NORTH = "north";
-    case SOUTH = "south";
-    case EAST = "east";
-    case WEST = "west";
-
-    public function getValue(): string
-    {
-        return $this->value;
-    }
+    public const NORTH = "north";
+    public const SOUTH = "south";
+    public const EAST = "east";
+    public const WEST = "west";
 }

@@ -26,7 +26,7 @@ class EntityFallOnBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::ENTITY_FALL_ON->value;
+        return BlockComponentIds::ENTITY_FALL_ON;
     }
 
     /**

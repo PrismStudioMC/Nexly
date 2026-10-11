@@ -9,7 +9,7 @@ use Nexly\Blocks\Components\SelectionBoxBlockComponent;
 use Nexly\Blocks\Components\TransformationBlockComponent;
 use Nexly\Blocks\Components\Types\BoxCollision;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialRenderMethod;
+use Nexly\Blocks\Components\Types\RenderMethod;
 use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Helpers\MolangHelper;
 use pocketmine\block\Block;
@@ -45,7 +45,7 @@ class DoorBlockMapper extends BlockMapper
         $permutation->addComponent(new MaterialInstancesBlockComponent([
             new Material(
                 texture: $builder->getName() . ($top ? "_upper" : "_lower"),
-                renderMethod: MaterialRenderMethod::ALPHA_TEST_SINGLE_SIDED
+                renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ]));
 

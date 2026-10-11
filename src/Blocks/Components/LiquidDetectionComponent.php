@@ -26,7 +26,7 @@ class LiquidDetectionComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::LIQUID_DETECTION->getValue();
+        return BlockComponentIds::LIQUID_DETECTION;
     }
 
     /**

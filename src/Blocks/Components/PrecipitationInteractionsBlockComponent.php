@@ -10,8 +10,11 @@ use pocketmine\nbt\tag\StringTag;
 #[Attribute(Attribute::TARGET_CLASS)]
 class PrecipitationInteractionsBlockComponent extends BlockComponent
 {
+    /**
+     * @param string $precipitation
+     */
     public function __construct(
-        protected PrecipitationType $precipitation,
+        protected string $precipitation = PrecipitationType::NONE,
     ) {
     }
 
@@ -20,7 +23,7 @@ class PrecipitationInteractionsBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::PRECIPITATION_INTERACTIONS->getValue();
+        return BlockComponentIds::PRECIPITATION_INTERACTIONS;
     }
 
     /**
@@ -31,6 +34,6 @@ class PrecipitationInteractionsBlockComponent extends BlockComponent
     public function toNBT(): CompoundTag
     {
         return CompoundTag::create()
-            ->setTag("precipitation_behavior", new StringTag(strtolower($this->precipitation->getName())));
+            ->setTag("precipitation_behavior", new StringTag(strtolower($this->precipitation)));
     }
 }

@@ -27,7 +27,7 @@ class OnInteractBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::ON_INTERACT->getValue();
+        return BlockComponentIds::ON_INTERACT;
     }
 
     /**

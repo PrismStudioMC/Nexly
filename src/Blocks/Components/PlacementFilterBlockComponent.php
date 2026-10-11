@@ -20,7 +20,7 @@ class PlacementFilterBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::PLACEMENT_FILTER->getValue();
+        return BlockComponentIds::PLACEMENT_FILTER;
     }
 
     /**

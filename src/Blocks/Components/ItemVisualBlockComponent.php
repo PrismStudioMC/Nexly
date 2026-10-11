@@ -25,7 +25,7 @@ class ItemVisualBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::ITEM_VISUAL->getValue();
+        return BlockComponentIds::ITEM_VISUAL;
     }
 
     /**

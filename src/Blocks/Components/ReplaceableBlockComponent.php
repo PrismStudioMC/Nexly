@@ -19,7 +19,7 @@ class ReplaceableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::REPLACEABLE->getValue();
+        return BlockComponentIds::REPLACEABLE;
     }
 
     /**

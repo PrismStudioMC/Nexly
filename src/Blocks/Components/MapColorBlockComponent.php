@@ -3,7 +3,6 @@
 namespace Nexly\Blocks\Components;
 
 use Attribute;
-use Nexly\Blocks\Components\Types\TintMethod;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 
@@ -14,11 +13,11 @@ class MapColorBlockComponent extends BlockComponent
 
     /**
      * @param string|array{int,int,int} $color Hex #RRGGBB or three RGB channels.
-     * @param TintMethod|null $tintMethod
+     * @param string|null $tintMethod
      */
     public function __construct(
         string|array $color,
-        protected ?TintMethod $tintMethod = null
+        protected ?string $tintMethod = null
     ) {
         if (is_array($color)) {
             $this->hexColor = sprintf('#%02X%02X%02X', ...$color);
@@ -33,7 +32,7 @@ class MapColorBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::MAP_COLOR->value;
+        return BlockComponentIds::MAP_COLOR;
     }
 
     /**
@@ -47,6 +46,6 @@ class MapColorBlockComponent extends BlockComponent
 
         return CompoundTag::create()
             ->setString('color', $this->hexColor)
-            ->setString('tint_method', $this->tintMethod->value);
+            ->setString('tint_method', $this->tintMethod);
     }
 }

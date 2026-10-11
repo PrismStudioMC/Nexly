@@ -24,7 +24,7 @@ class RedstoneConductivityBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::REDSTONE_CONDUCTIVITY->value;
+        return BlockComponentIds::REDSTONE_CONDUCTIVITY;
     }
 
     /**

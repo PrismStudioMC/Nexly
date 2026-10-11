@@ -2,32 +2,32 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum MaterialType: string
+class MaterialType
 {
-    case Air = "air";
-    case Dirt = "dirt";
-    case Wood = "wood";
-    case Metal = "metal";
-    case Grate = "grate";
-    case Water = "water";
-    case Lava = "lava";
-    case Leaves = "leaves";
-    case Plant = "plant";
-    case SolidPlant = "solidPlant"; // Crashes if used
-    case Fire = "fire";
-    case Glass = "glass";
-    case Explosive = "explosive";
-    case Ice = "ice"; // Not working properly
-    case PowderSnow = "powderSnow"; // Not working properly
-    case Cactus = "cactus";
-    case Portal = "portal";
-    case StoneDecoration = "stoneDecoration";
-    case Bubble = "bubble";
-    case Barrier = "barrier";
-    case DecorationSolid = "decorationSolid";
-    case ClientRequestPlaceholder = "clientRequestPlaceholder";
-    case StructureVoid = "structureVoid";
-    case Solid = "solid";
-    case NonSolid = "nonSolid";
-    case Any = "any";
+    public const Air = "air";
+    public const Dirt = "dirt";
+    public const Wood = "wood";
+    public const Metal = "metal";
+    public const Grate = "grate";
+    public const Water = "water";
+    public const Lava = "lava";
+    public const Leaves = "leaves";
+    public const Plant = "plant";
+    public const SolidPlant = "solidPlant"; // Crashes if used
+    public const Fire = "fire";
+    public const Glass = "glass";
+    public const Explosive = "explosive";
+    public const Ice = "ice"; // Not working properly
+    public const PowderSnow = "powderSnow"; // Not working properly
+    public const Cactus = "cactus";
+    public const Portal = "portal";
+    public const StoneDecoration = "stoneDecoration";
+    public const Bubble = "bubble";
+    public const Barrier = "barrier";
+    public const DecorationSolid = "decorationSolid";
+    public const ClientRequestPlaceholder = "clientRequestPlaceholder";
+    public const StructureVoid = "structureVoid";
+    public const Solid = "solid";
+    public const NonSolid = "nonSolid";
+    public const Any = "any";
 }

@@ -39,7 +39,7 @@ class CraftingTableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::CRAFTING_TABLE->getValue();
+        return BlockComponentIds::CRAFTING_TABLE;
     }
 
     /**

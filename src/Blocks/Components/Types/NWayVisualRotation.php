@@ -8,7 +8,7 @@ use pocketmine\nbt\tag\StringTag;
 class NWayVisualRotation
 {
     /**
-     * @param array<string, string>|list<array{AxisRotation|string, string}> $axes
+     * @param array<string, string>|list<array{string, string}> $axes
      */
     public function __construct(
         protected array $axes
@@ -20,8 +20,7 @@ class NWayVisualRotation
                 [$axis, $state] = $state;
             }
 
-            $key = $axis instanceof AxisRotation ? $axis->value : (string) $axis;
-            $normalized[$key] = (string) $state;
+            $normalized[$axis] = (string) $state;
         }
 
         $this->axes = $normalized;

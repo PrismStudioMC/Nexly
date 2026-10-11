@@ -2,8 +2,8 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum LavaFlammability: string
+class LavaFlammability
 {
-    case ALWAYS = "always";
-    case NEVER = "never";
+    public const ALWAYS = "always";
+    public const NEVER = "never";
 }

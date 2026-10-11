@@ -14,13 +14,14 @@ class FlammableBlockComponent extends BlockComponent
     /**
      * @param int $catchChanceModifier
      * @param int $destroyChanceModifier
-     * @param LavaFlammability $lavaFlammable
+     * @param string $lavaFlammable
      */
     public function __construct(
-        protected int $catchChanceModifier = 5,
-        protected int $destroyChanceModifier = 20,
-        protected LavaFlammability $lavaFlammable = LavaFlammability::NEVER,
-    ) {
+        protected int    $catchChanceModifier = 5,
+        protected int    $destroyChanceModifier = 20,
+        protected string $lavaFlammable = LavaFlammability::NEVER,
+    )
+    {
         if ($catchChanceModifier < 0 || $destroyChanceModifier < 0) {
             throw new \InvalidArgumentException("Flammability modifiers cannot be negative.");
         }
@@ -33,7 +34,7 @@ class FlammableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::FLAMMABLE->getValue();
+        return BlockComponentIds::FLAMMABLE;
     }
 
     /**
@@ -46,6 +47,6 @@ class FlammableBlockComponent extends BlockComponent
         return CompoundTag::create()
             ->setTag("catch_chance_modifier", new IntTag($this->catchChanceModifier))
             ->setTag("destroy_chance_modifier", new IntTag($this->destroyChanceModifier))
-            ->setTag("lava_flammable", new StringTag($this->lavaFlammable->value));
+            ->setTag("lava_flammable", new StringTag($this->lavaFlammable));
     }
 }

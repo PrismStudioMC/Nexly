@@ -3,7 +3,7 @@
 namespace Nexly\Items\Components\DataDriven;
 
 use Attribute;
-use Nexly\Blocks\Components\Types\BlockNbtDescriptor;
+use Nexly\Blocks\Components\Types\NbtDescriptor;
 use pocketmine\block\Block;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
@@ -31,7 +31,7 @@ class BlockPlacerItemComponent extends DataDrivenItemComponent
     ) {
         foreach ($this->useOn as $k => $useOn) {
             if (is_string($useOn)) {
-                $this->useOn[$k] = new BlockNbtDescriptor($useOn);
+                $this->useOn[$k] = new NbtDescriptor($useOn);
             }
         }
     }
@@ -89,7 +89,7 @@ class BlockPlacerItemComponent extends DataDrivenItemComponent
     {
         return CompoundTag::create()
             ->setTag("block", new StringTag($this->block))
-            ->setTag("use_on", new ListTag(array_map(fn (BlockNbtDescriptor $block): CompoundTag => $block->toNBT(), $this->useOn), NBT::TAG_Compound))
+            ->setTag("use_on", new ListTag(array_map(fn (NbtDescriptor $block): CompoundTag => $block->toNBT(), $this->useOn), NBT::TAG_Compound))
             ->setTag("canUseBlockAsIcon", new ByteTag($this->canUseBlockAsIcon))
             ->setTag("replace_block_item", new ByteTag($this->replaceBlockItem))
             ->setTag("aligned_placement", new ByteTag($this->alignedPlacement));

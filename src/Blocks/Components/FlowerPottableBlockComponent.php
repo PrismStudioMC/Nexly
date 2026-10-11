@@ -19,7 +19,7 @@ class FlowerPottableBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::FLOWER_POTTABLE->getValue();
+        return BlockComponentIds::FLOWER_POTTABLE;
     }
 
     /**

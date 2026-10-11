@@ -22,7 +22,7 @@ class RedstoneConsumerBlockComponent extends BlockComponent
 
     public function getName(): string
     {
-        return BlockComponentIds::REDSTONE_CONSUMER->value;
+        return BlockComponentIds::REDSTONE_CONSUMER;
     }
 
     public function toNBT(): CompoundTag

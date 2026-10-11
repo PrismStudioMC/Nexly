@@ -24,7 +24,7 @@ class LightDampeningBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::LIGHT_DAMPENING->getValue();
+        return BlockComponentIds::LIGHT_DAMPENING;
     }
 
     /**

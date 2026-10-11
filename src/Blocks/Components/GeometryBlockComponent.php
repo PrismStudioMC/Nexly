@@ -5,7 +5,6 @@ namespace Nexly\Blocks\Components;
 use Attribute;
 use Nexly\Blocks\Components\Types\CullingLayer;
 use Nexly\Blocks\Components\Types\CullingShape;
-use Nexly\Blocks\Components\Types\CullingType;
 use Nexly\Blocks\Components\Types\Geometry;
 use Nexly\Blocks\Components\Types\NWayVisualRotation;
 use pocketmine\nbt\NBT;
@@ -19,9 +18,9 @@ class GeometryBlockComponent extends BlockComponent
 {
     /**
      * @param string $identifier
-     * @param CullingType|string $cullingType
-     * @param CullingLayer $layer
-     * @param CullingShape $cullingShape
+     * @param string $cullingType
+     * @param string $layer
+     * @param string $cullingShape
      * @param NWayVisualRotation|null $nWayVisualRotation
      * @param bool|array $uvLock
      * @param bool $ignoreGeometryForIsSolid
@@ -31,9 +30,9 @@ class GeometryBlockComponent extends BlockComponent
      */
     public function __construct(
         protected string                 $identifier = Geometry::FULL_BLOCK,
-        protected CullingType|string     $cullingType = "",
-        protected CullingLayer           $layer = CullingLayer::UNDEFINED,
-        protected CullingShape           $cullingShape = CullingShape::EMPTY,
+        protected string                 $cullingType = "",
+        protected string                 $layer = CullingLayer::UNDEFINED,
+        protected string                 $cullingShape = CullingShape::EMPTY,
         protected ?NWayVisualRotation    $nWayVisualRotation = null,
         protected bool|array             $uvLock = false,
         protected bool                   $ignoreGeometryForIsSolid = true,
@@ -54,7 +53,7 @@ class GeometryBlockComponent extends BlockComponent
      */
     public function getName(): string
     {
-        return BlockComponentIds::GEOMETRY->getValue();
+        return BlockComponentIds::GEOMETRY;
     }
 
     /**
@@ -85,11 +84,11 @@ class GeometryBlockComponent extends BlockComponent
             ->setTag("bone_visibility", $this->boneVisibility)
             ->setTag("identifier", new StringTag($this->identifier))
             ->setTag("culling", new StringTag($this->cullingType))
-            ->setTag("culling_layer", new StringTag($this->layer->value))
+            ->setTag("culling_layer", new StringTag($this->layer))
             ->setTag("ignoreGeometryForIsSolid", new ByteTag($this->ignoreGeometryForIsSolid))
             ->setTag("needsLegacyTopRotation", new ByteTag($this->needsLegacyTopRotation))
             ->setTag("useBlockTypeLightAbsorption", new ByteTag($this->useBlockTypeLightAbsorption))
-            ->setTag("culling_shape", new StringTag($this->cullingShape->value));
+            ->setTag("culling_shape", new StringTag($this->cullingShape));
 
         if ($this->nWayVisualRotation !== null) {
             $nbt->setTag("n_way_visual_rotation", new StringTag($this->nWayVisualRotation));
