@@ -36,13 +36,21 @@ class PlacementFilterBlockComponent extends BlockComponent
      */
     public function toNBT(): CompoundTag
     {
+        $nbt = CompoundTag::create();
+
+        if (!empty($this->allowedFaces)) {
+            $nbt->setTag("allowed_faces", new ListTag(array_map(function (mixed $face) {
+                return new StringTag(is_int($face) ? Facing::toString($face) : (string)$face);
+            }, $this->allowedFaces), NBT::TAG_String));
+        }
+
+        if (!empty($this->blockFilter)) {
+            $nbt->setTag("block_filter", new ListTag(array_map(function (string $block) {
+                return new StringTag($block);
+            }, $this->allowedFaces), NBT::TAG_String));
+        }
+
         return CompoundTag::create()
-            ->setTag("conditions", CompoundTag::create()
-                ->setTag("allowed_faces", new ListTag(array_map(function (mixed $face) {
-                    return new StringTag(is_int($face) ? Facing::toString($face) : (string)$face);
-                }, $this->allowedFaces), NBT::TAG_String)))
-                ->setTag("block_filter", new ListTag(array_map(function (string $block) {
-                    return new StringTag($block);
-                }, $this->allowedFaces), NBT::TAG_String));
+            ->setTag("conditions", $nbt);
     }
 }

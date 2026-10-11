@@ -108,6 +108,11 @@ final class AsyncRegisterBlocksTask extends AsyncTask
                     throw new \InvalidArgumentException("Invalid facing for trait " . $facing);
                 }
 
+                $sixteenWayRotation = $state["sixteenWayRotation"] ?? null;
+                if (!is_bool($sixteenWayRotation)) {
+                    throw new \InvalidArgumentException("Invalid sixteenWayRotation for trait " . $facing);
+                }
+
                 $builder->addTrait(new MinecraftTrait(TraitIds::fromString($identifier), $rotationOffset, new State($cardinal, $facing)));
             }
 

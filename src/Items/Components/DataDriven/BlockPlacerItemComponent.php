@@ -24,8 +24,23 @@ class BlockPlacerItemComponent extends DataDrivenItemComponent
         private readonly string $block,
         private readonly array $useOn = [],
         private readonly bool $canUseBlockAsIcon = false,
+        private readonly bool $replaceBlockItem = false,
+        private readonly bool $alignedPlacement = false
     ) {
 
+    }
+
+    /**
+     * @param Block $block
+     * @param array $useOn
+     * @param bool $canUseBlockAsIcon
+     * @param bool $replaceBlockItem
+     * @param bool $alignedPlacement
+     * @return self
+     */
+    public static function make(Block $block, array $useOn = [], bool $canUseBlockAsIcon = false, bool $replaceBlockItem = false, bool $alignedPlacement = false): self
+    {
+        return new self($block, $useOn, $canUseBlockAsIcon, $replaceBlockItem, $alignedPlacement);
     }
 
     /**
@@ -63,6 +78,8 @@ class BlockPlacerItemComponent extends DataDrivenItemComponent
         return CompoundTag::create()
             ->setTag("block", new StringTag($this->block))
             ->setTag("canUseBlockAsIcon", new ByteTag($this->canUseBlockAsIcon))
-            ->setTag("use_on", new ListTag($this->useOn, NBT::TAG_String));
+            ->setTag("use_on", new ListTag($this->useOn, NBT::TAG_String))
+            ->setTag("replace_block_item", new ByteTag($this->replaceBlockItem))
+            ->setTag("aligned_placement", new ByteTag($this->alignedPlacement));
     }
 }

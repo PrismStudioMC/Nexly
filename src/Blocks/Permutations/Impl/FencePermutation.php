@@ -17,7 +17,7 @@ class FencePermutation
     }
 
     /**
-     * Creates a new instance of WallPermutation.
+     * Creates a new instance of FencePermutation.
      *
      * @param Builder $builder
      * @return self
@@ -28,108 +28,147 @@ class FencePermutation
     }
 
     /**
-     * Applies the wall permutations to the builder.
+     * Helper to generate the block state condition string cleanly.
+     */
+    private function getCondition(int $n, int $s, int $w, int $e): string
+    {
+        return "q.block_state('minecraft:connection_north') == {$n} && " .
+            "q.block_state('minecraft:connection_south') == {$s} && " .
+            "q.block_state('minecraft:connection_west') == {$w} && " .
+            "q.block_state('minecraft:connection_east') == {$e}";
+    }
+
+    /**
+     * Applies the fence permutations to the builder.
      *
      * @return Builder
      */
     public function apply(): Builder
     {
         return $this->builder
+            // 0 connections (Base Pillar)
             ->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 16, 4))]))
+                    ->setCondition($this->getCondition(0, 0, 0, 0))
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 4))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 16, 4))]))
+            )
+
+            // 1 connection
+            ->addPermutation(
+                Permutation::create()
+                    ->setCondition($this->getCondition(1, 0, 0, 0)) // North
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 10))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-1, 0, -8), new Vector3(2, 24, 16)),
-                    new BoxCollision(new Vector3(-8, 0, -1), new Vector3(16, 24, 2)),
-                ]))
-                ->addComponent(new SelectionBoxBlockComponent(true))
+                    ->setCondition($this->getCondition(0, 1, 0, 0)) // South
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 10))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 10))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 16, 10))]))
+                    ->setCondition($this->getCondition(0, 0, 1, 0)) // West
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 24, 4))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 16, 4))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 10))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 16, 10))]))
+                    ->setCondition($this->getCondition(0, 0, 0, 1)) // East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 24, 4))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 16, 4))]))
+            )
+
+            // 2 connections (Axis-aligned)
+            ->addPermutation(
+                Permutation::create()
+                    ->setCondition($this->getCondition(1, 1, 0, 0)) // North + South
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 16, 16))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 16, 4))]))
+                    ->setCondition($this->getCondition(0, 0, 1, 1)) // West + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4))]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 16, 4))]))
+            )
+
+            // 2 connections (Corners)
+            ->addPermutation(
+                Permutation::create()
+                    ->setCondition($this->getCondition(1, 0, 1, 0)) // North + West
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 10)),
+                        new BoxCollision(new Vector3(2, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(10, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 16, 4))]))
+                    ->setCondition($this->getCondition(1, 0, 0, 1)) // North + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 10)),
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(10, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 16, 16))]))
+                    ->setCondition($this->getCondition(0, 1, 1, 0)) // South + West
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 10)),
+                        new BoxCollision(new Vector3(2, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 16, 4))]))
+                    ->setCondition($this->getCondition(0, 1, 0, 1)) // South + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 10)),
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 16, 10))]))
+            )
+
+            // 3 connections
+            ->addPermutation(
+                Permutation::create()
+                    ->setCondition($this->getCondition(1, 1, 1, 0)) // North + South + West
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16)),
+                        new BoxCollision(new Vector3(2, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(10, 16, 16))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(10, 16, 10))]))
+                    ->setCondition($this->getCondition(1, 1, 0, 1)) // North + South + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16)),
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(6, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(10, 16, 16))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 10))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(10, 16, 10))]))
+                    ->setCondition($this->getCondition(1, 0, 1, 1)) // North + West + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4)),
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 6))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 16, 10))]))
             )->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(4, 24, 10))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -2), new Vector3(10, 16, 10))]))
-            )->addPermutation(
+                    ->setCondition($this->getCondition(0, 1, 1, 1)) // South + West + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4)),
+                        new BoxCollision(new Vector3(-2, 0, 2), new Vector3(4, 24, 6))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 16, 10))]))
+            )
+
+            // 4 connections
+            ->addPermutation(
                 Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 24, 4))]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(10, 16, 10))]))
-            )->addPermutation(
-                Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 0 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4)),
-                    new BoxCollision(new Vector3(-1, 0, -8), new Vector3(2, 24, 10)),
-                ]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 16, 10))]))
-            )->addPermutation(
-                Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 0 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4)),
-                    new BoxCollision(new Vector3(-1, 0, -2), new Vector3(2, 24, 10)),
-                ]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 16, 10))]))
-            )->addPermutation(
-                Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 1 && q.block_state('mc:e') == 0")
-                ->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16)),
-                    new BoxCollision(new Vector3(-2, 0, -1), new Vector3(10, 24, 2)),
-                ]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-2, 0, -8), new Vector3(10, 16, 16))]))
-            )->addPermutation(
-                Permutation::create()
-                ->setCondition("q.block_state('mc:n') == 1 && q.block_state('mc:s') == 1 && q.block_state('mc:w') == 0 && q.block_state('mc:e') == 1")
-                ->addComponent(new CollisionBoxBlockComponent(true, [
-                    new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16)),
-                    new BoxCollision(new Vector3(-8, 0, -1), new Vector3(10, 24, 2)),
-                ]))
-                ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(10, 16, 16))]))
+                    ->setCondition($this->getCondition(1, 1, 1, 1)) // North + South + West + East
+                    ->addComponent(new CollisionBoxBlockComponent(true, [
+                        new BoxCollision(new Vector3(-2, 0, -8), new Vector3(4, 24, 16)),
+                        new BoxCollision(new Vector3(-8, 0, -2), new Vector3(16, 24, 4))
+                    ]))
+                    ->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-8, 0, -8), new Vector3(16, 16, 16))]))
             );
     }
 }

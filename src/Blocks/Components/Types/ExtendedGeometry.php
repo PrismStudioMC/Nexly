@@ -14,11 +14,12 @@ enum ExtendedGeometry: string
     case WALL = "geometry.wall";
     case TRAPDOOR = "geometry.trapdoor";
     case HOPPER = "geometry.hopper";
-    case MOBHEAD = "geometry.mob_head";
+    case HEAD_BLOCK = "geometry.head_block";
     case LADDER = "geometry.ladder";
     case FARMLAND = "geometry.farmland";
     case GLASS_PANE = "geometry.glass_pane";
     case LEVER = "geometry.lever";
+    case GLASS = "geometry.glass";
 
     /**
      * Returns the enum value as a string.
