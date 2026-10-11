@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Nexly\Listener;
+namespace Nexly\Listeners;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -14,12 +12,12 @@ use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\types\PlayerAction;
-use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
-use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
+use pocketmine\network\mcpe\protocol\types\PlayerBlockAction;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use WeakMap;
+
 use function in_array;
 
 /**
@@ -27,18 +25,18 @@ use function in_array;
  *
  * @deprecated
  */
-final class BlockBreakingListener implements Listener
+class BlockBreakingListener implements Listener
 {
-    private const MAX_BLOCK_ACTIONS = 100;
-    private const MAX_DIST_SQ = 10_000;
+    protected const MAX_BLOCK_ACTIONS = 100;
+    protected const MAX_DIST_SQ = 10_000;
 
     /** @var WeakMap<Player, SurvivalBlockBreakHandler|null> */
-    private WeakMap $breakHandlers;
+    protected WeakMap $breakHandlers;
 
     /** Réflexion mise en cache */
-    private static ?\ReflectionProperty $rpPlayerBlockBreakHandler = null;
-    private static ?\ReflectionProperty $rpHandlerLastBlockAttacked = null;
-    private static ?\ReflectionProperty $rpAuthInputBlockActions   = null;
+    protected static ?\ReflectionProperty $rpPlayerBlockBreakHandler = null;
+    protected static ?\ReflectionProperty $rpHandlerLastBlockAttacked = null;
+    protected static ?\ReflectionProperty $rpAuthInputBlockActions   = null;
 
     public function __construct()
     {
@@ -104,7 +102,7 @@ final class BlockBreakingListener implements Listener
      * @param PlayerAuthInputPacket $pk
      * @return void
      */
-    private function handleAuthInput(Player $player, InGamePacketHandler $handler, PlayerAuthInputPacket $pk): void
+    protected function handleAuthInput(Player $player, InGamePacketHandler $handler, PlayerAuthInputPacket $pk): void
     {
         $actions = $pk->getBlockActions();
         if ($actions !== null) {
@@ -113,9 +111,7 @@ final class BlockBreakingListener implements Listener
             }
 
             foreach ($actions as $action) {
-                if ($action instanceof PlayerBlockActionStopBreak) {
-                    $this->handleAction($player, $handler, $action->getActionType(), new BlockPosition(0, 0, 0), Facing::DOWN);
-                } elseif ($action instanceof PlayerBlockActionWithBlockInfo) {
+                if ($action instanceof PlayerBlockAction) {
                     $this->handleAction($player, $handler, $action->getActionType(), $action->getBlockPosition(), $action->getFace());
                 }
             }
@@ -146,7 +142,7 @@ final class BlockBreakingListener implements Listener
      * @param int $face
      * @return void
      */
-    private function handleAction(
+    protected function handleAction(
         Player $player,
         InGamePacketHandler $handler,
         int $action,
@@ -173,10 +169,8 @@ final class BlockBreakingListener implements Listener
                 if (!$player->attackBlock($pos, $face)) {
                     $this->syncBlocksNearby($player, $pos, $face);
                 } else {
-                    // on capture le handler réel pour suivre la progression côté listener
                     $bh = $this->getPlayerBlockBreakHandler($player);
                     if ($bh !== null) {
-                        // on clone pour décorréler de l’instance interne du joueur
                         $this->breakHandlers->offsetSet($player, clone $bh);
                     }
                 }
@@ -271,7 +265,7 @@ final class BlockBreakingListener implements Listener
      * @param BlockPosition $bp
      * @return Vector3
      */
-    private static function v(BlockPosition $bp): Vector3
+    protected static function v(BlockPosition $bp): Vector3
     {
         return new Vector3($bp->getX(), $bp->getY(), $bp->getZ());
     }
@@ -282,7 +276,7 @@ final class BlockBreakingListener implements Listener
      * @param PlayerAuthInputPacket $pk
      * @return void
      */
-    private function clearAuthInputBlockActions(PlayerAuthInputPacket $pk): void
+    protected function clearAuthInputBlockActions(PlayerAuthInputPacket $pk): void
     {
         if (self::$rpAuthInputBlockActions === null) {
             $rc = new \ReflectionClass($pk);
@@ -301,7 +295,7 @@ final class BlockBreakingListener implements Listener
      * @param Player $player
      * @return SurvivalBlockBreakHandler|null
      */
-    private function getPlayerBlockBreakHandler(Player $player): ?SurvivalBlockBreakHandler
+    protected function getPlayerBlockBreakHandler(Player $player): ?SurvivalBlockBreakHandler
     {
         if (self::$rpPlayerBlockBreakHandler === null) {
             $rc = new \ReflectionClass($player);
@@ -321,7 +315,7 @@ final class BlockBreakingListener implements Listener
      * @param InGamePacketHandler $handler
      * @return BlockPosition|null
      */
-    private function getLastBlockAttacked(InGamePacketHandler $handler): ?BlockPosition
+    protected function getLastBlockAttacked(InGamePacketHandler $handler): ?BlockPosition
     {
         if (self::$rpHandlerLastBlockAttacked === null) {
             $rc = new \ReflectionClass($handler);
@@ -342,7 +336,7 @@ final class BlockBreakingListener implements Listener
      * @param BlockPosition|null $bp
      * @return void
      */
-    private function setLastBlockAttacked(InGamePacketHandler $handler, ?BlockPosition $bp): void
+    protected function setLastBlockAttacked(InGamePacketHandler $handler, ?BlockPosition $bp): void
     {
         if (self::$rpHandlerLastBlockAttacked === null) {
             $rc = new \ReflectionClass($handler);
@@ -362,7 +356,7 @@ final class BlockBreakingListener implements Listener
      * @param int|null $face
      * @return void
      */
-    private function syncBlocksNearby(Player $player, Vector3 $blockPos, ?int $face): void
+    protected function syncBlocksNearby(Player $player, Vector3 $blockPos, ?int $face): void
     {
         if ($blockPos->distanceSquared($player->getLocation()) >= self::MAX_DIST_SQ) {
             return;
@@ -386,7 +380,7 @@ final class BlockBreakingListener implements Listener
      *
      * @throws PacketHandlingException
      */
-    private static function validateFacing(int $facing): void
+    protected static function validateFacing(int $facing): void
     {
         if (!in_array($facing, Facing::ALL, true)) {
             throw new PacketHandlingException("Invalid facing value $facing");

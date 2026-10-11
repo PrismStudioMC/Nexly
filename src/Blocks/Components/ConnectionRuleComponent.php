@@ -17,8 +17,8 @@ class ConnectionRuleComponent extends BlockComponent
      * @param list<HorizontalFace> $enabledDirections
      */
     public function __construct(
-        private readonly ConnectionType $from = ConnectionType::ALL,
-        private readonly array $enabledDirections = [HorizontalFace::SOUTH, HorizontalFace::NORTH, HorizontalFace::EAST, HorizontalFace::WEST],
+        protected ConnectionType $from = ConnectionType::ALL,
+        protected array $enabledDirections = [HorizontalFace::SOUTH, HorizontalFace::NORTH, HorizontalFace::EAST, HorizontalFace::WEST],
     ) {
     }
 

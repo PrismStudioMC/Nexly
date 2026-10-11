@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\IntTag;
 class DamageProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly int $damage
+        protected int $damage
     ) {
         if ($this->damage < -32768 || $this->damage > 32767) {
             throw new \InvalidArgumentException("Damage must be between -32768 and 32767");

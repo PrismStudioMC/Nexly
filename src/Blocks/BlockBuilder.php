@@ -9,7 +9,6 @@ use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
 use Nexly\Blocks\Components\ConnectionRuleComponent;
-use Nexly\Blocks\Components\CustomComponentsBlockComponent;
 use Nexly\Blocks\Components\DestructibleByExplosionBlockComponent;
 use Nexly\Blocks\Components\DestructibleByMiningBlockComponent;
 use Nexly\Blocks\Components\DisplayNameBlockComponent;
@@ -25,11 +24,11 @@ use Nexly\Blocks\Components\Types\BreathabilityType;
 use Nexly\Blocks\Components\Types\Material;
 use Nexly\Blocks\Components\Types\MaterialRenderMethod;
 use Nexly\Blocks\Components\Types\MaterialType;
+use Nexly\Blocks\Mappers\BlockMapper;
 use Nexly\Blocks\Permutations\BlockProperty;
 use Nexly\Blocks\Permutations\CartesianProduct;
-use Nexly\Blocks\Permutations\NexlyPermutations;
 use Nexly\Blocks\Permutations\Permutation;
-use Nexly\Blocks\Traits\MinecraftTrait;
+use Nexly\Blocks\Traits\BlockTrait;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Events\Impl\BlockLoaderEvent;
 use Nexly\Items\Components\DataDriven\DataDrivenItemBuilder;
@@ -48,7 +47,6 @@ use Nexly\Recipes\Types\Recipe;
 use pocketmine\block\block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\block\Cactus;
-use pocketmine\block\Crops;
 use pocketmine\block\Door;
 use pocketmine\block\Farmland;
 use pocketmine\block\Fence;
@@ -63,7 +61,6 @@ use pocketmine\block\Hopper;
 use pocketmine\block\Ladder;
 use pocketmine\block\Leaves;
 use pocketmine\block\Lever;
-use pocketmine\block\NetherWartPlant;
 use pocketmine\block\Opaque;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\block\Sapling;
@@ -72,10 +69,10 @@ use pocketmine\block\Slime;
 use pocketmine\block\Stair;
 use pocketmine\block\tile\Container;
 use pocketmine\block\Trapdoor;
+use pocketmine\block\utils\Ageable;
 use pocketmine\block\utils\Colored;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
-use pocketmine\data\bedrock\block\BlockStateNames;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
@@ -102,25 +99,26 @@ use ReflectionClass;
 
 class BlockBuilder
 {
-    private string $stringId;
-    private ?int $numericId = null;
-    private Closure $block;
-    private ?Closure $serializer = null;
-    private ?Closure $deserializer = null;
-    private ?CreativeInfo $creativeInfo = null;
-    private MaterialType $material = MaterialType::Dirt;
+    protected string $stringId;
+    protected ?int $numericId = null;
+    protected Closure $block;
+    protected ?Closure $serializer = null;
+    protected ?Closure $deserializer = null;
+    protected ?CreativeInfo $creativeInfo = null;
+    protected MaterialType $material = MaterialType::Dirt;
 
     /** @var array<string> */
-    private array $tags = [];
+    protected array $tags = [];
 
     /** @var array<BlockComponent> */
-    private array $components = [];
+    protected array $components = [];
     /** @var array<Permutation> */
-    private array $permutations = [];
-    /** @var array<MinecraftTrait> */
-    private array $traits = [];
+    protected array $permutations = [];
+    protected ?string $mapper = null;
+    /** @var array<BlockTrait> */
+    protected array $traits = [];
     /** @var array<BlockProperty> */
-    private array $properties = [];
+    protected array $properties = [];
 
     /**
      * @return BlockBuilder
@@ -226,35 +224,35 @@ class BlockBuilder
     }
 
     /**
-     * Get the custom serializer for the block.
-     *
-     * @return Closure|null
-     */
-    public function getSerializer(): ?Closure
-    {
-        return $this->serializer;
-    }
-
-    /**
      * Set a custom serializer for the block.
      *
      * @param Closure|null $serializer
      * @return $this
      */
-    public function setSerializer(?Closure $serializer): self
+    public function mapSerializer(?Closure $serializer): self
     {
+        if ($serializer === null) {
+            $this->serializer = null;
+            return $this;
+        }
+
+        $ref = new \ReflectionFunction($serializer);
+
+        if (!$ref->isAnonymous()) {
+            throw new \InvalidArgumentException("Serializer must be an anonymous Closure.");
+        }
+
+        if (!$ref->isStatic()) {
+            throw new \InvalidArgumentException("Serializer must be a static Closure.");
+        }
+
+        $returnType = $ref->getReturnType();
+        if ($returnType !== null && $returnType->getName() !== BlockStateWriter::class) {
+            throw new \InvalidArgumentException("Serializer return type must be a " . BlockStateWriter::class . ".");
+        }
+
         $this->serializer = $serializer;
         return $this;
-    }
-
-    /**
-     * Get the custom deserializer for the block.
-     *
-     * @return Closure|null
-     */
-    public function getDeserializer(): ?Closure
-    {
-        return $this->deserializer;
     }
 
     /**
@@ -263,8 +261,40 @@ class BlockBuilder
      * @param Closure|null $deserializer
      * @return $this
      */
-    public function setDeserializer(?Closure $deserializer): self
+    public function mapDeserializer(?Closure $deserializer): self
     {
+        if ($deserializer === null) {
+            $this->deserializer = null;
+            return $this;
+        }
+
+        $ref = new \ReflectionFunction($deserializer);
+
+        if (!$ref->isAnonymous()) {
+            throw new \InvalidArgumentException("Deserializer must be an anonymous Closure.");
+        }
+
+        if (!$ref->isStatic()) {
+            throw new \InvalidArgumentException("Deserializer must be a static Closure.");
+        }
+
+        if ($ref->getNumberOfParameters() < 1) {
+            throw new \InvalidArgumentException("Deserializer must accept a BlockStateReader as its first parameter.");
+        }
+
+        $firstParamType = $ref->getParameters()[0]->getType();
+        if ($firstParamType !== null && $firstParamType->getName() !== BlockStateReader::class) {
+            throw new \InvalidArgumentException("The first parameter of the deserializer must be typed as " . BlockStateReader::class . ".");
+        }
+
+        $returnType = $ref->getReturnType();
+        if ($returnType !== null) {
+            $returnTypeName = $returnType->getName();
+            if ($returnTypeName !== Block::class && !is_subclass_of($returnTypeName, Block::class)) {
+                throw new \InvalidArgumentException("Deserializer return type must be an instance of " . Block::class . ".");
+            }
+        }
+
         $this->deserializer = $deserializer;
         return $this;
     }
@@ -383,6 +413,16 @@ class BlockBuilder
     }
 
     /**
+     * @param string $class
+     * @return BlockBuilder
+     */
+    public function setMapper(string $class): BlockBuilder
+    {
+        $this->mapper = $class;
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getTraits(): array
@@ -393,10 +433,10 @@ class BlockBuilder
     /**
      * Add a trait to the builder.
      *
-     * @param MinecraftTrait $trait
+     * @param BlockTrait $trait
      * @return $this
      */
-    public function addTrait(MinecraftTrait $trait): self
+    public function addTrait(BlockTrait $trait): self
     {
         $this->traits[] = $trait;
         return $this;
@@ -440,7 +480,7 @@ class BlockBuilder
      * @param block $block
      * @return ItemBuilder
      */
-    private function getItemFrom(Block $block): ItemBuilder
+    protected function getItemFrom(Block $block): ItemBuilder
     {
         $item = $block->asItem();
         if ($item->isNull()) {
@@ -503,11 +543,7 @@ class BlockBuilder
         $properties = [];
         foreach ($this->properties as $property) {
             foreach ($this->traits as $trait) {
-                if ($trait->getState()->isCardinal() && $property->getName() == BlockStateNames::MC_CARDINAL_DIRECTION) {
-                    continue 2;
-                }
-
-                if ($trait->getState()->isFacing() && $property->getName() == BlockStateNames::FACING_DIRECTION) {
+                if (in_array($property->getName(), $trait->getState()->getNames(), true)) {
                     continue 2;
                 }
             }
@@ -527,7 +563,7 @@ class BlockBuilder
                 ->setTag("is_hidden_in_commands", new ByteTag($this->getCreativeInfo()?->isHidden() ?? false))
             )
             ->setTag("blockTags", new ListTag(array_map(fn (string $tag) => new StringTag($tag), $this->tags), NBT::TAG_String))
-            ->setTag("traits", new ListTag(array_map(fn (MinecraftTrait $trait) => $trait->toNBT(), $this->traits), NBT::TAG_Compound))
+            ->setTag("traits", new ListTag(array_map(fn (BlockTrait $trait) => $trait->toNBT(), $this->traits), NBT::TAG_Compound))
             ->setTag(
                 "vanilla_block_data",
                 CompoundTag::create()
@@ -553,15 +589,27 @@ class BlockBuilder
         $stringId = $this->getStringId();
         $numericId = $this->getNumericId();
 
-        $block = ($this->getBlock())($numericId);
+        $ref = new \ReflectionFunction($this->getBlock());
+        if (!$ref->isStatic()) {
+            throw new \RuntimeException("Block method is not static.");
+        }
+
+        $parameters = $ref->getParameters();
+        if (count($parameters) !== 1) {
+            throw new \RuntimeException("Block method has only one parameter.");
+        }
+
+        $block = $ref->invoke($numericId);
         if (!$block instanceof Block) {
             throw new \RuntimeException("The block closure must return an instance of " . Block::class);
         }
 
         $this->loadComponents($block, $autoload);
-
-        $serializer = $this->serializer ??= static fn () => new BlockStateWriter($stringId);
-        $deserializer = $this->deserializer ??= static fn (BlockStateReader $in) => clone $block;
+        if ($this->mapper !== null) {
+            /** @var BlockMapper $mapper */
+            $mapper = new ($this->mapper)();
+            $mapper->apply($this, $block, $this->properties);
+        }
 
         $entries = [];
         foreach ($this->getBlockStateDictionaryEntry() as $entry) {
@@ -570,11 +618,15 @@ class BlockBuilder
         }
 
         BlockPalette::getInstance()->insertStates($entries);
-
+        BlockMappings::getInstance()->registerMapping(new BlockMapping($this, new BlockPaletteEntry($stringId, new CacheableNbt($this->toNBT()))));
         RuntimeBlockStateRegistry::getInstance()->register($block);
+
+        $serializer = $this->serializer ??= static fn () => new BlockStateWriter($stringId);
+        $deserializer = $this->deserializer ??= static fn (BlockStateReader $in) => clone $block;
+
         BlockStateHandlers::getSerializer()->map($block, $serializer);
         BlockStateHandlers::getDeserializer()->map($stringId, $deserializer);
-        BlockMappings::getInstance()->registerMapping(new BlockMapping($this, new BlockPaletteEntry($stringId, new CacheableNbt($this->toNBT()))));
+
         AsyncInitialization::addAsyncBlock($stringId, [
             $this->numericId,
             $this->block,
@@ -593,14 +645,10 @@ class BlockBuilder
                 "name" => $component->getName(),
                 "nbt" => base64_encode((new CacheableNbt($component->toNBT()))->getEncodedNbt())
             ], $this->getComponents()), JSON_THROW_ON_ERROR),
-            json_encode(array_map(fn (MinecraftTrait $trait) => [
-                "identifier" => $trait->getIdentifier()->value,
+            json_encode(array_map(fn (BlockTrait $trait) => [
+                "identifier" => $trait->getId()->value,
                 "rotationOffset" => $trait->getRotationOffset(),
-                "state" => [
-                    "cardinal" => $trait->getState()->isCardinal(),
-                    "facing" => $trait->getState()->isFacing(),
-                    "sixteenWayRotation" => $trait->getState()->isSixteenWayRotation(),
-                ],
+                "state" => $trait->getState()->toArray(),
             ], $this->traits), JSON_THROW_ON_ERROR),
             $serializer,
             $deserializer,
@@ -665,7 +713,7 @@ class BlockBuilder
                 default => MaterialRenderMethod::BLEND,
             })]));
 
-            if($block->getFlammability() > 0){
+            if ($block->getFlammability() > 0) {
                 $this->addComponent(new FlammableBlockComponent($block->getFlameEncouragement()));
             }
             if ($block instanceof Flowable) {
@@ -675,12 +723,6 @@ class BlockBuilder
             $tile = $block->getIdInfo()->getTileClass();
             if ($tile !== null && is_a($tile, Container::class, true)) {
                 $this->addComponent(new OnInteractBlockComponent());
-            }
-
-            if ($this->hasComponent(BlockComponentIds::ON_INTERACT)) {
-                $this->addComponent(new CustomComponentsBlockComponent(
-                    hasPlayerInteract: $this->hasComponent(BlockComponentIds::ON_INTERACT),
-                ));
             }
 
             $this->addComponent(new SelectionBoxBlockComponent(true));
@@ -711,7 +753,7 @@ class BlockBuilder
      * @param block $block
      * @return void
      */
-    private function registerItem(Block $block): void
+    protected function registerItem(Block $block): void
     {
         $builder = $this->getItemFrom($block);
         $stringId = $this->getStringId();
@@ -738,7 +780,7 @@ class BlockBuilder
      * @param Block $block
      * @return void
      */
-    private function registerBlockItem(Block $block): void
+    protected function registerBlockItem(Block $block): void
     {
         $name = $this->getName();
         $stringId = $this->getStringId();
@@ -758,7 +800,7 @@ class BlockBuilder
     /**
      * @return Generator
      */
-    private function getBlockStateDictionaryEntry(): Generator
+    protected function getBlockStateDictionaryEntry(): Generator
     {
         if (empty($this->properties)) {
             return yield new BlockStateDictionaryEntry($this->getStringId(), [], 0);
@@ -786,34 +828,34 @@ class BlockBuilder
      * @param block $block
      * @return void
      */
-    private function detectDefaultComponent(Block $block): void
+    protected function detectDefaultComponent(Block $block): void
     {
         match (true) {
-            $block instanceof Crops => NexlyPermutations::makeCrop($this, $block),
-            $block instanceof NetherWartPlant => NexlyPermutations::makeNetherPlant($this, $block),
-            $block instanceof Wood => NexlyPermutations::makeWood($this, $block),
-            $block instanceof Leaves => NexlyPermutations::makeLeaves($this, $block),
-            $block instanceof GrassPath => NexlyPermutations::makeGrassPath($this, $block),
-            $block instanceof Sapling => NexlyPermutations::makeSapling($this, $block),
-            $block instanceof Stair => NexlyPermutations::makeStair($this, $block),
-            $block instanceof Slab => NexlyPermutations::makeSlab($this, $block),
-            $block instanceof Door => NexlyPermutations::makeDoor($this, $block),
-            $block instanceof Fence => NexlyPermutations::makeFence($this, $block),
-            $block instanceof FenceGate => NexlyPermutations::makeFenceGate($this, $block),
-            $block instanceof Wall => NexlyPermutations::makeWall($this, $block),
-            $block instanceof Trapdoor => NexlyPermutations::makeTrapdoor($this, $block),
-            $block instanceof Hopper => NexlyPermutations::makeHopper($this, $block),
-            $block instanceof Furnace => NexlyPermutations::makeFurnace($this, $block),
-            $block instanceof HeadBlock => NexlyPermutations::makeHead($this, $block),
-            $block instanceof Ladder => NexlyPermutations::makeLadder($this, $block),
-            $block instanceof Farmland => NexlyPermutations::makeFarmland($this, $block),
-            $block instanceof Flower => NexlyPermutations::makeFlower($this, $block),
-            $block instanceof Glass => NexlyPermutations::makeGlass($this, $block),
-            $block instanceof GlassPane => NexlyPermutations::makeGlassPane($this, $block),
-            $block instanceof Lever => NexlyPermutations::makeLever($this, $block),
-            $block instanceof Slime => NexlyPermutations::makeSlime($this, $block),
-            $block instanceof Cactus => NexlyPermutations::makeCactus($this, $block),
-            $block instanceof Colored => NexlyPermutations::makeSimpleColored($this, $block),
+            $block instanceof Ageable => BlockCreator::makeAgeable($this, $block),
+
+            $block instanceof Wood => BlockCreator::makeWood($this, $block),
+            $block instanceof Leaves => BlockCreator::makeLeaves($this, $block),
+            $block instanceof GrassPath => BlockCreator::makeGrassPath($this, $block),
+            $block instanceof Sapling => BlockCreator::makeSapling($this, $block),
+            $block instanceof Stair => BlockCreator::makeStair($this, $block),
+            $block instanceof Slab => BlockCreator::makeSlab($this, $block),
+            $block instanceof Door => BlockCreator::makeDoor($this, $block),
+            $block instanceof Fence => BlockCreator::makeFence($this, $block),
+            $block instanceof FenceGate => BlockCreator::makeFenceGate($this, $block),
+            $block instanceof Wall => BlockCreator::makeWall($this, $block),
+            $block instanceof Trapdoor => BlockCreator::makeTrapdoor($this, $block),
+            $block instanceof Hopper => BlockCreator::makeHopper($this, $block),
+            $block instanceof Furnace => BlockCreator::makeFurnace($this, $block),
+            $block instanceof HeadBlock => BlockCreator::makeHead($this, $block),
+            $block instanceof Ladder => BlockCreator::makeLadder($this, $block),
+            $block instanceof Farmland => BlockCreator::makeFarmland($this, $block),
+            $block instanceof Flower => BlockCreator::makeFlower($this, $block),
+            $block instanceof Glass => BlockCreator::makeGlass($this, $block),
+            $block instanceof GlassPane => BlockCreator::makeGlassPane($this, $block),
+            $block instanceof Lever => BlockCreator::makeLever($this, $block),
+            $block instanceof Slime => BlockCreator::makeSlime($this, $block),
+            $block instanceof Cactus => BlockCreator::makeCactus($this, $block),
+            $block instanceof Colored => BlockCreator::makeSimpleColored($this, $block),
             default => null,
         };
     }

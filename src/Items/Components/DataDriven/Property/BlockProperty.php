@@ -11,7 +11,7 @@ use pocketmine\world\format\io\GlobalBlockStateHandlers;
 class BlockProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly string $blockName
+        protected string $blockName
     ) {
     }
 

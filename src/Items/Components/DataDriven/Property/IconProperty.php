@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\StringTag;
 class IconProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly string $icon,
+        protected string $icon,
     ) {
     }
 

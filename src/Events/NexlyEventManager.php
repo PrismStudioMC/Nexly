@@ -14,7 +14,7 @@ class NexlyEventManager
 {
     use SingletonTrait;
 
-    private const PRIORITY_ORDER = [
+    protected const PRIORITY_ORDER = [
         EventPriority::LOWEST,
         EventPriority::LOW,
         EventPriority::NORMAL,
@@ -24,7 +24,7 @@ class NexlyEventManager
     ];
 
     /** @var EventReflected[] */
-    private array $handlerCaches = [];
+    protected array $handlerCaches = [];
 
     /**
      * Register an event listener.
@@ -34,7 +34,7 @@ class NexlyEventManager
      * @param object|null $instance
      * @return void
      */
-    public function listen(string $event, callable $callback, object $instance = null): void
+    public function listen(string $event, callable $callback, ?object $instance = null): void
     {
         if (!\class_exists($event) || !\is_subclass_of($event, Event::class)) {
             throw new \InvalidArgumentException("Event class must exist and be a subclass of " . Event::class . " (got: {$event})");
@@ -98,7 +98,7 @@ class NexlyEventManager
      * @return void
      * @throws ReflectionException
      */
-    public function deafen(string $event, callable $callback = null, object $instance = null): void
+    public function deafen(string $event, ?callable $callback = null, ?object $instance = null): void
     {
         if (!\class_exists($event) || !\is_subclass_of($event, Event::class)) {
             throw new \InvalidArgumentException("Event class must exist and be a subclass of " . Event::class . " (got: {$event})");

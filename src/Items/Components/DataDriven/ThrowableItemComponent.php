@@ -19,12 +19,12 @@ class ThrowableItemComponent extends DataDrivenItemComponent
      * @param bool $scalePowerByDrawDuration
      */
     public function __construct(
-        private readonly bool  $doSwingAnimation = true,
-        private readonly float $launchPowerScale = 1.0,
-        private readonly float $maxDrawDuration = 0.0,
-        private readonly float $maxLaunchPower = 1.0,
-        private readonly float $minDrawDuration = 0.0,
-        private readonly bool  $scalePowerByDrawDuration = false
+        protected bool  $doSwingAnimation = true,
+        protected float $launchPowerScale = 1.0,
+        protected float $maxDrawDuration = 0.0,
+        protected float $maxLaunchPower = 1.0,
+        protected float $minDrawDuration = 0.0,
+        protected bool  $scalePowerByDrawDuration = false
     ) {
     }
 

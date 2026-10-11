@@ -19,7 +19,7 @@ class MaxDamageComponent extends LegacyItemComponent
     }
 
     public function __construct(
-        private readonly int $maxDamage
+        protected int $maxDamage
     ) {
     }
 

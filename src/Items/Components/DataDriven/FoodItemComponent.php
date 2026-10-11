@@ -32,16 +32,16 @@ class FoodItemComponent extends DataDrivenItemComponent
      * @param int[] $removeEffects
      */
     public function __construct(
-        private readonly int                 $nutrition,
-        private readonly float               $saturationModifier,
-        private readonly bool                $canAlwaysEat = false,
-        private readonly ItemCooldownType  $cooldownType = ItemCooldownType::NONE,
-        private readonly int                 $cooldownTick = 0,
-        private string                       $usingConvertsTo = "air",
-        private readonly ItemUseActionType $useActionType = ItemUseActionType::NONE,
-        private readonly array               $onUseRange = [],
-        private readonly array               $effects = [],
-        private readonly array               $removeEffects = [],
+        protected int               $nutrition,
+        protected float             $saturationModifier,
+        protected bool              $canAlwaysEat = false,
+        protected ItemCooldownType  $cooldownType = ItemCooldownType::NONE,
+        protected int               $cooldownTick = 0,
+        protected string            $usingConvertsTo = "air",
+        protected ItemUseActionType $useActionType = ItemUseActionType::NONE,
+        protected array             $onUseRange = [],
+        protected array             $effects = [],
+        protected array             $removeEffects = [],
     ) {
     }
 

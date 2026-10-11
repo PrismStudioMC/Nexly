@@ -16,8 +16,8 @@ class WearableItemComponent extends DataDrivenItemComponent
      * @param int $protection
      */
     public function __construct(
-        private readonly ItemSlot $slot,
-        private readonly int $protection
+        protected ItemSlot $slot,
+        protected int $protection
     ) {
     }
 

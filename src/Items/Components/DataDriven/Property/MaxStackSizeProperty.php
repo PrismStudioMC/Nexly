@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\IntTag;
 class MaxStackSizeProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly int $size
+        protected int $size
     ) {
     }
 

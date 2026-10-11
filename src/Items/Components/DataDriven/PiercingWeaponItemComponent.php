@@ -15,9 +15,9 @@ use pocketmine\nbt\tag\IntTag;
 class PiercingWeaponItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly float $hitboxMargin = 0,
-        private readonly int   $min = 0,
-        private readonly int   $max = 3,
+        protected float $hitboxMargin = 0,
+        protected int   $min = 0,
+        protected int   $max = 3,
     ) {
     }
 

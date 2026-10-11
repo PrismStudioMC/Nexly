@@ -26,7 +26,7 @@ enum PropertyComponentIds: string
     case GLINT = "glint";
     case INTERACT_BUTTON = "interact_button";
     case ON_USE = "on_use";
-    case ON_USE_ON = "on_use_on"; // TODO: Investigate
+    case ON_USE_ON = "on_use_on";
     case RARITY = "rarity";
 
     /**

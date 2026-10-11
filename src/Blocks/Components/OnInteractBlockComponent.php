@@ -14,9 +14,9 @@ use pocketmine\nbt\tag\StringTag;
 class OnInteractBlockComponent extends BlockComponent
 {
     public function __construct(
-        private string $condition = "",
-        private string $event = "",
-        private string $target = "self",
+        protected string $condition = "",
+        protected string $event = "",
+        protected string $target = "self",
     ) {
     }
 

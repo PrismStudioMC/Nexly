@@ -19,7 +19,7 @@ trait DataDrivenItemBlockTrait
             public function __construct(
                 ItemIdentifier $identifier,
                 string                         $name,
-                private readonly Block $block,
+                protected Block $block,
             ) {
                 parent::__construct($identifier, $name);
             }

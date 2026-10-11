@@ -13,7 +13,7 @@ class StorageWeightModifierItemComponent extends DataDrivenItemComponent
      * @param int $capacity
      */
     public function __construct(
-        private readonly int $capacity,
+        protected int $capacity,
     ) {
         if ($capacity < 0) {
             throw new \InvalidArgumentException("Capacity must be a non-negative integer.");

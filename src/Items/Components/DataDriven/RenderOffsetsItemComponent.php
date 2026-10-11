@@ -15,7 +15,7 @@ class RenderOffsetsItemComponent extends DataDrivenItemComponent
      * @param int $resolution
      */
     public function __construct(
-        private readonly int $resolution = 16,
+        protected int $resolution = 16,
     ) {
     }
 

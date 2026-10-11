@@ -18,7 +18,7 @@ class SwingDurationItemComponent extends DataDrivenItemComponent
      * @param float $duration The duration of the swing sound in seconds.
      */
     public function __construct(
-        private readonly float $duration,
+        protected float $duration,
     ) {
     }
 

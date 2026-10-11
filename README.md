@@ -1,11 +1,11 @@
 # Nexly
 
 <p>
-    <a><img src="https://img.shields.io/badge/php-^8.1.0-informational" alt="Version"></a>
+    <a><img src="https://img.shields.io/badge/php-^8.2.0-informational" alt="Version"></a>
     <a href="https://github.com/pmmp/Zwuiix-cmd/Nexly/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/Zwuiix-cmd/Nexly?label=release&sort=semver"></a>
 </p>
 
-Nexly is a **PocketMine-MP 5.35.0+** (PHP 8.1+) plugin that simplifies custom item and block creation for Minecraft Bedrock Edition. 
+Nexly is a **PocketMine-MP 5.35.0+** (PHP 8.2+) plugin that simplifies custom item and block creation for Minecraft Bedrock Edition. 
 Focus on your game logic and visual design while Nexly handles the complex technical implementation details.
 
 ### [Advanced documentation](https://deepwiki.com/Zwuiix-cmd/Nexly)

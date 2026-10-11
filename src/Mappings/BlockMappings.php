@@ -13,8 +13,8 @@ class BlockMappings
     /**
      * @var array<string, BlockMapping> Mapping of block string IDs to their BlockMapping instances.
      */
-    private array $mappings = [];
-    private array $entries = [];
+    protected array $mappings = [];
+    protected array $entries = [];
 
     /**
      * @return int

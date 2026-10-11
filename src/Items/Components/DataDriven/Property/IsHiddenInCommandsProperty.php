@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\ByteTag;
 class IsHiddenInCommandsProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly bool $value
+        protected bool $value
     ) {
     }
 

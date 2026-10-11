@@ -18,9 +18,9 @@ class ShapelessRecipe implements Recipe
      * @param Item|string[] $outputs
      */
     public function __construct(
-        private readonly ShapelessRecipeType $type,
-        private readonly array               $ingredients,
-        private readonly array               $outputs
+        protected ShapelessRecipeType $type,
+        protected array               $ingredients,
+        protected array               $outputs
     ) {
     }
 

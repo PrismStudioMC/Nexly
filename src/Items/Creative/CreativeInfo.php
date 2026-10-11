@@ -10,9 +10,9 @@ use pocketmine\inventory\CreativeCategory;
 class CreativeInfo
 {
     public function __construct(
-        private ?CreativeCategory $category,
-        private CreativeGroup|BackedEnum|null $group = null,
-        private bool $isHidden = false,
+        protected ?CreativeCategory $category,
+        protected CreativeGroup|BackedEnum|null $group = null,
+        protected bool $isHidden = false,
     ) {
     }
 

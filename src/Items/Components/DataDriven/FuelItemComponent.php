@@ -13,7 +13,7 @@ class FuelItemComponent extends DataDrivenItemComponent
      * @param bool $value
      */
     public function __construct(
-        private readonly float $duration
+        protected float $duration
     ) {
         if ($this->duration < 0.05) {
             throw new \InvalidArgumentException("Duration must be at least 0.05");

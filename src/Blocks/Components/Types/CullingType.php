@@ -2,7 +2,7 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-enum Culling: string
+enum CullingType: string
 {
     case FENCE = "nexly:culling.fence";
     case TRAPDOOR = "nexly:culling.trapdoor";

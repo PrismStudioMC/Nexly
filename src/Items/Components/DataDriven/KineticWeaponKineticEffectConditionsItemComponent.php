@@ -16,9 +16,9 @@ use pocketmine\nbt\tag\IntTag;
 class KineticWeaponKineticEffectConditionsItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly int $maxDuration = -1,
-        private readonly float $minRelativeSpeed = 0,
-        private readonly float $minSpeed = 0,
+        protected int $maxDuration = -1,
+        protected float $minRelativeSpeed = 0,
+        protected float $minSpeed = 0,
     ) {
     }
 

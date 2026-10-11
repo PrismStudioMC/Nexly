@@ -11,8 +11,8 @@ use pocketmine\crafting\ShapelessRecipeType;
 
 class RecipeRegistryEvent extends Event
 {
-    private int $shaped = 0;
-    private int $shapeless = 0;
+    protected int $shaped = 0;
+    protected int $shapeless = 0;
 
     /**
      * Registers a shaped recipe.

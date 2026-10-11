@@ -10,7 +10,7 @@ use pocketmine\nbt\tag\FloatTag;
 class CompostableItemComponent extends DataDrivenItemComponent
 {
     public function __construct(
-        private readonly float $chance,
+        protected float $chance,
     ) {
     }
 

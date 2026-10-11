@@ -10,9 +10,9 @@ use pocketmine\nbt\tag\CompoundTag;
 class CustomComponentsBlockComponent extends BlockComponent
 {
     public function __construct(
-        private bool $hasPlayerInteract = true,
-        private bool $hasPlayerPlacing = true,
-        private bool $isV1Component = true,
+        protected bool $hasPlayerInteract = true,
+        protected bool $hasPlayerPlacing = true,
+        protected bool $isV1Component = true,
     ) {
     }
 

@@ -17,7 +17,7 @@ class RepairableItemComponent extends DataDrivenItemComponent
      * @param ItemRepair[] $items
      */
     public function __construct(
-        private readonly array $items,
+        protected array $items,
     ) {
     }
 

@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\StringTag;
 class HoverTextColorProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly string $prefix
+        protected string $prefix
     ) {
     }
 

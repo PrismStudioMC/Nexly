@@ -13,12 +13,12 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\utils\Utils;
 use ReflectionProperty;
 
-final class BlockPalette
+class BlockPalette
 {
     use SingletonTrait;
 
     /** @var BlockStateDictionaryEntry[] */
-    private array $states = [];
+    protected array $states = [];
 
     public function __construct()
     {
@@ -67,7 +67,7 @@ final class BlockPalette
      * @param array|null $stateDataToStateIdLookup
      * @return void
      */
-    private function sort(array $states, ?array &$sortedStates, ?array &$stateDataToStateIdLookup): void
+    protected function sort(array $states, ?array &$sortedStates, ?array &$stateDataToStateIdLookup): void
     {
         if ($stateDataToStateIdLookup === null) {
             $stateDataToStateIdLookup = [];
@@ -124,7 +124,7 @@ final class BlockPalette
      * @param string $str
      * @return int
      */
-    private static function fnv1a32(string $str): int
+    protected static function fnv1a32(string $str): int
     {
         $hashHex = hash('fnv1a32', $str);
         $hashInt = intval(hexdec($hashHex));

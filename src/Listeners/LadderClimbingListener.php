@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Nexly\Listener;
+namespace Nexly\Listeners;
 
 use Nexly\Blocks\Vanilla\NexlyLadder;
 use pocketmine\block\Ladder;
@@ -16,7 +14,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\player\Player;
 
-final class LadderClimbingListener implements Listener
+class LadderClimbingListener implements Listener
 {
     /**
      * Called when a player joins the server to initialize climbing ability.

@@ -20,12 +20,12 @@ class CameraComponent extends LegacyItemComponent
     }
 
     public function __construct(
-        private readonly float $blackBarsDuration,
-        private readonly float $blackBarsScreenRatio,
-        private readonly float $shutterDuration,
-        private readonly float $shutterScreenRatio,
-        private readonly float $pictureDuration,
-        private readonly float $slideAwayDuration,
+        protected float $blackBarsDuration,
+        protected float $blackBarsScreenRatio,
+        protected float $shutterDuration,
+        protected float $shutterScreenRatio,
+        protected float $pictureDuration,
+        protected float $slideAwayDuration,
     ) {
     }
 

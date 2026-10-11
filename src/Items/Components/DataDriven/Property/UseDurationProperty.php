@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\IntTag;
 class UseDurationProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly int $tick
+        protected int $tick
     ) {
     }
 

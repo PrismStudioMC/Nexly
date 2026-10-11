@@ -45,8 +45,8 @@ class BoxCollision
     }
 
     public function __construct(
-        private Vector3 $origin,
-        private Vector3 $size,
+        protected Vector3 $origin,
+        protected Vector3 $size,
     ) {
     }
 

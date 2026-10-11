@@ -9,7 +9,7 @@ namespace Nexly\Blocks;
 class AsyncInitialization
 {
     /** @var array  */
-    private static array $blocks = [];
+    protected static array $blocks = [];
 
     /**
      * Adds an asynchronous block definition.

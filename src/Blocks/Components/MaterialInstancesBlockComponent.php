@@ -13,8 +13,8 @@ class MaterialInstancesBlockComponent extends BlockComponent
      * @param Material[] $materials
      */
     public function __construct(
-        private readonly array $materials,
-        private ?CompoundTag $mappings = null
+        protected array $materials,
+        protected ?CompoundTag $mappings = null
     ) {
         $this->mappings ??= CompoundTag::create();
     }

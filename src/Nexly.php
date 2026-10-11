@@ -6,9 +6,8 @@ use Nexly\Blocks\AsyncInitialization;
 use Nexly\Blocks\BlockPalette;
 use Nexly\Events\Impl\BlockRegistryEvent;
 use Nexly\Events\Impl\ItemRegistryEvent;
-use Nexly\Events\Impl\RecipeRegistryEvent;
-use Nexly\Listener\BlockBreakingListener;
-use Nexly\Listener\LadderClimbingListener;
+use Nexly\Listeners\BlockBreakingListener;
+use Nexly\Listeners\LadderClimbingListener;
 use Nexly\Mappings\BlockMappings;
 use Nexly\Recipes\NexlyRecipes;
 use Nexly\Tasks\AsyncRegisterBlocksTask;
@@ -63,7 +62,7 @@ class Nexly extends PluginBase
             foreach ($packets as $packet) {
                 if ($packet instanceof StartGamePacket) {
                     $packet->blockNetworkIdsAreHashes = true; // Always true for Nexly
-                    $packet->blockPalette = BlockMappings::getInstance()->getEntries();
+                    $packet->blockPalette = array_merge($packet->blockPalette, BlockMappings::getInstance()->getEntries());
                 }
             }
         }, EventPriority::NORMAL, $this);
@@ -72,11 +71,7 @@ class Nexly extends PluginBase
             $pool = $this->getServer()->getAsyncPool();
             $blocks = AsyncInitialization::getBlocks();
 
-            $ev = new RecipeRegistryEvent();
-            $ev->trigger();
-            $this->getLogger()->notice("Registered " . $ev->getShaped() . " shaped and " . $ev->getShapeless() . " shapeless recipes.");
-
-            NexlyRecipes::getInstance()->registers();
+            NexlyRecipes::getInstance()->registers($this);
             BlockPalette::getInstance()->apply();
 
             $this->getLogger()->notice("Sending " . count($blocks) . " blocks to worker threads for registration...");

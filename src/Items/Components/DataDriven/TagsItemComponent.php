@@ -15,7 +15,7 @@ class TagsItemComponent extends DataDrivenItemComponent
      * @param array $tags
      */
     public function __construct(
-        private readonly array $tags,
+        protected array $tags,
     ) {
     }
 

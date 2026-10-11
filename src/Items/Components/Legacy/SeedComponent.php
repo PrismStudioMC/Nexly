@@ -66,10 +66,15 @@ class SeedComponent extends LegacyItemComponent
         );
     }
 
+    /**
+     * @param string $result
+     * @param array $plantAt
+     * @param LegacyFace $plantFace
+     */
     public function __construct(
-        private string $result,
-        private array $plantAt = [],
-        private readonly LegacyFace $plantFace = LegacyFace::UP,
+        protected string $result,
+        protected array $plantAt = [],
+        protected LegacyFace $plantFace = LegacyFace::UP,
     ) {
         $this->result = str_replace(["minecraft:", "grass_block", "air"], ["", "grass", "light_block"], strtolower($this->result));
         $this->plantAt = array_map(fn (string $block) => str_replace(["minecraft:", "grass_block"], ["", "grass"], strtolower($block)), $this->plantAt);

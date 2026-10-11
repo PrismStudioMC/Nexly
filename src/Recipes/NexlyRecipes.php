@@ -2,12 +2,14 @@
 
 namespace Nexly\Recipes;
 
+use Nexly\Events\Impl\RecipeRegistryEvent;
 use Nexly\Recipes\Types\Recipe;
 use Nexly\Recipes\Types\ShapedRecipe;
 use Nexly\Recipes\Types\ShapelessRecipe;
 use pocketmine\crafting\ShapelessRecipe as ShapelessRecipePM;
 use pocketmine\crafting\ShapelessRecipeType;
 use pocketmine\item\StringToItemParser;
+use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 
@@ -16,7 +18,7 @@ class NexlyRecipes
     use SingletonTrait;
 
     /** @var \Closure[] */
-    private array $recipes = [];
+    protected array $recipes = [];
 
     public function __construct()
     {
@@ -129,15 +131,20 @@ class NexlyRecipes
     /**
      * @return void
      */
-    public function registers(): void
+    public function registers(Plugin $plugin): void
     {
         $server = Server::getInstance();
         $craftingManager = $server->getCraftingManager();
+
+        $ev = new RecipeRegistryEvent();
+        $ev->trigger();
+        $plugin->getLogger()->notice("Registered " . $ev->getShaped() . " shaped and " . $ev->getShapeless() . " shapeless recipes.");
+
         foreach ($this->recipes as $closure) {
             try {
                 $recipe = ($closure)();
             } catch (\Exception $e) {
-                Server::getInstance()->getLogger()->error("Error while building a recipe: " . $e->getMessage());
+                $plugin->getLogger()->error("Error while building a recipe: " . $e->getMessage());
                 continue;
             }
 

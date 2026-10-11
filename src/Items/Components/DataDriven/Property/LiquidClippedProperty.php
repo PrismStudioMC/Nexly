@@ -9,7 +9,7 @@ use pocketmine\nbt\tag\ByteTag;
 class LiquidClippedProperty extends PropertyItemComponent
 {
     public function __construct(
-        private readonly bool $value
+        protected bool $value
     ) {
     }
 
