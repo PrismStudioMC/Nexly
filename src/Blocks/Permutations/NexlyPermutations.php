@@ -311,12 +311,17 @@ final class NexlyPermutations
         $builder->addProperty(new BlockProperty(StateNames::UPSIDE_DOWN_BIT, [false, true]));
         $builder->addProperty(new BlockProperty(StateNames::MC_CORNER, $coners));
 
+        $ud = "q.block_state('" . StateNames::UPSIDE_DOWN_BIT . "')";
+        $mc_corner = "q.block_state('" . StateNames::MC_CORNER . "')";
+
         $geometry = (new GeometryBlockComponent(ExtendedGeometry::STAIR->toString()))
             ->add("base", "1")
-            ->add("top_nw", "q.block_state('" . StateNames::MC_CORNER . "') != '" . StateValues::MC_CORNER_OUTER_LEFT . "'") // Inversé
-            ->add("top_ne", "q.block_state('" . StateNames::MC_CORNER . "') != '" . StateValues::MC_CORNER_OUTER_RIGHT . "'") // Inversé
-            ->add("top_sw", "q.block_state('" . StateNames::MC_CORNER . "') == '" . StateValues::MC_CORNER_INNER_RIGHT . "'") // Inversé
-            ->add("top_se", "q.block_state('" . StateNames::MC_CORNER . "') == '" . StateValues::MC_CORNER_INNER_LEFT . "'"); // Inversé
+            ->add("top_nw", "$ud ? $mc_corner != '" . StateValues::MC_CORNER_OUTER_RIGHT . "' : $mc_corner != '" . StateValues::MC_CORNER_OUTER_LEFT . "'")
+            ->add("top_ne", "$ud ? $mc_corner != '" . StateValues::MC_CORNER_OUTER_LEFT . "' : $mc_corner != '" . StateValues::MC_CORNER_OUTER_RIGHT . "'")
+            ->add("top_sw", "$ud ? $mc_corner == '" . StateValues::MC_CORNER_INNER_LEFT . "' : $mc_corner == '" . StateValues::MC_CORNER_INNER_RIGHT . "'")
+            ->add("top_se", "$ud ? $mc_corner == '" . StateValues::MC_CORNER_INNER_RIGHT . "' : $mc_corner == '" . StateValues::MC_CORNER_INNER_LEFT . "'");
+
+        $builder->addComponent($geometry);
 
         $builder->addComponent($geometry);
 
