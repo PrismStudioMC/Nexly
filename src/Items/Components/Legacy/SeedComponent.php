@@ -50,19 +50,22 @@ class SeedComponent extends LegacyItemComponent
      */
     public static function fromTags(Block $result, array $tags): self
     {
-        $blocks = [];
+        $plantAtNames = [];
+        $serializer = GlobalBlockStateHandlers::getSerializer();
+
         foreach (RuntimeBlockStateRegistry::getInstance()->getAllKnownStates() as $state) {
             foreach ($tags as $tag) {
                 if ($state->hasTypeTag($tag)) {
-                    $blocks[] = $state->getStateId();
+                    $name = $serializer->serialize($state->getStateId())->getName();
+                    $plantAtNames[$name] = $name;
                     break;
                 }
             }
         }
 
         return new self(
-            GlobalBlockStateHandlers::getSerializer()->serialize($result->getStateId())->getName(),
-            array_map(fn (int $stateId) => GlobalBlockStateHandlers::getSerializer()->serialize($stateId)->getName(), $blocks),
+            $serializer->serialize($result->getStateId())->getName(),
+            array_values($plantAtNames)
         );
     }
 

@@ -23,8 +23,7 @@ class LiquidRule
         protected string            $onLiquidTouches = LiquidTouchAction::BLOCKING,
         protected array             $stopsLiquidFlowingFromDirection = [],
         protected bool              $useLiquidClipping = false,
-    )
-    {
+    ) {
     }
 
     /**

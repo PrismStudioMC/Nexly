@@ -12,7 +12,7 @@ class Material
 {
     public function __construct(
         protected string $texture,
-        protected string $target = MaterialTarget::ALL,
+        protected string $target = Target::ALL,
         protected string $renderMethod = RenderMethod::OPAQUE,
         protected string $tintMethod = TintMethod::NONE,
         protected float  $ambientOcclusion = 1.0,
@@ -20,8 +20,7 @@ class Material
         protected bool   $isotropic = false,
         protected bool   $packedBools = false,
         protected bool   $alphaMaskedTint = false,
-    )
-    {
+    ) {
         if ($ambientOcclusion < 0.0 || $ambientOcclusion > 10.0) {
             throw new InvalidArgumentException("Ambient occlusion must be between 0.0 and 10.0.");
         }

@@ -2,22 +2,34 @@
 
 namespace Nexly\Blocks\Traits;
 
-use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\Tag;
 
 class TraitState
 {
     /** @var string[] */
     protected array $enabledTraits;
 
-    /**
-     * @param TraitStateId ...$states
-     */
-    public function __construct(TraitStateId ...$states)
+    public function __construct(string ...$states)
     {
-        $this->enabledTraits = array_values(array_unique(
-            array_map(fn (TraitStateId $state) => $state->value, $states)
-        ));
+        $this->enabledTraits = array_values(array_unique($states));
+
+        $directionsCount = 0;
+        if ($this->isCardinal()) {
+            $directionsCount++;
+        }
+        if ($this->isFacing()) {
+            $directionsCount++;
+        }
+        if (in_array(TraitStateId::SIXTEEN_WAY_ROTATION, $this->enabledTraits, true)) {
+            $directionsCount++;
+        }
+
+        if ($directionsCount > 1) {
+            throw new \InvalidArgumentException("A trait cannot combine cardinal_direction, facing_direction, or sixteen_way_rotation. Choose only one.");
+        }
     }
 
     /**
@@ -33,7 +45,7 @@ class TraitState
      */
     public function isCardinal(): bool
     {
-        return in_array(TraitStateId::CARDINAL_DIRECTION->value, $this->enabledTraits, true);
+        return in_array(TraitStateId::CARDINAL_DIRECTION, $this->enabledTraits, true);
     }
 
     /**
@@ -41,17 +53,17 @@ class TraitState
      */
     public function isFacing(): bool
     {
-        return in_array(TraitStateId::FACING_DIRECTION->value, $this->enabledTraits, true);
+        return in_array(TraitStateId::FACING_DIRECTION, $this->enabledTraits, true);
     }
 
     /**
-     * @return string[]
+     * @return array
      */
     public function getNames(): array
     {
         $names = [];
         foreach ($this->enabledTraits as $stateValue) {
-            if ($stateValue === TraitStateId::CORNER_AND_CARDINAL_DIRECTION->value) {
+            if ($stateValue === TraitStateId::CORNER_AND_CARDINAL_DIRECTION) {
                 $names[] = 'minecraft:corner';
                 $names[] = 'minecraft:cardinal_direction';
             } else {
@@ -62,38 +74,42 @@ class TraitState
     }
 
     /**
-     * @param CompoundTag $nbt
+     * @param ListTag $nbt
      * @return self
      */
-    public static function fromNBT(CompoundTag $nbt): self
+    public static function fromNBT(Tag $nbt): self
     {
-        $enums = [];
-
-        foreach ($nbt->getValue() as $key => $tag) {
-            if ($tag instanceof ByteTag && $tag->getValue() === 1) {
-                $enum = TraitStateId::tryFrom($key);
-                if ($enum !== null) {
-                    $enums[] = $enum;
-                }
-            }
+        $rawNames = [];
+        /** @var StringTag $tag */
+        foreach ($nbt as $tag) {
+            $rawNames[] = $tag->getValue();
         }
 
-        return new self(...$enums);
+        $hasCorner = in_array('minecraft:corner', $rawNames, true);
+        $hasCardinal = in_array('minecraft:cardinal_direction', $rawNames, true);
+
+        $states = [];
+        foreach ($rawNames as $rawName) {
+            if ($rawName === 'minecraft:corner') {
+                continue;
+            }
+            if ($rawName === 'minecraft:cardinal_direction' && $hasCorner) {
+                $states[] = TraitStateId::CORNER_AND_CARDINAL_DIRECTION;
+                continue;
+            }
+
+            $states[] = str_replace('minecraft:', '', $rawName);
+        }
+
+
+        return new self(...$states);
     }
 
     /**
-     * @return CompoundTag
+     * @return ListTag
      */
-    public function toNBT(): CompoundTag
+    public function toNBT(): ListTag
     {
-        $nbt = CompoundTag::create()
-            ->setByte("cardinal_direction", (int) $this->isCardinal()) // Sécurité PHP 8
-            ->setByte("facing_direction", (int) $this->isFacing());
-
-        foreach ($this->enabledTraits as $stateValue) {
-            $nbt->setByte($stateValue, 1);
-        }
-
-        return $nbt;
+        return new ListTag(array_map(fn (string $name) => new StringTag($name), $this->getEnabledTraits()), NBT::TAG_String);
     }
 }

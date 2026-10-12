@@ -5,6 +5,7 @@ namespace Nexly\Blocks;
 use Closure;
 use Generator;
 use Nexly\Blocks\Components\BlockComponent;
+use Nexly\Blocks\Components\BlockComponentIds;
 use Nexly\Blocks\Components\BlockEntityBlockComponent;
 use Nexly\Blocks\Components\BreathabilityBlockComponent;
 use Nexly\Blocks\Components\CollisionBoxBlockComponent;
@@ -16,21 +17,34 @@ use Nexly\Blocks\Components\DisplayNameBlockComponent;
 use Nexly\Blocks\Components\EntityFallOnBlockComponent;
 use Nexly\Blocks\Components\FlammableBlockComponent;
 use Nexly\Blocks\Components\FrictionBlockComponent;
+use Nexly\Blocks\Components\GeometryBlockComponent;
 use Nexly\Blocks\Components\InstrumentSoundBlockComponent;
+use Nexly\Blocks\Components\ItemVisualBlockComponent;
 use Nexly\Blocks\Components\LightDampeningBlockComponent;
 use Nexly\Blocks\Components\LightEmissionBlockComponent;
 use Nexly\Blocks\Components\MapColorBlockComponent;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
+use Nexly\Blocks\Components\MovableBlockComponent;
 use Nexly\Blocks\Components\OnInteractBlockComponent;
 use Nexly\Blocks\Components\OnPlayerPlacingBlockComponent;
+use Nexly\Blocks\Components\PrecipitationInteractionsBlockComponent;
+use Nexly\Blocks\Components\RedstoneConductivityBlockComponent;
+use Nexly\Blocks\Components\RedstoneProducerBlockComponent;
 use Nexly\Blocks\Components\ReplaceableBlockComponent;
 use Nexly\Blocks\Components\SelectionBoxBlockComponent;
+use Nexly\Blocks\Components\SupportBlockComponent;
+use Nexly\Blocks\Components\TickBlockComponent;
 use Nexly\Blocks\Components\Types\BreathabilityType;
 use Nexly\Blocks\Components\Types\Material;
 use Nexly\Blocks\Components\Types\MaterialType;
+use Nexly\Blocks\Components\Types\MovementType;
 use Nexly\Blocks\Components\Types\NoteInstrument;
+use Nexly\Blocks\Components\Types\PrecipitationType;
 use Nexly\Blocks\Components\Types\RenderMethod;
+use Nexly\Blocks\Components\Types\StickyType;
+use Nexly\Blocks\Components\Types\SupportShape;
 use Nexly\Blocks\Components\Types\TintMethod;
+use Nexly\Blocks\Components\Types\UseDefaultVisual;
 use Nexly\Blocks\Mappers\BlockMapper;
 use Nexly\Blocks\Permutations\BlockProperty;
 use Nexly\Blocks\Permutations\CartesianProduct;
@@ -38,6 +52,7 @@ use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Blocks\Traits\BlockTrait;
 use Nexly\Blocks\Vanilla\HeadBlock;
 use Nexly\Events\Impl\BlockLoaderEvent;
+use Nexly\Helpers\ComponentHelper;
 use Nexly\Items\Components\DataDriven\DataDrivenItemBuilder;
 use Nexly\Items\Components\DataDriven\DataDrivenItemComponent;
 use Nexly\Items\Components\DataDriven\Property\PropertyItemComponent;
@@ -76,12 +91,12 @@ use pocketmine\block\Sapling;
 use pocketmine\block\Slab;
 use pocketmine\block\Slime;
 use pocketmine\block\Stair;
-use pocketmine\block\tile\Container;
-use pocketmine\block\tile\Tile;
-use pocketmine\block\tile\TileFactory;
+use pocketmine\block\Transparent;
 use pocketmine\block\Trapdoor;
 use pocketmine\block\utils\Ageable;
+use pocketmine\block\utils\AnalogRedstoneSignalEmitter;
 use pocketmine\block\utils\Colored;
+use pocketmine\block\utils\PoweredByRedstone;
 use pocketmine\block\Wall;
 use pocketmine\block\Wood;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
@@ -91,7 +106,6 @@ use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
 use pocketmine\item\ItemBlock;
 use pocketmine\item\StringToItemParser;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -568,8 +582,14 @@ class BlockBuilder
             $properties[] = $property->toNBT();
         }
 
+        $traits = CompoundTag::create();
+        foreach ($this->traits as $trait) {
+            $traits->setTag($trait->getId(), $trait->toNBT());
+        }
+
         return CompoundTag::create()
             ->setTag("components", $components)
+            ->setTag("traits", $traits)
             ->setTag("permutations", new ListTag(array_map(fn (Permutation $permutation) => $permutation->toNBT(), $this->permutations), NBT::TAG_Compound))
             ->setTag("properties", new ListTag($properties, NBT::TAG_Compound))
             ->setTag(
@@ -580,7 +600,6 @@ class BlockBuilder
                 ->setTag("is_hidden_in_commands", new ByteTag($this->getCreativeInfo()?->isHidden() ?? false))
             )
             ->setTag("blockTags", new ListTag(array_map(fn (string $tag) => new StringTag($tag), $this->tags), NBT::TAG_String))
-            ->setTag("traits", new ListTag(array_map(fn (BlockTrait $trait) => $trait->toNBT(), $this->traits), NBT::TAG_Compound))
             ->setTag(
                 "vanilla_block_data",
                 CompoundTag::create()
@@ -597,7 +616,7 @@ class BlockBuilder
      * @param bool $autoload
      * @return $this
      */
-    public function register(bool $creative = true, bool $autoload = true): self
+    public function register(bool $creative = true, bool $autoload = true, bool $async = false): self
     {
         if (!isset($this->block)) {
             throw new \RuntimeException("Block instance is not set. Use setBlock() to set it before registering.");
@@ -621,7 +640,7 @@ class BlockBuilder
             throw new \RuntimeException("The block closure must return an instance of " . Block::class);
         }
 
-        $this->loadComponents($block, $autoload);
+        $this->loadComponents($block, $autoload, $async);
         if ($this->mapper !== null) {
             /** @var BlockMapper $mapper */
             $mapper = new ($this->mapper)();
@@ -663,9 +682,8 @@ class BlockBuilder
                 "nbt" => base64_encode((new CacheableNbt($component->toNBT()))->getEncodedNbt())
             ], $this->getComponents()), JSON_THROW_ON_ERROR),
             json_encode(array_map(fn (BlockTrait $trait) => [
-                "identifier" => $trait->getId()->value,
-                "rotationOffset" => $trait->getRotationOffset(),
-                "state" => base64_encode((new CacheableNbt($trait->getState()->toNBT()))->getEncodedNbt()),
+                "identifier" => $trait->getId(),
+                "nbt" => base64_encode((new CacheableNbt($trait->toNBT()))->getEncodedNbt()),
             ], $this->traits), JSON_THROW_ON_ERROR),
             $serializer,
             $deserializer,
@@ -711,7 +729,7 @@ class BlockBuilder
      * @param bool $autoload
      * @return void
      */
-    public function loadComponents(Block $block, bool $autoload): void
+    public function loadComponents(Block $block, bool $autoload, bool $async = false): void
     {
         if ($autoload) {
             $this->addComponent(new BreathabilityBlockComponent($block->isTransparent() ? BreathabilityType::AIR : BreathabilityType::SOLID));
@@ -724,6 +742,12 @@ class BlockBuilder
             $this->addComponent(new LightDampeningBlockComponent(max(0, 1 - $block->getLightFilter())));
             $this->addComponent(new EntityFallOnBlockComponent(3));
             $this->addComponent(new InstrumentSoundBlockComponent(NoteInstrument::from($block)));
+            $this->addComponent(new MovableBlockComponent(MovementType::from($block), StickyType::from($block)));
+            $this->addComponent(new PrecipitationInteractionsBlockComponent(match(true) {
+                $block instanceof Flowable => PrecipitationType::OBSTRUCT_RAIN_ACCUMULATE_SNOW,
+                $block->isSolid(), $block instanceof Transparent => PrecipitationType::OBRAIN,
+                default => PrecipitationType::NONE
+            }));
             $this->addComponent(new MaterialInstancesBlockComponent([new Material($this->getName(), renderMethod: match(true) {
                 $block->isTransparent() => RenderMethod::ALPHA_TEST_SINGLE_SIDED,
                 $block instanceof Opaque => RenderMethod::OPAQUE,
@@ -736,36 +760,40 @@ class BlockBuilder
             if ($block->canBeReplaced()) {
                 $this->addComponent(new ReplaceableBlockComponent());
             }
+            if ($block->ticksRandomly()) {
+                $this->addComponent(new TickBlockComponent());
+            }
 
+            if ($block instanceof PoweredByRedstone) {
+                $this->addComponent(new RedstoneConductivityBlockComponent(redstoneConductor: true));
+            }
+            if ($block instanceof AnalogRedstoneSignalEmitter) {
+                $this->addComponent(new RedstoneProducerBlockComponent($block->getOutputSignalStrength()));
+            }
             if ($block instanceof Flowable) {
                 $this->addComponent(new ConnectionRuleComponent());
             }
             if ($block instanceof CraftingTable) {
-                $this->addComponent(new CraftingTableBlockComponent(["crafting_table"]));
+                $this->addComponent(new CraftingTableBlockComponent(["crafting_table"], 3));
             }
             if ($block instanceof Grass) {
                 $this->addComponent(new MapColorBlockComponent("#7CBA46", TintMethod::from($this)));
-            } else if ($block instanceof Colored) {
+            } elseif ($block instanceof Colored) {
                 $color = $block->getColor()->getRgbValue();
-                $this->addComponent(new MapColorBlockComponent([$color->getR(), $color->getG(), $color->getB()], TintMethod::from($this)));
+                $this->addComponent(new MapColorBlockComponent([$color->getR(), $color->getG(), $color->getB()], TintMethod::from($block)));
             }
 
-            $tile = $block->getIdInfo()->getTileClass();
-            if ($tile !== null) {
-                if (!TileFactory::getInstance()->isRegistered($tile)) {
-                    throw new \InvalidArgumentException("Tile class '{$tile}' is not registered");
-                }
-
-                $containerSlotCount = null;
-
-                /** @var Tile $tile */
-                $tile = new $tile(Server::getInstance()->getWorldManager()->getDefaultWorld(), Vector3::zero());
-                if ($tile instanceof Container) {
-                    $containerSlotCount = $tile->getInventory()->getSize();
-                    $this->addComponent(new OnInteractBlockComponent());
-                }
-
+            $containerSlotCount = null;
+            if (ComponentHelper::hasTile($block, $containerSlotCount)) {
                 $this->addComponent(new BlockEntityBlockComponent(true, $containerSlotCount));
+            }
+            if (ComponentHelper::hasInteract($block)) {
+                $this->addComponent(new OnInteractBlockComponent());
+            }
+
+            $shape = SupportShape::from($block);
+            if ($shape !== null) {
+                $this->addComponent(new SupportBlockComponent($shape));
             }
 
             $this->addComponent(new SelectionBoxBlockComponent(true));
@@ -774,8 +802,10 @@ class BlockBuilder
 
         $ev = new BlockLoaderEvent($this, $block);
         $ev->trigger();
-        if (!$ev->isAffected() && $autoload) {
-            $this->detectDefaultComponent($block); // Detect known block types and apply default components
+        if (!$async) {
+            if (!$ev->isAffected() && $autoload) {
+                $this->detectDefaultComponent($block); // Detect known block types and apply default components
+            }
         }
 
         $reflection = new ReflectionClass($block);
@@ -785,6 +815,11 @@ class BlockBuilder
                 $instance = $attribute->newInstance();
                 if ($instance instanceof BlockComponent) {
                     $this->addComponent($instance);
+                }
+                if ($instance instanceof UseDefaultVisual) {
+                    $geometry = $this->getComponent(BlockComponentIds::GEOMETRY);
+                    $material = $this->getComponent(BlockComponentIds::MATERIAL_INSTANCES);
+                    $this->addComponent(new ItemVisualBlockComponent(is_null($instance->getGeometry()) ? $geometry : new GeometryBlockComponent($instance->getGeometry()), $material));
                 }
             }
         }
