@@ -8,8 +8,6 @@ use Nexly\Blocks\NexlyBlocks;
 use Nexly\Blocks\Permutations\BlockProperty;
 use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Blocks\Traits\BlockTrait;
-use Nexly\Blocks\Traits\TraitId;
-use Nexly\Blocks\Traits\TraitState;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
@@ -89,24 +87,18 @@ class AsyncRegisterBlocksTask extends AsyncTask
                     throw new \InvalidArgumentException("Invalid identifier for trait " . $identifier);
                 }
 
-                $rotationOffset = $trait["rotationOffset"] ?? null;
-                if (!is_numeric($rotationOffset)) {
-                    throw new \InvalidArgumentException("Invalid rotationOffset for trait " . $rotationOffset);
+                $nbt = $trait["nbt"] ?? null;
+                if (!is_string($nbt)) {
+                    throw new \InvalidArgumentException("Invalid nbt for trait " . $identifier);
                 }
 
-                $state = $trait["state"] ?? null;
-                if (!is_array($state)) {
-                    throw new \InvalidArgumentException("Invalid state for trait " . $state);
-                }
-
-                $builder->addTrait(new BlockTrait(
-                    TraitId::fromString($identifier),
-                    TraitState::fromNBT((new NetworkNbtSerializer())->read(base64_decode($state))->getTag()),
-                    $rotationOffset
+                $builder->addTrait(BlockTrait::fromNBT(
+                    $identifier,
+                    (new NetworkNbtSerializer())->read(base64_decode($nbt))->getTag()
                 ));
             }
 
-            $builder->register(false, false);
+            $builder->register(false, false, true);
         }
 
         // Sort the block palette

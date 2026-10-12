@@ -5,8 +5,8 @@ namespace Nexly\Blocks\Mappers;
 use Nexly\Blocks\BlockBuilder as Builder;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialTarget;
 use Nexly\Blocks\Components\Types\RenderMethod;
+use Nexly\Blocks\Components\Types\Target;
 use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Helpers\MolangHelper;
 use pocketmine\block\Block;
@@ -24,7 +24,7 @@ class FarmlandBlockMapper extends BlockMapper
             ->addComponent(new MaterialInstancesBlockComponent([
                 new Material(
                     texture: $builder->getName() . ($isWet ? "_wet" : "_dry"),
-                    target: MaterialTarget::UP,
+                    target: Target::UP,
                     renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
                 )
             ]));

@@ -18,10 +18,10 @@ use Nexly\Blocks\Components\Types\BoxCollision;
 use Nexly\Blocks\Components\Types\CullingType;
 use Nexly\Blocks\Components\Types\Geometry;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialTarget;
 use Nexly\Blocks\Components\Types\NexlyGeometry;
 use Nexly\Blocks\Components\Types\RangeOffset;
 use Nexly\Blocks\Components\Types\RenderMethod;
+use Nexly\Blocks\Components\Types\Target;
 use Nexly\Blocks\Mappers\AgeableBlockMapper;
 use Nexly\Blocks\Mappers\DoorBlockMapper;
 use Nexly\Blocks\Mappers\FarmlandBlockMapper;
@@ -99,8 +99,8 @@ class BlockCreator
             default => NexlyGeometry::CROP
         });
 
-        $builder->mapSerializer(static fn (Crops $block): Writer => SerializerHelper::encodeAgeable($block, new Writer($stringId)));
-        $builder->mapDeserializer(static fn (Reader $in): Ageable => DeserializerHelper::decodeAgeable(clone $block, $in));
+        $builder->mapSerializer(static fn (Ageable $block): Writer => SerializerHelper::encodeAgeable($block, new Writer($stringId)));
+        $builder->mapDeserializer(static fn (Reader $in): Block => DeserializerHelper::decodeAgeable(clone $block, $in));
 
         $builder->addProperty(new Property(StateNames::AGE, range(0, $block::MAX_AGE)));
         $builder->addComponent(new GeometryBlockComponent($geometry));
@@ -143,7 +143,12 @@ class BlockCreator
         $builder->addProperty(new Property(StateNames::PERSISTENT_BIT, PropertyHelper::BOOL));
         $builder->addProperty(new Property(StateNames::UPDATE_BIT, PropertyHelper::BOOL));
 
-        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::ALPHA_TEST)]));
+        $builder->addComponent(new MaterialComponent([new Material(
+            texture: $builder->getName(),
+            renderMethod: RenderMethod::ALPHA_TEST,
+            ambientOcclusion: 0.80,
+            isotropic: true,
+        )]));
     }
 
     /**
@@ -158,17 +163,17 @@ class BlockCreator
         $materials = [
             new Material(
                 texture: $builder->getName() . "_top",
-                target: MaterialTarget::UP,
+                target: Target::UP,
                 renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             ),
             new Material(
                 texture: $builder->getName() . "_bottom",
-                target: MaterialTarget::DOWN,
+                target: Target::DOWN,
                 renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             ),
             new Material(
                 texture: $builder->getName() . "_side",
-                target: MaterialTarget::ALL,
+                target: Target::ALL,
                 renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ];
@@ -473,12 +478,12 @@ class BlockCreator
         );
 
         $builder->addComponent(new MaterialComponent([
-            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_inside", target: MaterialTarget::DOWN, renderMethod: RenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::NORTH, renderMethod: RenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::SOUTH, renderMethod: RenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::WEST, renderMethod: RenderMethod::ALPHA_TEST),
-            new Material($builder->getName() . "_outside", target: MaterialTarget::EAST, renderMethod: RenderMethod::ALPHA_TEST)
+            new Material($builder->getName() . "_top", target: Target::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_inside", target: Target::DOWN, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: Target::NORTH, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: Target::SOUTH, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: Target::WEST, renderMethod: RenderMethod::ALPHA_TEST),
+            new Material($builder->getName() . "_outside", target: Target::EAST, renderMethod: RenderMethod::ALPHA_TEST)
         ]));
     }
 
@@ -569,7 +574,7 @@ class BlockCreator
         $builder->addComponent(new MaterialComponent([
             new Material(
                 texture: $builder->getName() . "_side",
-                target: MaterialTarget::ALL,
+                target: Target::ALL,
                 renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
             )
         ]));
@@ -627,12 +632,44 @@ class BlockCreator
         $builder->addProperty(new Property(StateNames::MC_CONNECTION_WEST, PropertyHelper::BOOL));
         $builder->addProperty(new Property(StateNames::MC_CONNECTION_EAST, PropertyHelper::BOOL));
 
+        $n = MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, true);
+        $s = MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, true);
+        $w = MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, true);
+        $e = MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, true);
+
+        $notN = MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, false);
+        $notS = MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, false);
+        $notW = MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, false);
+        $notE = MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, false);
+
+        $straightNS = MolangHelper::and($n, $s);
+        $straightEW = MolangHelper::and($e, $w);
+
+        $onlyN = MolangHelper::and($n, $notS, $notE, $notW);
+        $onlyS = MolangHelper::and($s, $notN, $notE, $notW);
+        $onlyE = MolangHelper::and($e, $notN, $notS, $notW);
+        $onlyW = MolangHelper::and($w, $notN, $notS, $notE);
+
+        $noConnections = MolangHelper::and($notN, $notS, $notE, $notW);
+        $hasNS = MolangHelper::or($n, $s);
+        $hasEW = MolangHelper::or($e, $w);
+
+        $isCorner = MolangHelper::and($hasNS, $hasEW, MolangHelper::not($straightNS), MolangHelper::not($straightEW));
+        $showBone = MolangHelper::or($noConnections, $isCorner);
+
         $builder->addComponent(
             $geometryComponent = (new GeometryBlockComponent(NexlyGeometry::GLASS_PANE))
-                ->add("n", MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, true))
-                ->add("s", MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, true))
-                ->add("w", MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, true))
-                ->add("e", MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, true))
+                ->add("bone", $showBone)
+                ->add("straight_ns", $straightNS)
+                ->add("straight_ew", $straightEW)
+                ->add("end_n", $onlyN)
+                ->add("end_s", $onlyS)
+                ->add("end_e", $onlyE)
+                ->add("end_w", $onlyW)
+                ->add("n", MolangHelper::and($n, MolangHelper::not($straightNS), MolangHelper::not($onlyN)))
+                ->add("s", MolangHelper::and($s, MolangHelper::not($straightNS), MolangHelper::not($onlyS)))
+                ->add("e", MolangHelper::and($e, MolangHelper::not($straightEW), MolangHelper::not($onlyE)))
+                ->add("w", MolangHelper::and($w, MolangHelper::not($straightEW), MolangHelper::not($onlyW)))
         );
         $builder->addComponent($material = new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::BLEND)]));
         $builder->addComponent(new ItemVisualBlockComponent(new GeometryBlockComponent(NexlyGeometry::GLASS_PANE . "_render"), $material));
@@ -694,9 +731,9 @@ class BlockCreator
     {
         $builder->addComponent(new GeometryBlockComponent(NexlyGeometry::CACTUS));
         $builder->addComponent(new MaterialComponent([
-            new Material($builder->getName() . "_top", target: MaterialTarget::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_bottom", target: MaterialTarget::DOWN, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
-            new Material($builder->getName() . "_side", target: MaterialTarget::ALL, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_top", target: Target::UP, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_bottom", target: Target::DOWN, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
+            new Material($builder->getName() . "_side", target: Target::ALL, renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED),
         ]));
         $builder->addComponent(new SelectionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
         $builder->addComponent(new CollisionBoxBlockComponent(true, [new BoxCollision(new Vector3(-7.0, 0.0, -7.0), new Vector3(14.0, 16.0, 14.0))]));
@@ -717,7 +754,7 @@ class BlockCreator
         ));
         $builder->mapDeserializer(static fn (Reader $in): Glass => clone $block);
 
-
+        $builder->addComponent(new MaterialComponent([new Material($builder->getName(), renderMethod: RenderMethod::BLEND)]));
         $builder->addComponent(new GeometryBlockComponent(identifier: NexlyGeometry::GLASS, cullingType: CullingType::GLASS));
     }
 

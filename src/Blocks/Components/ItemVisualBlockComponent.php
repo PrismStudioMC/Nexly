@@ -9,12 +9,12 @@ use pocketmine\nbt\tag\CompoundTag;
 class ItemVisualBlockComponent extends BlockComponent
 {
     /**
-     * @param GeometryBlockComponent $geometry
-     * @param MaterialInstancesBlockComponent $material
+     * @param GeometryBlockComponent|AsyncBlockComponent $geometry
+     * @param MaterialInstancesBlockComponent|AsyncBlockComponent $material
      */
     public function __construct(
-        protected GeometryBlockComponent $geometry,
-        protected MaterialInstancesBlockComponent $material
+        protected GeometryBlockComponent|AsyncBlockComponent $geometry,
+        protected MaterialInstancesBlockComponent|AsyncBlockComponent $material
     ) {
     }
 

@@ -31,8 +31,8 @@ class WallBlockMapper extends BlockMapper
         $hasE = $states[StateNames::WALL_CONNECTION_TYPE_EAST] !== $none;
         $hasPost = $states[StateNames::WALL_POST_BIT];
 
-        $minX = $hasW ? -8 : -4;
-        $maxX = $hasE ? 8 : 4;
+        $minX = $hasE ? -8 : -4;
+        $maxX = $hasW ? 8 : 4;
         $minZ = $hasN ? -8 : -4;
         $maxZ = $hasS ? 8 : 4;
 

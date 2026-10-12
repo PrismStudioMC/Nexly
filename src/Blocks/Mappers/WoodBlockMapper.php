@@ -6,8 +6,8 @@ use Nexly\Blocks\BlockBuilder as Builder;
 use Nexly\Blocks\Components\MaterialInstancesBlockComponent;
 use Nexly\Blocks\Components\TransformationBlockComponent;
 use Nexly\Blocks\Components\Types\Material;
-use Nexly\Blocks\Components\Types\MaterialTarget;
 use Nexly\Blocks\Components\Types\RenderMethod;
+use Nexly\Blocks\Components\Types\Target;
 use Nexly\Blocks\Permutations\Permutation;
 use Nexly\Helpers\MolangHelper;
 use pocketmine\block\Block;
@@ -38,17 +38,17 @@ class WoodBlockMapper extends BlockMapper
             ->addComponent(new MaterialInstancesBlockComponent([
                 new Material(
                     texture: $builder->getName() . "_top",
-                    target: MaterialTarget::UP,
+                    target: Target::UP,
                     renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
                 ),
                 new Material(
                     texture: $builder->getName() . "_top",
-                    target: MaterialTarget::DOWN,
+                    target: Target::DOWN,
                     renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
                 ),
                 new Material(
                     texture: $builder->getName() . "_side",
-                    target: MaterialTarget::ALL,
+                    target: Target::ALL,
                     renderMethod: RenderMethod::ALPHA_TEST_SINGLE_SIDED
                 )
             ]));

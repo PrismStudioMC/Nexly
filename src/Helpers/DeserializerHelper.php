@@ -3,6 +3,7 @@
 namespace Nexly\Helpers;
 
 use Nexly\Blocks\Vanilla\HeadBlock;
+use pocketmine\block\Block;
 use pocketmine\block\Farmland;
 use pocketmine\block\Fence;
 use pocketmine\block\Furnace;
@@ -28,10 +29,14 @@ class DeserializerHelper
     /**
      * @param Ageable $block
      * @param BlockStateReader $in
-     * @return Ageable
+     * @return Block
      */
-    public static function decodeAgeable(Ageable $block, BlockStateReader $in): Ageable
+    public static function decodeAgeable(Ageable $block, BlockStateReader $in): Block
     {
+        if (!$block instanceof Block) {
+            throw new RuntimeException("Deserializer requires Block object.");
+        }
+
         return $block->setAge($in->readBoundedInt(StateNames::AGE, 0, $block::MAX_AGE));
     }
 

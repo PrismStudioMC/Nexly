@@ -20,8 +20,7 @@ class FlammableBlockComponent extends BlockComponent
         protected int    $catchChanceModifier = 5,
         protected int    $destroyChanceModifier = 20,
         protected string $lavaFlammable = LavaFlammability::NEVER,
-    )
-    {
+    ) {
         if ($catchChanceModifier < 0 || $destroyChanceModifier < 0) {
             throw new \InvalidArgumentException("Flammability modifiers cannot be negative.");
         }

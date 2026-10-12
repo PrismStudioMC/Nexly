@@ -65,9 +65,8 @@ class GeometryBlockComponent extends BlockComponent
     {
         $this->boneVisibility->setTag(
             $boneName,
-            is_bool($visibility) ?
-                new ByteTag($visibility) : CompoundTag::create()
-                ->setString("expression", $visibility)
+            CompoundTag::create()
+                ->setString("expression", is_bool($visibility) ? strval((int)$visibility) : $visibility)
                 ->setShort("version", 12)
         );
         return $this;

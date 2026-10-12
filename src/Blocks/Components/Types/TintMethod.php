@@ -20,9 +20,9 @@ class TintMethod
 
     /**
      * @param Block $block
-     * @return string
+     * @return string|null
      */
-    public static function from(Block $block): string
+    public static function from(Block $block): ?string
     {
         return match(true) {
             $block instanceof Grass => TintMethod::GRASS,

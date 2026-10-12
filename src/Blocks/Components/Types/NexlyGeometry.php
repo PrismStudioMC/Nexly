@@ -2,7 +2,7 @@
 
 namespace Nexly\Blocks\Components\Types;
 
-class NexlyGeometry extends Geometry
+class NexlyGeometry
 {
     public const CROP = "geometry.crop";
     public const NETHER_WART = "geometry.nether_wart";

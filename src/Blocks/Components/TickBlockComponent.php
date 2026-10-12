@@ -17,8 +17,8 @@ class TickBlockComponent extends BlockComponent
      * @param bool $looping
      */
     public function __construct(
-        protected int  $min,
-        protected int  $max,
+        protected int $min = 20,
+        protected int $max = 60,
         protected bool $looping = true
     ) {
     }

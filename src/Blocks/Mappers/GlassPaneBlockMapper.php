@@ -21,33 +21,37 @@ class GlassPaneBlockMapper extends BlockMapper
         $w = $states[StateNames::MC_CONNECTION_WEST];
         $e = $states[StateNames::MC_CONNECTION_EAST];
 
+        $minX = $e ? -8 : -1;
+        $maxX = $w ? 8 : 1;
+
+        $minZ = $n ? -8 : -1;
+        $maxZ = $s ? 8 : 1;
+
+        $selectionBox = new BoxCollision(
+            new Vector3($minX, 0, $minZ),
+            new Vector3($maxX - $minX, 16, $maxZ - $minZ)
+        );
+
+        $collisions = [];
+
+        if ($n || $s) {
+            $collisions[] = new BoxCollision(new Vector3(-1, 0, $minZ), new Vector3(2, 16, $maxZ - $minZ));
+        }
+        if ($w || $e) {
+            $collisions[] = new BoxCollision(new Vector3($minX, 0, -1), new Vector3($maxX - $minX, 16, 2));
+        }
+        if (!$n && !$s && !$w && !$e) {
+            $collisions[] = new BoxCollision(new Vector3(-1, 0, -1), new Vector3(2, 16, 2));
+        }
+
         $expr = MolangHelper::and(
             MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, $n),
             MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, $s),
             MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, $w),
             MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, $e)
         );
-
-        $minX = $w ? -8 : -1;
-        $maxX = $e ? 8 : 1;
-        $minZ = $n ? -8 : -1;
-        $maxZ = $s ? 8 : 1;
-
-        $boxes = [];
-
-        if ($n || $s) {
-            $boxes[] = new BoxCollision(new Vector3(-1, 0, $minZ), new Vector3(2, 16, $maxZ - $minZ));
-        }
-        if ($w || $e) {
-            $boxes[] = new BoxCollision(new Vector3($minX, 0, -1), new Vector3($maxX - $minX, 16, 2));
-        }
-
-        if (!$n && !$s && !$w && !$e) {
-            $boxes[] = new BoxCollision(new Vector3(-1, 0, -1), new Vector3(2, 16, 2));
-        }
-
         return Permutation::create($expr)
-            ->addComponent(new CollisionBoxBlockComponent(true, $boxes))
-            ->addComponent(new SelectionBoxBlockComponent(true, $boxes));
+            ->addComponent(new CollisionBoxBlockComponent(true, $collisions))
+            ->addComponent(new SelectionBoxBlockComponent(true, [$selectionBox]));
     }
 }

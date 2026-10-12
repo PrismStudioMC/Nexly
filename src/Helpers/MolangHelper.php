@@ -163,8 +163,12 @@ class MolangHelper
     public static function and(string ...$expressions): string
     {
         $filtered = array_filter($expressions, fn (string $expr) => $expr !== "");
-        if (count($filtered) === 0) return "";
-        if (count($filtered) === 1) return reset($filtered);
+        if (count($filtered) === 0) {
+            return "";
+        }
+        if (count($filtered) === 1) {
+            return reset($filtered);
+        }
 
         return "(" . implode(") && (", $filtered) . ")";
     }
@@ -176,8 +180,12 @@ class MolangHelper
     public static function or(string ...$expressions): string
     {
         $filtered = array_filter($expressions, fn (string $expr) => $expr !== "");
-        if (count($filtered) === 0) return "";
-        if (count($filtered) === 1) return reset($filtered);
+        if (count($filtered) === 0) {
+            return "";
+        }
+        if (count($filtered) === 1) {
+            return reset($filtered);
+        }
 
         return "(" . implode(") || (", $filtered) . ")";
     }
@@ -188,7 +196,9 @@ class MolangHelper
      */
     public static function not(string $expression): string
     {
-        if ($expression === "") return "";
+        if ($expression === "") {
+            return "";
+        }
         return "!(" . $expression . ")";
     }
 
