@@ -1,30 +1,44 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Blocks\Components\Types;
 
 use pocketmine\math\Vector3;
 
 class RangeOffset
 {
-    public function __construct(
-        protected Vector3 $min,
-        protected Vector3 $max,
-    ) {
-    }
+	public function __construct(
+		protected Vector3 $min,
+		protected Vector3 $max,
+	) {
+	}
 
-    /**
-     * @return Vector3
-     */
-    public function getMin(): Vector3
-    {
-        return $this->min;
-    }
+	public function getMin() : Vector3
+	{
+		return $this->min;
+	}
 
-    /**
-     * @return Vector3
-     */
-    public function getMax(): Vector3
-    {
-        return $this->max;
-    }
+	public function getMax() : Vector3
+	{
+		return $this->max;
+	}
 }

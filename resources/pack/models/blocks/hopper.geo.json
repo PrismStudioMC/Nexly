@@ -5,10 +5,7 @@
 			"description": {
 				"identifier": "geometry.hopper",
 				"texture_width": 16,
-				"texture_height": 16,
-				"visible_bounds_width": 2,
-				"visible_bounds_height": 2.5,
-				"visible_bounds_offset": [0, 0.75, 0]
+				"texture_height": 16
 			},
 			"bones": [
 				{

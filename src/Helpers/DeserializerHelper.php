@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Helpers;
 
 use Nexly\Blocks\Vanilla\HeadBlock;
@@ -26,187 +46,132 @@ use RuntimeException;
 
 class DeserializerHelper
 {
-    /**
-     * @param Ageable $block
-     * @param BlockStateReader $in
-     * @return Block
-     */
-    public static function decodeAgeable(Ageable $block, BlockStateReader $in): Block
-    {
-        if (!$block instanceof Block) {
-            throw new RuntimeException("Deserializer requires Block object.");
-        }
+	public static function decodeAgeable(Ageable $block, BlockStateReader $in) : Block
+	{
+		if (!$block instanceof Block) {
+			throw new RuntimeException("Deserializer requires Block object.");
+		}
 
-        return $block->setAge($in->readBoundedInt(StateNames::AGE, 0, $block::MAX_AGE));
-    }
+		return $block->setAge($in->readBoundedInt(StateNames::AGE, 0, $block::MAX_AGE));
+	}
 
-    /**
-     * @param Stair $block
-     * @param BlockStateReader $in
-     * @return Stair
-     */
-    public static function decodeStair(Stair $block, BlockStateReader $in): Stair
-    {
-        return $block
-            ->setUpsideDown($in->readBool(StateNames::UPSIDE_DOWN_BIT))
-            ->setFacing($in->read5MinusHorizontalFacing())
-            ->setShape(match ($in->readString(StateNames::MC_CORNER)) {
-                StateValues::MC_CORNER_INNER_LEFT => StairShape::INNER_LEFT(),
-                StateValues::MC_CORNER_INNER_RIGHT => StairShape::INNER_RIGHT(),
-                StateValues::MC_CORNER_OUTER_LEFT => StairShape::OUTER_LEFT(),
-                StateValues::MC_CORNER_OUTER_RIGHT => StairShape::OUTER_RIGHT(),
-                default => StairShape::STRAIGHT,
-            });
-    }
+	public static function decodeStair(Stair $block, BlockStateReader $in) : Stair
+	{
+		return $block
+			->setUpsideDown($in->readBool(StateNames::UPSIDE_DOWN_BIT))
+			->setFacing($in->read5MinusHorizontalFacing())
+			->setShape(match ($in->readString(StateNames::MC_CORNER)) {
+				StateValues::MC_CORNER_INNER_LEFT => StairShape::INNER_LEFT(),
+				StateValues::MC_CORNER_INNER_RIGHT => StairShape::INNER_RIGHT(),
+				StateValues::MC_CORNER_OUTER_LEFT => StairShape::OUTER_LEFT(),
+				StateValues::MC_CORNER_OUTER_RIGHT => StairShape::OUTER_RIGHT(),
+				default => StairShape::STRAIGHT,
+			});
+	}
 
-    /**
-     * @param Slab $block
-     * @param BlockStateReader $in
-     * @return Slab
-     */
-    public static function decodeSlab(Slab $block, BlockStateReader $in): Slab
-    {
-        return $block
-            ->setSlabType(match ($in->readString(StateNames::MC_VERTICAL_HALF)) {
-                StateValues::MC_VERTICAL_HALF_BOTTOM => SlabType::BOTTOM,
-                StateValues::MC_VERTICAL_HALF_TOP => SlabType::TOP,
-                "double" => SlabType::DOUBLE,
-                default => throw new RuntimeException("Invalid slab type"),
-            });
-    }
+	public static function decodeSlab(Slab $block, BlockStateReader $in) : Slab
+	{
+		return $block
+			->setSlabType(match ($in->readString(StateNames::MC_VERTICAL_HALF)) {
+				StateValues::MC_VERTICAL_HALF_BOTTOM => SlabType::BOTTOM,
+				StateValues::MC_VERTICAL_HALF_TOP => SlabType::TOP,
+				"double" => SlabType::DOUBLE,
+				default => throw new RuntimeException("Invalid slab type"),
+			});
+	}
 
-    /**
-     * @param Fence $block
-     * @param BlockStateReader $in
-     * @return Fence
-     */
-    public static function decodeFence(Fence $block, BlockStateReader $in): Fence
-    {
-        $co = [];
+	public static function decodeFence(Fence $block, BlockStateReader $in) : Fence
+	{
+		$co = [];
 
-        if ($in->readBool("minecraft:connection_north")) {
-            $co[Facing::NORTH] = Facing::NORTH;
-        }
-        if ($in->readBool("minecraft:connection_south")) {
-            $co[Facing::SOUTH] = Facing::SOUTH;
-        }
-        if ($in->readBool("minecraft:connection_west")) {
-            $co[Facing::WEST] = Facing::WEST;
-        }
-        if ($in->readBool("minecraft:connection_east")) {
-            $co[Facing::EAST] = Facing::EAST;
-        }
+		if ($in->readBool("minecraft:connection_north")) {
+			$co[Facing::NORTH] = Facing::NORTH;
+		}
+		if ($in->readBool("minecraft:connection_south")) {
+			$co[Facing::SOUTH] = Facing::SOUTH;
+		}
+		if ($in->readBool("minecraft:connection_west")) {
+			$co[Facing::WEST] = Facing::WEST;
+		}
+		if ($in->readBool("minecraft:connection_east")) {
+			$co[Facing::EAST] = Facing::EAST;
+		}
 
-        $reflection = new ReflectionClass(Fence::class);
-        $connections = $reflection->getProperty("connections");
-        $connections->setValue($block, $co);
-        return $block;
-    }
+		$reflection = new ReflectionClass(Fence::class);
+		$connections = $reflection->getProperty("connections");
+		$connections->setValue($block, $co);
+		return $block;
+	}
 
-    /**
-     * @param Hopper $block
-     * @param BlockStateReader $in
-     * @return Hopper
-     */
-    public static function decodeHopper(Hopper $block, BlockStateReader $in): Hopper
-    {
-        return $block
-            ->setPowered($in->readBool(StateNames::TOGGLE_BIT))
-            ->setFacing($in->readFacingWithoutUp());
-    }
+	public static function decodeHopper(Hopper $block, BlockStateReader $in) : Hopper
+	{
+		return $block
+			->setPowered($in->readBool(StateNames::TOGGLE_BIT))
+			->setFacing($in->readFacingWithoutUp());
+	}
 
-    /**
-     * @param Furnace $block
-     * @param BlockStateReader $in
-     * @return Furnace
-     */
-    public static function decodeFurnace(Furnace $block, BlockStateReader $in): Furnace
-    {
-        return $block->setFacing($in->readCardinalHorizontalFacing());
-    }
+	public static function decodeFurnace(Furnace $block, BlockStateReader $in) : Furnace
+	{
+		return $block->setFacing($in->readCardinalHorizontalFacing());
+	}
 
-    /**
-     * @param HeadBlock $block
-     * @param BlockStateReader $in
-     * @return HeadBlock
-     */
-    public static function decodeHeadBlock(HeadBlock $block, BlockStateReader $in): HeadBlock
-    {
-        return $block
-            ->setRotation($in->readInt(StateNames::ROTATION))
-            ->setFacing($in->readFacingWithoutDown());
-    }
+	public static function decodeHeadBlock(HeadBlock $block, BlockStateReader $in) : HeadBlock
+	{
+		return $block
+			->setRotation($in->readInt(StateNames::ROTATION))
+			->setFacing($in->readFacingWithoutDown());
+	}
 
-    /**
-     * @param Ladder $block
-     * @param BlockStateReader $in
-     * @return Ladder
-     */
-    public static function decodeLadder(Ladder $block, BlockStateReader $in): Ladder
-    {
-        return $block
-            ->setFacing($in->readHorizontalFacing());
-    }
+	public static function decodeLadder(Ladder $block, BlockStateReader $in) : Ladder
+	{
+		return $block
+			->setFacing($in->readHorizontalFacing());
+	}
 
-    /**
-     * @param Farmland $block
-     * @param BlockStateReader $in
-     * @return Farmland
-     */
-    public static function decodeFarmland(Farmland $block, BlockStateReader $in): Farmland
-    {
-        return $block
-            ->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT));
-    }
+	public static function decodeFarmland(Farmland $block, BlockStateReader $in) : Farmland
+	{
+		return $block
+			->setWetness($in->readInt(StateNames::MOISTURIZED_AMOUNT));
+	}
 
-    /**
-     * @param GlassPane $block
-     * @param BlockStateReader $in
-     * @return GlassPane
-     */
-    public static function decodeGlassPane(GlassPane $block, BlockStateReader $in): GlassPane
-    {
-        $co = [];
+	public static function decodeGlassPane(GlassPane $block, BlockStateReader $in) : GlassPane
+	{
+		$co = [];
 
-        if ($in->readInt(StateNames::MC_CONNECTION_NORTH)) {
-            $co[Facing::NORTH] = Facing::NORTH;
-        }
-        if ($in->readInt(StateNames::MC_CONNECTION_SOUTH)) {
-            $co[Facing::SOUTH] = Facing::SOUTH;
-        }
-        if ($in->readInt(StateNames::MC_CONNECTION_WEST)) {
-            $co[Facing::WEST] = Facing::WEST;
-        }
-        if ($in->readInt(StateNames::MC_CONNECTION_EAST)) {
-            $co[Facing::EAST] = Facing::EAST;
-        }
+		if ($in->readInt(StateNames::MC_CONNECTION_NORTH)) {
+			$co[Facing::NORTH] = Facing::NORTH;
+		}
+		if ($in->readInt(StateNames::MC_CONNECTION_SOUTH)) {
+			$co[Facing::SOUTH] = Facing::SOUTH;
+		}
+		if ($in->readInt(StateNames::MC_CONNECTION_WEST)) {
+			$co[Facing::WEST] = Facing::WEST;
+		}
+		if ($in->readInt(StateNames::MC_CONNECTION_EAST)) {
+			$co[Facing::EAST] = Facing::EAST;
+		}
 
-        $reflection = new ReflectionClass(GlassPane::class);
-        $connections = $reflection->getProperty("connections");
-        $connections->setValue($block, $co);
+		$reflection = new ReflectionClass(GlassPane::class);
+		$connections = $reflection->getProperty("connections");
+		$connections->setValue($block, $co);
 
-        return $block;
-    }
+		return $block;
+	}
 
-    /**
-     * @param Lever $block
-     * @param BlockStateReader $in
-     * @return Lever
-     */
-    public static function decodeLever(Lever $block, BlockStateReader $in): Lever
-    {
-        return (clone $block)
-            ->setActivated($in->readBool(StateNames::OPEN_BIT))
-            ->setFacing(match($in->readString(StateNames::LEVER_DIRECTION)) {
-                StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => LeverFacing::DOWN_AXIS_Z,
-                StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => LeverFacing::DOWN_AXIS_X,
-                StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => LeverFacing::UP_AXIS_Z,
-                StateValues::LEVER_DIRECTION_UP_EAST_WEST => LeverFacing::UP_AXIS_X,
-                StateValues::LEVER_DIRECTION_NORTH => LeverFacing::NORTH,
-                StateValues::LEVER_DIRECTION_SOUTH => LeverFacing::SOUTH,
-                StateValues::LEVER_DIRECTION_WEST => LeverFacing::WEST,
-                StateValues::LEVER_DIRECTION_EAST => LeverFacing::EAST,
-                default => throw new RuntimeException("Invalid lever direction"),
-            });
-    }
+	public static function decodeLever(Lever $block, BlockStateReader $in) : Lever
+	{
+		return (clone $block)
+			->setActivated($in->readBool(StateNames::OPEN_BIT))
+			->setFacing(match($in->readString(StateNames::LEVER_DIRECTION)) {
+				StateValues::LEVER_DIRECTION_DOWN_NORTH_SOUTH => LeverFacing::DOWN_AXIS_Z,
+				StateValues::LEVER_DIRECTION_DOWN_EAST_WEST => LeverFacing::DOWN_AXIS_X,
+				StateValues::LEVER_DIRECTION_UP_NORTH_SOUTH => LeverFacing::UP_AXIS_Z,
+				StateValues::LEVER_DIRECTION_UP_EAST_WEST => LeverFacing::UP_AXIS_X,
+				StateValues::LEVER_DIRECTION_NORTH => LeverFacing::NORTH,
+				StateValues::LEVER_DIRECTION_SOUTH => LeverFacing::SOUTH,
+				StateValues::LEVER_DIRECTION_WEST => LeverFacing::WEST,
+				StateValues::LEVER_DIRECTION_EAST => LeverFacing::EAST,
+				default => throw new RuntimeException("Invalid lever direction"),
+			});
+	}
 }

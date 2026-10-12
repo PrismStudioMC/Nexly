@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Items\Components\DataDriven\Property;
 
 use Attribute;
@@ -8,26 +28,21 @@ use pocketmine\nbt\tag\FloatTag;
 #[Attribute(Attribute::TARGET_CLASS)]
 class MiningSpeedProperty extends PropertyItemComponent
 {
-    public function __construct(
-        protected float $speed
-    ) {
-    }
+	public function __construct(
+		protected float $speed
+	) {
+	}
 
-    /**
-     * The name of the component.
-     *
-     * @return string
-     */
-    public static function getName(): string
-    {
-        return PropertyComponentIds::MINING_SPEED->getValue();
-    }
+	/**
+	 * The name of the component.
+	 */
+	public static function getName() : string
+	{
+		return PropertyComponentIds::MINING_SPEED->getValue();
+	}
 
-    /**
-     * @return FloatTag
-     */
-    public function toNBT(): FloatTag
-    {
-        return new FloatTag($this->speed);
-    }
+	public function toNBT() : FloatTag
+	{
+		return new FloatTag($this->speed);
+	}
 }

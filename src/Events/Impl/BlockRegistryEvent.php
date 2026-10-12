@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Events\Impl;
 
 use Nexly\Blocks\BlockBuilder;
@@ -9,37 +29,22 @@ use Nexly\Items\Creative\CreativeInfo;
 
 class BlockRegistryEvent extends Event
 {
-    protected int $count = 0;
+	protected int $count = 0;
 
-    /**
-     * @param string $stringId
-     * @param \Closure $block
-     * @param CreativeInfo|null $creativeInfo
-     * @return BlockBuilder
-     */
-    public function register(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null): BlockBuilder
-    {
-        $this->count++;
-        return NexlyBlocks::register($stringId, $block, $creativeInfo);
-    }
+	public function register(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null) : BlockBuilder
+	{
+		$this->count++;
+		return NexlyBlocks::register($stringId, $block, $creativeInfo);
+	}
 
-    /**
-     * @param string $stringId
-     * @param \Closure $block
-     * @param CreativeInfo|null $creativeInfo
-     * @return BlockBuilder
-     */
-    public function build(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null): BlockBuilder
-    {
-        $this->count++;
-        return NexlyBlocks::buildComplex($stringId, $block, $creativeInfo);
-    }
+	public function build(string $stringId, \Closure $block, ?CreativeInfo $creativeInfo = null) : BlockBuilder
+	{
+		$this->count++;
+		return NexlyBlocks::buildComplex($stringId, $block, $creativeInfo);
+	}
 
-    /**
-     * @return int
-     */
-    public function getCount(): int
-    {
-        return $this->count;
-    }
+	public function getCount() : int
+	{
+		return $this->count;
+	}
 }

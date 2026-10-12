@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Blocks\Mappers;
 
 use Nexly\Blocks\BlockBuilder as Builder;
@@ -14,44 +34,44 @@ use pocketmine\math\Vector3;
 
 class GlassPaneBlockMapper extends BlockMapper
 {
-    public function map(Builder $builder, Block $block, array $states): Permutation
-    {
-        $n = $states[StateNames::MC_CONNECTION_NORTH];
-        $s = $states[StateNames::MC_CONNECTION_SOUTH];
-        $w = $states[StateNames::MC_CONNECTION_WEST];
-        $e = $states[StateNames::MC_CONNECTION_EAST];
+	public function map(Builder $builder, Block $block, array $states) : Permutation
+	{
+		$n = $states[StateNames::MC_CONNECTION_NORTH];
+		$s = $states[StateNames::MC_CONNECTION_SOUTH];
+		$w = $states[StateNames::MC_CONNECTION_WEST];
+		$e = $states[StateNames::MC_CONNECTION_EAST];
 
-        $minX = $e ? -8 : -1;
-        $maxX = $w ? 8 : 1;
+		$minX = $e ? -8 : -1;
+		$maxX = $w ? 8 : 1;
 
-        $minZ = $n ? -8 : -1;
-        $maxZ = $s ? 8 : 1;
+		$minZ = $n ? -8 : -1;
+		$maxZ = $s ? 8 : 1;
 
-        $selectionBox = new BoxCollision(
-            new Vector3($minX, 0, $minZ),
-            new Vector3($maxX - $minX, 16, $maxZ - $minZ)
-        );
+		$selectionBox = new BoxCollision(
+			new Vector3($minX, 0, $minZ),
+			new Vector3($maxX - $minX, 16, $maxZ - $minZ)
+		);
 
-        $collisions = [];
+		$collisions = [];
 
-        if ($n || $s) {
-            $collisions[] = new BoxCollision(new Vector3(-1, 0, $minZ), new Vector3(2, 16, $maxZ - $minZ));
-        }
-        if ($w || $e) {
-            $collisions[] = new BoxCollision(new Vector3($minX, 0, -1), new Vector3($maxX - $minX, 16, 2));
-        }
-        if (!$n && !$s && !$w && !$e) {
-            $collisions[] = new BoxCollision(new Vector3(-1, 0, -1), new Vector3(2, 16, 2));
-        }
+		if ($n || $s) {
+			$collisions[] = new BoxCollision(new Vector3(-1, 0, $minZ), new Vector3(2, 16, $maxZ - $minZ));
+		}
+		if ($w || $e) {
+			$collisions[] = new BoxCollision(new Vector3($minX, 0, -1), new Vector3($maxX - $minX, 16, 2));
+		}
+		if (!$n && !$s && !$w && !$e) {
+			$collisions[] = new BoxCollision(new Vector3(-1, 0, -1), new Vector3(2, 16, 2));
+		}
 
-        $expr = MolangHelper::and(
-            MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, $n),
-            MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, $s),
-            MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, $w),
-            MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, $e)
-        );
-        return Permutation::create($expr)
-            ->addComponent(new CollisionBoxBlockComponent(true, $collisions))
-            ->addComponent(new SelectionBoxBlockComponent(true, [$selectionBox]));
-    }
+		$expr = MolangHelper::and(
+			MolangHelper::stateEquals(StateNames::MC_CONNECTION_NORTH, $n),
+			MolangHelper::stateEquals(StateNames::MC_CONNECTION_SOUTH, $s),
+			MolangHelper::stateEquals(StateNames::MC_CONNECTION_WEST, $w),
+			MolangHelper::stateEquals(StateNames::MC_CONNECTION_EAST, $e)
+		);
+		return Permutation::create($expr)
+			->addComponent(new CollisionBoxBlockComponent(true, $collisions))
+			->addComponent(new SelectionBoxBlockComponent(true, [$selectionBox]));
+	}
 }

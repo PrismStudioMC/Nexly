@@ -1,9 +1,28 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Items;
 
 use Nexly\Items\Components\DataDriven\DataDriven;
-use Nexly\Items\Components\DataDriven\ItemDataDriven;
 use pocketmine\item\Armor;
 use pocketmine\item\Dye;
 use pocketmine\item\Item;
@@ -12,60 +31,53 @@ use pocketmine\item\Record;
 use pocketmine\item\SpawnEgg;
 use ReflectionClass;
 use ReflectionException;
+use function count;
 
-enum ItemVersion: int
+enum ItemVersion : int
 {
-    case LEGACY = 0;
-    case DATA_DRIVEN = 1;
-    case NONE = 2;
+	case LEGACY = 0;
+	case DATA_DRIVEN = 1;
+	case NONE = 2;
 
-    /**
-     * Get the integer value of the ItemVersion.
-     *
-     * @return int
-     */
-    public function getValue(): int
-    {
-        return $this->value;
-    }
+	/**
+	 * Get the integer value of the ItemVersion.
+	 */
+	public function getValue() : int
+	{
+		return $this->value;
+	}
 
-    /**
-     * Check if two ItemVersion instances are equal.
-     *
-     * @param self $other
-     * @return bool
-     */
-    public function equals(self $other): bool
-    {
-        return $this === $other;
-    }
+	/**
+	 * Check if two ItemVersion instances are equal.
+	 */
+	public function equals(self $other) : bool
+	{
+		return $this === $other;
+	}
 
-    /**
-     * Get the ItemVersion from an Item instance.
-     *
-     * @param Item $item
-     * @return self
-     */
-    public static function fromItem(Item $item): self
-    {
-        try {
-            $reflection = new ReflectionClass($item::class);
-        } catch (ReflectionException $e) {
-            return self::NONE; // In case of reflection failure, return NONE
-        }
+	/**
+	 * Get the ItemVersion from an Item instance.
+	 */
+	public static function fromItem(Item $item) : self
+	{
+		try {
+			$reflection = new ReflectionClass($item::class);
+		} catch (ReflectionException $e) {
+			return self::NONE; // In case of reflection failure, return NONE
+		}
 
-        $attributes = $reflection->getAttributes(DataDriven::class);
-        if (
-            count($attributes) > 0 ||
-            $item instanceof Armor ||
-            $item instanceof SpawnEgg ||
-            $item instanceof ProjectileItem ||
-            $item instanceof Record ||
-            $item instanceof Dye
-        ) {
-            return self::DATA_DRIVEN;
-        }
+		$attributes = $reflection->getAttributes(DataDriven::class);
+		if (
+			count($attributes) > 0 ||
+			$item instanceof Armor ||
+			$item instanceof SpawnEgg ||
+			$item instanceof ProjectileItem ||
+			$item instanceof Record ||
+			$item instanceof Dye
+		) {
+			return self::DATA_DRIVEN;
+		}
 
-        return self::LEGACY;
-    }
+		return self::LEGACY;
+	}
 }

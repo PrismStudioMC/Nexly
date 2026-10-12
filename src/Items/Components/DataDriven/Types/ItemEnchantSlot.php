@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Items\Components\DataDriven\Types;
 
 use pocketmine\inventory\ArmorInventory;
@@ -14,87 +34,77 @@ use pocketmine\item\Shears;
 use pocketmine\item\Shovel;
 use pocketmine\item\Sword;
 
-enum ItemEnchantSlot: string
+enum ItemEnchantSlot : string
 {
-    case SWORD = "sword";
-    case HOE = "hoe";
-    case SHOVEL = "shovel";
-    case PICKAXE = "pickaxe";
-    case AXE = "axe";
-    case BOW = "bow";
-    case CROSSBOW = "crossbow";
-    case ELYTRA = "elytra";
-    case FISHING_ROD = "fishing_rod";
-    case SHEARS = "shears";
-    case SHIELD = "shield";
-    case FLINTSTEEL = "flintsteel";
+	case SWORD = "sword";
+	case HOE = "hoe";
+	case SHOVEL = "shovel";
+	case PICKAXE = "pickaxe";
+	case AXE = "axe";
+	case BOW = "bow";
+	case CROSSBOW = "crossbow";
+	case ELYTRA = "elytra";
+	case FISHING_ROD = "fishing_rod";
+	case SHEARS = "shears";
+	case SHIELD = "shield";
+	case FLINTSTEEL = "flintsteel";
 
-    case ARMOR_HEAD = "armor_head";
-    case ARMOR_TORSO = "armor_torso";
-    case ARMOR_LEGS = "armor_legs";
-    case ARMOR_FEET = "armor_feet";
+	case ARMOR_HEAD = "armor_head";
+	case ARMOR_TORSO = "armor_torso";
+	case ARMOR_LEGS = "armor_legs";
+	case ARMOR_FEET = "armor_feet";
 
-    case ALL = "all";
+	case ALL = "all";
 
-    /**
-     * The name of the enchantment slot.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
+	/**
+	 * The name of the enchantment slot.
+	 */
+	public function getName() : string
+	{
+		return $this->name;
+	}
 
-    /**
-     * The value of the enchantment slot.
-     *
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
+	/**
+	 * The value of the enchantment slot.
+	 */
+	public function getValue() : string
+	{
+		return $this->value;
+	}
 
-    /**
-     * Get the enchantment slot from armor type info.
-     *
-     * @param int $slotArmor
-     * @return ItemEnchantSlot
-     */
-    public static function fromArmorTypeInfo(int $slotArmor): ItemEnchantSlot
-    {
-        return match ($slotArmor) {
-            ArmorInventory::SLOT_HEAD => self::ARMOR_HEAD,
-            ArmorInventory::SLOT_CHEST => self::ARMOR_TORSO,
-            ArmorInventory::SLOT_LEGS => self::ARMOR_LEGS,
-            ArmorInventory::SLOT_FEET => self::ARMOR_FEET,
-            default => self::ALL
-        };
-    }
+	/**
+	 * Get the enchantment slot from armor type info.
+	 */
+	public static function fromArmorTypeInfo(int $slotArmor) : ItemEnchantSlot
+	{
+		return match ($slotArmor) {
+			ArmorInventory::SLOT_HEAD => self::ARMOR_HEAD,
+			ArmorInventory::SLOT_CHEST => self::ARMOR_TORSO,
+			ArmorInventory::SLOT_LEGS => self::ARMOR_LEGS,
+			ArmorInventory::SLOT_FEET => self::ARMOR_FEET,
+			default => self::ALL
+		};
+	}
 
-    /**
-     * Get the enchantment slot from an item instance.
-     *
-     * @param Item $item
-     * @return ItemEnchantSlot
-     */
-    public static function fromItem(Item $item): ItemEnchantSlot
-    {
-        return match (true) {
-            $item instanceof Sword => ItemEnchantSlot::SWORD,
-            $item instanceof Pickaxe => ItemEnchantSlot::PICKAXE,
-            $item instanceof Axe => ItemEnchantSlot::AXE,
-            $item instanceof Hoe => ItemEnchantSlot::HOE,
-            $item instanceof Shovel => ItemEnchantSlot::SHOVEL,
-            $item instanceof Bow => ItemEnchantSlot::BOW,
-            //$item instanceof Crossbow => ItemEnchantSlot::CROSSBOW, TODO: Add CrossBow class
-            //$item instanceof Elytra => ItemEnchantSlot::ELYTRA, TODO: Add Elytra class
-            $item instanceof FishingRod => ItemEnchantSlot::FISHING_ROD,
-            $item instanceof Shears => ItemEnchantSlot::SHEARS,
-            //$item instanceof Shield => ItemEnchantSlot::SHIELD, TODO: Add Shield class
-            $item instanceof Armor => self::fromArmorTypeInfo($item->getArmorSlot()),
-            default => ItemEnchantSlot::ALL
-        };
-    }
+	/**
+	 * Get the enchantment slot from an item instance.
+	 */
+	public static function fromItem(Item $item) : ItemEnchantSlot
+	{
+		return match (true) {
+			$item instanceof Sword => ItemEnchantSlot::SWORD,
+			$item instanceof Pickaxe => ItemEnchantSlot::PICKAXE,
+			$item instanceof Axe => ItemEnchantSlot::AXE,
+			$item instanceof Hoe => ItemEnchantSlot::HOE,
+			$item instanceof Shovel => ItemEnchantSlot::SHOVEL,
+			$item instanceof Bow => ItemEnchantSlot::BOW,
+			//$item instanceof Crossbow => ItemEnchantSlot::CROSSBOW, TODO: Add CrossBow class
+			//$item instanceof Elytra => ItemEnchantSlot::ELYTRA, TODO: Add Elytra class
+			$item instanceof FishingRod => ItemEnchantSlot::FISHING_ROD,
+			$item instanceof Shears => ItemEnchantSlot::SHEARS,
+			//$item instanceof Shield => ItemEnchantSlot::SHIELD, TODO: Add Shield class
+			$item instanceof Armor => self::fromArmorTypeInfo($item->getArmorSlot()),
+			default => ItemEnchantSlot::ALL
+		};
+	}
 }

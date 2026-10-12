@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Items\Components\DataDriven\Property;
 
 use Attribute;
@@ -10,37 +30,29 @@ use pocketmine\nbt\tag\StringTag;
 #[Attribute(Attribute::TARGET_CLASS)]
 class EnchantableSlotProperty extends PropertyItemComponent
 {
-    public function __construct(
-        protected ItemEnchantSlot $slot
-    ) {
-    }
+	public function __construct(
+		protected ItemEnchantSlot $slot
+	) {
+	}
 
-    /**
-     * Create an EnchantableSlotProperty from an Item.
-     *
-     * @param Item $item
-     * @return EnchantableSlotProperty
-     */
-    public static function fromItem(Item $item): EnchantableSlotProperty
-    {
-        return new self(ItemEnchantSlot::fromItem($item));
-    }
+	/**
+	 * Create an EnchantableSlotProperty from an Item.
+	 */
+	public static function fromItem(Item $item) : EnchantableSlotProperty
+	{
+		return new self(ItemEnchantSlot::fromItem($item));
+	}
 
-    /**
-     * The name of the component.
-     *
-     * @return string
-     */
-    public static function getName(): string
-    {
-        return PropertyComponentIds::ENCHANTABLE_SLOT->getValue();
-    }
+	/**
+	 * The name of the component.
+	 */
+	public static function getName() : string
+	{
+		return PropertyComponentIds::ENCHANTABLE_SLOT->getValue();
+	}
 
-    /**
-     * @return StringTag
-     */
-    public function toNBT(): StringTag
-    {
-        return new StringTag($this->slot->getValue());
-    }
+	public function toNBT() : StringTag
+	{
+		return new StringTag($this->slot->getValue());
+	}
 }

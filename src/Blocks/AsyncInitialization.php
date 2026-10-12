@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Blocks;
 
 /**
@@ -8,26 +28,18 @@ namespace Nexly\Blocks;
  */
 class AsyncInitialization
 {
-    /** @var array  */
-    protected static array $blocks = [];
+	protected static array $blocks = [];
 
-    /**
-     * Adds an asynchronous block definition.
-     *
-     * @param string $stringId
-     * @param array $data
-     * @return void
-     */
-    public static function addAsyncBlock(string $stringId, array $data): void
-    {
-        self::$blocks[$stringId] = $data;
-    }
+	/**
+	 * Adds an asynchronous block definition.
+	 */
+	public static function addAsyncBlock(string $stringId, array $data) : void
+	{
+		self::$blocks[$stringId] = $data;
+	}
 
-    /**
-     * @return array
-     */
-    public static function getBlocks(): array
-    {
-        return self::$blocks;
-    }
+	public static function getBlocks() : array
+	{
+		return self::$blocks;
+	}
 }

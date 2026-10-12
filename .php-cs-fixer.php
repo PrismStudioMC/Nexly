@@ -2,53 +2,118 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$paths = [];
-$dry = false;
-foreach ($argv as $a) {
-    if (str_starts_with($a, '--path=')) $paths = array_filter(array_map('trim', explode(',', substr($a, 7))));
-    if ($a === '--dry-run') $dry = true;
-}
-$paths = $paths ?: ['src'];
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__ . '/src')
+    ->in(__DIR__ . '/build');
 
-function iterPhp(array $roots): Generator {
-    foreach ($roots as $r) if (is_dir($r)) {
-        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($r, FilesystemIterator::SKIP_DOTS));
-        foreach ($it as $f) if (strtolower($f->getExtension()) === 'php') yield $f->getPathname();
-    }
-}
+return (new PhpCsFixer\Config)
+    ->setRiskyAllowed(true)
+    ->setRules([
+        'align_multiline_comment' => [
+            'comment_type' => 'phpdocs_only'
+        ],
+        'array_indentation' => true,
+        'array_syntax' => [
+            'syntax' => 'short'
+        ],
+        'binary_operator_spaces' => [
+            'default' => 'single_space'
+        ],
+        'blank_line_after_namespace' => true,
+        'blank_line_after_opening_tag' => true,
+        'blank_line_before_statement' => [
+            'statements' => [
+                'declare'
+            ]
+        ],
+        'cast_spaces' => [
+            'space' => 'single'
+        ],
+        'concat_space' => [
+            'spacing' => 'one'
+        ],
+        'elseif' => true,
+        'fully_qualified_strict_types' => true,
+        'global_namespace_import' => [
+            'import_constants' => true,
+            'import_functions' => true,
+            'import_classes' => null,
+        ],
+        'header_comment' => [
+            'comment_type' => 'comment',
+            'header' => <<<BODY
+ _   _           _       
+| \ | | _____  _| |_   _ 
+|  \| |/ _ \ \/ / | | | |
+| |\  |  __/>  <| | |_| |
+|_| \_|\___/_/\_\_|\__, |
+                   |___/ 
 
-$rx = '/[\x{00A0}\x{1680}\x{2000}-\x{200B}\x{202F}\x{205F}\x{3000}\x{FEFF}]/u';
-$files = $repl = 0;
-foreach (iterPhp($paths) as $p) {
-    $files++;
-    $s = file_get_contents($p);
-    $n = preg_replace($rx, ' ', $s, -1, $c);
-    if ($c > 0) { $repl += $c; if (!$dry) file_put_contents($p, $n); echo "[normalize] $p — $c\n"; }
-}
-echo "Standardization summary: $files file(s) scanned, $repl space replacement(s).\n";
+Nexly - A modern PocketMine-MP framework for custom blocks and items.
 
-$config = getcwd() . '/.php-cs-fixer.generated.php';
-$rules = [
-    '@PSR12' => true,
-];
-file_put_contents($config, "<?php\nreturn (new PhpCsFixer\\Config())->setRiskyAllowed(true)->setRules("
-    . var_export($rules, true)
-    . ")->setFinder(PhpCsFixer\\Finder::create()->in(" . var_export($paths, true) . "));\n");
+This project is free software: you can redistribute it and/or modify
+it under the terms of the Apache License, Version 2.0 as published by
+the Apache Software Foundation.
 
-$isWin = DIRECTORY_SEPARATOR === '\\';
-$bat = getcwd() . '\\vendor\\bin\\php-cs-fixer.bat';
-$bin = getcwd() . '/vendor/bin/php-cs-fixer';
-$exec = $isWin ? $bat : $bin;
+@author Zwuiix-cmd
+@link   https://github.com/Zwuiix-cmd/Nexly
 
-if (!file_exists($exec)) {
-    fwrite(STDERR, "Error: PHP-CS-Fixer not found. Run: composer require --dev friendsofphp/php-cs-fixer\n");
-    exit(1);
-}
 
-$args = ' fix --config=' . escapeshellarg($config) . ' --allow-risky=yes' . ($dry ? ' --dry-run --diff --verbose' : '');
-$cmd = $isWin ? escapeshellarg($exec) . $args : escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($exec) . $args;
-
-echo "\n[php-cs-fixer] $cmd\n\n";
-passthru($cmd, $code);
-if (!$dry && file_exists($config)) @unlink($config);
-exit($code);
+BODY,
+            'location' => 'after_open'
+        ],
+        'indentation_type' => true,
+        'logical_operators' => true,
+        'native_constant_invocation' => [
+            'scope' => 'namespaced'
+        ],
+        'native_function_invocation' => [
+            'scope' => 'namespaced',
+            'include' => ['@all'],
+        ],
+        'new_with_braces' => [
+            'named_class' => true,
+            'anonymous_class' => false,
+        ],
+        'no_closing_tag' => true,
+        'no_empty_phpdoc' => true,
+        'no_extra_blank_lines' => true,
+        'no_superfluous_phpdoc_tags' => [
+            'allow_mixed' => true,
+        ],
+        'no_trailing_whitespace' => true,
+        'no_trailing_whitespace_in_comment' => true,
+        'no_whitespace_in_blank_line' => true,
+        'no_unused_imports' => true,
+        'ordered_imports' => [
+            'imports_order' => [
+                'class',
+                'function',
+                'const',
+            ],
+            'sort_algorithm' => 'alpha'
+        ],
+        'phpdoc_align' => [
+            'align' => 'vertical',
+            'tags' => [
+                'param',
+            ]
+        ],
+        'phpdoc_line_span' => [
+            'property' => 'single',
+            'method' => null,
+            'const' => null
+        ],
+        'phpdoc_trim' => true,
+        'phpdoc_trim_consecutive_blank_line_separation' => true,
+        'return_type_declaration' => [
+            'space_before' => 'one'
+        ],
+        'single_blank_line_at_eof' => true,
+        'single_import_per_statement' => true,
+        'strict_param' => true,
+        'unary_operator_spaces' => true,
+    ])
+    ->setFinder($finder)
+    ->setIndent("\t")
+    ->setLineEnding("\n");

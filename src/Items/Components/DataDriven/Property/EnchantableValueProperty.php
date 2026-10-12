@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Items\Components\DataDriven\Property;
 
 use Attribute;
@@ -9,37 +29,29 @@ use pocketmine\nbt\tag\IntTag;
 #[Attribute(Attribute::TARGET_CLASS)]
 class EnchantableValueProperty extends PropertyItemComponent
 {
-    public function __construct(
-        protected int $value
-    ) {
-    }
+	public function __construct(
+		protected int $value
+	) {
+	}
 
-    /**
-     * Create an EnchantableValueProperty from an Item.
-     *
-     * @param Item $item
-     * @return EnchantableValueProperty
-     */
-    public static function fromItem(Item $item): EnchantableValueProperty
-    {
-        return new self($item->getEnchantability());
-    }
+	/**
+	 * Create an EnchantableValueProperty from an Item.
+	 */
+	public static function fromItem(Item $item) : EnchantableValueProperty
+	{
+		return new self($item->getEnchantability());
+	}
 
-    /**
-     * The name of the component.
-     *
-     * @return string
-     */
-    public static function getName(): string
-    {
-        return PropertyComponentIds::ENCHANTABLE_VALUE->getValue();
-    }
+	/**
+	 * The name of the component.
+	 */
+	public static function getName() : string
+	{
+		return PropertyComponentIds::ENCHANTABLE_VALUE->getValue();
+	}
 
-    /**
-     * @return IntTag
-     */
-    public function toNBT(): IntTag
-    {
-        return new IntTag($this->value);
-    }
+	public function toNBT() : IntTag
+	{
+		return new IntTag($this->value);
+	}
 }

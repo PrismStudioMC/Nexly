@@ -3,21 +3,18 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.mob_head",
+				"identifier": "geometry.farmland",
 				"texture_width": 16,
-				"texture_height": 16,
-				"visible_bounds_width": 2,
-				"visible_bounds_height": 2.5,
-				"visible_bounds_offset": [0, 0.75, 0]
+				"texture_height": 16
 			},
 			"bones": [
 				{
 					"name": "bone",
-					"pivot": [0, 8, 0],
+					"pivot": [8, 0, -8],
 					"cubes": [
 						{
-							"origin": [-4, 0, -4],
-							"size": [8, 8, 8],
+							"origin": [-8, 0, -8],
+							"size": [16, 15, 16],
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [16, 16]},
 								"east": {"uv": [0, 0], "uv_size": [16, 16]},

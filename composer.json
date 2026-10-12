@@ -1,5 +1,23 @@
 {
     "name": "zwuiix-cmd/nexly",
+    "description": "An object-oriented framework for PocketMine-MP that completely automates custom blocks, items, and Bedrock components.",
+    "type": "library",
+    "keywords": [
+        "pocketmine",
+        "pocketmine-mp",
+        "pmmp",
+        "framework",
+        "bedrock",
+        "components",
+        "nbt"
+    ],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Zwuiix-cmd",
+            "role": "Developer"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Nexly\\": "src/"
@@ -10,5 +28,15 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.94"
+    },
+    "scripts": {
+        "make": [
+            "@composer install --classmap-authoritative --ignore-platform-reqs",
+            "@php -dphar.readonly=0 build/compiler.php"
+        ],
+        "cs-fixer": [
+            "@composer install --classmap-authoritative --ignore-platform-reqs",
+            "./vendor/bin/php-cs-fixer fix -v"
+        ]
     }
 }

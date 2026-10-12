@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Blocks\Components;
 
 use Attribute;
@@ -12,71 +32,63 @@ use pocketmine\block\Potato;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
+use function array_key_first;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class SelectionBoxBlockComponent extends BlockComponent
 {
-    /**
-     * @param bool $enabled
-     * @param BoxCollision[] $collisions
-     */
-    public function __construct(
-        protected bool $enabled,
-        protected array $collisions = [],
-    ) {
-        if (empty($this->collisions)) {
-            $this->collisions[] = new BoxCollision(new Vector3(-8.0, 0.0, -8.0), new Vector3(16.0, 16.0, 16.0));
-        }
-    }
+	/**
+	 * @param BoxCollision[] $collisions
+	 */
+	public function __construct(
+		protected bool $enabled,
+		protected array $collisions = [],
+	) {
+		if (empty($this->collisions)) {
+			$this->collisions[] = new BoxCollision(new Vector3(-8.0, 0.0, -8.0), new Vector3(16.0, 16.0, 16.0));
+		}
+	}
 
-    /**
-     * Creates the component from a Block instance.
-     *
-     * @param int $age
-     * @param Block $block
-     * @return self
-     */
-    public static function fromCrops(Block $block, int $age): self
-    {
-        return new self(
-            true,
-            [
-                new BoxCollision(
-                    new Vector3(-8.0, 0.0, -8.0),
-                    match(true) {
-                        $block instanceof Carrot => new Vector3(16.0, (($age + 1.0) * (1 / $block::MAX_AGE)) * 0.7 * 16, 16.0),
-                        $block instanceof Potato, $block instanceof Beetroot => new Vector3(16.0, (($age + 1.0) * (1 / $block::MAX_AGE)) * 0.6 * 16, 16.0),
-                        $block instanceof NetherWartPlant => new Vector3(16.0, ($age + 1.0) * 0.25 * 16, 16.0),
-                        default => new Vector3(16.0, ($age + 1) * (1 / ($block::MAX_AGE ?? 7)) * 16, 16.0),
-                    }
-                )
-            ]
-        );
-    }
+	/**
+	 * Creates the component from a Block instance.
+	 */
+	public static function fromCrops(Block $block, int $age) : self
+	{
+		return new self(
+			true,
+			[
+				new BoxCollision(
+					new Vector3(-8.0, 0.0, -8.0),
+					match(true) {
+						$block instanceof Carrot => new Vector3(16.0, (($age + 1.0) * (1 / $block::MAX_AGE)) * 0.7 * 16, 16.0),
+						$block instanceof Potato, $block instanceof Beetroot => new Vector3(16.0, (($age + 1.0) * (1 / $block::MAX_AGE)) * 0.6 * 16, 16.0),
+						$block instanceof NetherWartPlant => new Vector3(16.0, ($age + 1.0) * 0.25 * 16, 16.0),
+						default => new Vector3(16.0, ($age + 1) * (1 / ($block::MAX_AGE ?? 7)) * 16, 16.0),
+					}
+				)
+			]
+		);
+	}
 
-    /**
-     * Determines whether the block is breathable by defining if the block is treated as a `solid` or as `air`. The default is `solid` if this component is omitted
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return BlockComponentIds::SELECTION_BOX;
-    }
+	/**
+	 * Determines whether the block is breathable by defining if the block is treated as a `solid` or as `air`. The default is `solid` if this component is omitted
+	 */
+	public function getName() : string
+	{
+		return BlockComponentIds::SELECTION_BOX;
+	}
 
-    /**
-     * Returns the component in the correct NBT format supported by the client.
-     *
-     * @return CompoundTag
-     */
-    public function toNBT(): CompoundTag
-    {
-        if (!$this->enabled) {
-            return CompoundTag::create()
-                ->setTag("enabled", new ByteTag($this->enabled));
-        }
+	/**
+	 * Returns the component in the correct NBT format supported by the client.
+	 */
+	public function toNBT() : CompoundTag
+	{
+		if (!$this->enabled) {
+			return CompoundTag::create()
+				->setTag("enabled", new ByteTag($this->enabled));
+		}
 
-        return $this->collisions[array_key_first($this->collisions)]->toNBT(false)
-            ->setTag("enabled", new ByteTag($this->enabled));
-    }
+		return $this->collisions[array_key_first($this->collisions)]->toNBT(false)
+			->setTag("enabled", new ByteTag($this->enabled));
+	}
 }

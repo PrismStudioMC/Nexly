@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Recipes;
 
 use Nexly\Events\Impl\RecipeRegistryEvent;
@@ -12,152 +32,138 @@ use pocketmine\item\StringToItemParser;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
+use function count;
+use function is_array;
+use function is_string;
+use function strtolower;
 
 class NexlyRecipes
 {
-    use SingletonTrait;
+	use SingletonTrait;
 
-    /** @var \Closure[] */
-    protected array $recipes = [];
+	/** @var \Closure[] */
+	protected array $recipes = [];
 
-    public function __construct()
-    {
-        self::setInstance($this);
-    }
+	public function __construct()
+	{
+		self::setInstance($this);
+	}
 
-    /**
-     * @return array
-     */
-    public function getRecipes(): array
-    {
-        return $this->recipes;
-    }
+	public function getRecipes() : array
+	{
+		return $this->recipes;
+	}
 
-    /**
-     * @param array $recipes
-     */
-    public function setRecipes(array $recipes): void
-    {
-        $this->recipes = $recipes;
-    }
+	public function setRecipes(array $recipes) : void
+	{
+		$this->recipes = $recipes;
+	}
 
-    /**
-     * @param \Closure $recipe
-     */
-    public function addRecipe(\Closure $recipe): void
-    {
-        $this->recipes[] = $recipe;
-    }
+	public function addRecipe(\Closure $recipe) : void
+	{
+		$this->recipes[] = $recipe;
+	}
 
-    /**
-     * Loads a recipe from an associative array.
-     *
-     * @param array $data
-     * @return void
-     */
-    public function fromArray(array $data): void
-    {
-        if (!isset($data["output"])) {
-            throw new \InvalidArgumentException("Missing 'output' key");
-        }
-        if (!isset($data["ingredients"])) {
-            throw new \InvalidArgumentException("Missing 'ingredients' key");
-        }
+	/**
+	 * Loads a recipe from an associative array.
+	 */
+	public function fromArray(array $data) : void
+	{
+		if (!isset($data["output"])) {
+			throw new \InvalidArgumentException("Missing 'output' key");
+		}
+		if (!isset($data["ingredients"])) {
+			throw new \InvalidArgumentException("Missing 'ingredients' key");
+		}
 
-        $this->addRecipe(function () use ($data): Recipe {
-            $output = $data["output"];
-            if (is_string($output)) {
-                $output = StringToItemParser::getInstance()->parse($output);
-            } elseif (is_array($output)) {
-                if (!isset($output["item"])) {
-                    throw new \InvalidArgumentException("Invalid 'output' format, missing 'item' key");
-                }
+		$this->addRecipe(function () use ($data) : Recipe {
+			$output = $data["output"];
+			if (is_string($output)) {
+				$output = StringToItemParser::getInstance()->parse($output);
+			} elseif (is_array($output)) {
+				if (!isset($output["item"])) {
+					throw new \InvalidArgumentException("Invalid 'output' format, missing 'item' key");
+				}
 
-                if (isset($output["count"])) {
-                    $count = (int)$output["count"];
-                    if ($count < 1 || $count > 64) {
-                        throw new \InvalidArgumentException("Invalid 'output' count, must be between 1 and 64");
-                    }
-                    $item = StringToItemParser::getInstance()->parse($output["item"]);
-                    $item->setCount($count);
-                    $output = $item;
-                } else {
-                    $output = StringToItemParser::getInstance()->parse($output["item"]);
-                }
-            } else {
-                throw new \InvalidArgumentException("Invalid 'output' format");
-            }
+				if (isset($output["count"])) {
+					$count = (int) $output["count"];
+					if ($count < 1 || $count > 64) {
+						throw new \InvalidArgumentException("Invalid 'output' count, must be between 1 and 64");
+					}
+					$item = StringToItemParser::getInstance()->parse($output["item"]);
+					$item->setCount($count);
+					$output = $item;
+				} else {
+					$output = StringToItemParser::getInstance()->parse($output["item"]);
+				}
+			} else {
+				throw new \InvalidArgumentException("Invalid 'output' format");
+			}
 
-            if (count($data["ingredients"]) > 9) {
-                throw new \InvalidArgumentException("Too many 'ingredients', maximum is 9");
-            }
-            if (!isset($data["shape"])) {
-                if (!isset($data["type"])) {
-                    $type = ShapelessRecipeType::CRAFTING();
-                } else {
-                    $type = match(strtolower($data["type"])) {
-                        "crafting_table" => ShapelessRecipeType::CRAFTING(),
-                        "cartography" => ShapelessRecipeType::CARTOGRAPHY(),
-                        "smithing" => ShapelessRecipeType::SMITHING(),
-                        "stonecutter" => ShapelessRecipeType::STONECUTTER(),
-                        default => throw new \InvalidArgumentException("Invalid 'type' value"),
-                    };
-                }
+			if (count($data["ingredients"]) > 9) {
+				throw new \InvalidArgumentException("Too many 'ingredients', maximum is 9");
+			}
+			if (!isset($data["shape"])) {
+				if (!isset($data["type"])) {
+					$type = ShapelessRecipeType::CRAFTING();
+				} else {
+					$type = match(strtolower($data["type"])) {
+						"crafting_table" => ShapelessRecipeType::CRAFTING(),
+						"cartography" => ShapelessRecipeType::CARTOGRAPHY(),
+						"smithing" => ShapelessRecipeType::SMITHING(),
+						"stonecutter" => ShapelessRecipeType::STONECUTTER(),
+						default => throw new \InvalidArgumentException("Invalid 'type' value"),
+					};
+				}
 
-                return new ShapelessRecipe($type, $data["ingredients"], [$output]);
-            }
+				return new ShapelessRecipe($type, $data["ingredients"], [$output]);
+			}
 
-            return new ShapedRecipe($data["shape"], $data["ingredients"], [$output]);
-        });
-    }
+			return new ShapedRecipe($data["shape"], $data["ingredients"], [$output]);
+		});
+	}
 
-    /**
-     * Loads recipes from a JSON array.
-     *
-     * @param array $data
-     * @return void
-     */
-    public function fromJson(array $data): void
-    {
-        foreach ($data as $recipe) {
-            if (is_array($recipe)) {
-                $this->fromArray($recipe);
-            } else {
-                throw new \InvalidArgumentException("Invalid recipe format, expected array");
-            }
-        }
-    }
+	/**
+	 * Loads recipes from a JSON array.
+	 */
+	public function fromJson(array $data) : void
+	{
+		foreach ($data as $recipe) {
+			if (is_array($recipe)) {
+				$this->fromArray($recipe);
+			} else {
+				throw new \InvalidArgumentException("Invalid recipe format, expected array");
+			}
+		}
+	}
 
-    /**
-     * @return void
-     */
-    public function registers(Plugin $plugin): void
-    {
-        $server = Server::getInstance();
-        $craftingManager = $server->getCraftingManager();
+	public function registers(Plugin $plugin) : void
+	{
+		$server = Server::getInstance();
+		$craftingManager = $server->getCraftingManager();
 
-        $ev = new RecipeRegistryEvent();
-        $ev->trigger();
-        $plugin->getLogger()->notice("Registered " . $ev->getShaped() . " shaped and " . $ev->getShapeless() . " shapeless recipes.");
+		$ev = new RecipeRegistryEvent();
+		$ev->trigger();
+		$plugin->getLogger()->notice("Registered " . $ev->getShaped() . " shaped and " . $ev->getShapeless() . " shapeless recipes.");
 
-        foreach ($this->recipes as $closure) {
-            try {
-                $recipe = ($closure)();
-            } catch (\Exception $e) {
-                $plugin->getLogger()->error("Error while building a recipe: " . $e->getMessage());
-                continue;
-            }
+		foreach ($this->recipes as $closure) {
+			try {
+				$recipe = ($closure)();
+			} catch (\Exception $e) {
+				$plugin->getLogger()->error("Error while building a recipe: " . $e->getMessage());
+				continue;
+			}
 
-            if (!$recipe instanceof Recipe) {
-                continue;
-            }
+			if (!$recipe instanceof Recipe) {
+				continue;
+			}
 
-            $craftingRecipe = $recipe->build();
-            if ($craftingRecipe instanceof ShapelessRecipePM) {
-                $craftingManager->registerShapelessRecipe($craftingRecipe);
-            } else {
-                $craftingManager->registerShapedRecipe($craftingRecipe);
-            }
-        }
-    }
+			$craftingRecipe = $recipe->build();
+			if ($craftingRecipe instanceof ShapelessRecipePM) {
+				$craftingManager->registerShapelessRecipe($craftingRecipe);
+			} else {
+				$craftingManager->registerShapedRecipe($craftingRecipe);
+			}
+		}
+	}
 }

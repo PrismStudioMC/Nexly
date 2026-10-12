@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Events;
 
 use ReflectionFunction;
@@ -7,70 +27,49 @@ use WeakReference;
 
 class EventReflected
 {
-    public function __construct(
-        protected \Closure           $closure,
-        protected ReflectionFunction $ref,
-        protected bool               $isStatic,
-        protected ?WeakReference     $instanceRef,
-        protected ?int               $instanceId,
-        protected int                $priority,
-        protected bool               $handleCancelled,
-    ) {
-    }
+	public function __construct(
+		protected \Closure           $closure,
+		protected ReflectionFunction $ref,
+		protected bool               $isStatic,
+		protected ?WeakReference     $instanceRef,
+		protected ?int               $instanceId,
+		protected int                $priority,
+		protected bool               $handleCancelled,
+	) {
+	}
 
-    /**
-     * @return \Closure
-     */
-    public function getClosure(): \Closure
-    {
-        return $this->closure;
-    }
+	public function getClosure() : \Closure
+	{
+		return $this->closure;
+	}
 
-    /**
-     * @return ReflectionFunction
-     */
-    public function getRef(): ReflectionFunction
-    {
-        return $this->ref;
-    }
+	public function getRef() : ReflectionFunction
+	{
+		return $this->ref;
+	}
 
-    /**
-     * @return bool
-     */
-    public function isStatic(): bool
-    {
-        return $this->isStatic;
-    }
+	public function isStatic() : bool
+	{
+		return $this->isStatic;
+	}
 
-    /**
-     * @return WeakReference|null
-     */
-    public function getInstanceRef(): ?WeakReference
-    {
-        return $this->instanceRef;
-    }
+	public function getInstanceRef() : ?WeakReference
+	{
+		return $this->instanceRef;
+	}
 
-    /**
-     * @return int|null
-     */
-    public function getInstanceId(): ?int
-    {
-        return $this->instanceId;
-    }
+	public function getInstanceId() : ?int
+	{
+		return $this->instanceId;
+	}
 
-    /**
-     * @return int
-     */
-    public function getPriority(): int
-    {
-        return $this->priority;
-    }
+	public function getPriority() : int
+	{
+		return $this->priority;
+	}
 
-    /**
-     * @return bool
-     */
-    public function isHandleCancelled(): bool
-    {
-        return $this->handleCancelled;
-    }
+	public function isHandleCancelled() : bool
+	{
+		return $this->handleCancelled;
+	}
 }

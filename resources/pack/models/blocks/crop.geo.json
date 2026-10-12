@@ -3,12 +3,9 @@
 	"minecraft:geometry": [
 		{
 			"description": {
-				"identifier": "geometry.nether_wart",
+				"identifier": "geometry.crop",
 				"texture_width": 16,
-				"texture_height": 16,
-				"visible_bounds_width": 2,
-				"visible_bounds_height": 2.5,
-				"visible_bounds_offset": [0, 0.75, 0]
+				"texture_height": 16
 			},
 			"bones": [
 				{
@@ -16,7 +13,7 @@
 					"pivot": [8, 0, -8],
 					"cubes": [
 						{
-							"origin": [4, 0, -8],
+							"origin": [4, -1, -8],
 							"size": [0, 16, 16],
 							"uv": {
 								"east": {"uv": [16, 0], "uv_size": [-16, 16]},
@@ -24,7 +21,7 @@
 							}
 						},
 						{
-							"origin": [-4, 0, -8],
+							"origin": [-4, -1, -8],
 							"size": [0, 16, 16],
 							"uv": {
 								"east": {"uv": [0, 0], "uv_size": [16, 16]},
@@ -33,14 +30,14 @@
 						},
 						{
 							"origin": [-8, 0, -4],
-							"size": [16, 16, 0],
+							"size": [16, 15, 0],
 							"uv": {
 								"north": {"uv": [0, 0], "uv_size": [16, 16]},
 								"south": {"uv": [16, 0], "uv_size": [-16, 16]}
 							}
 						},
 						{
-							"origin": [-8, 0, 4],
+							"origin": [-8, -1, 4],
 							"size": [16, 16, 0],
 							"uv": {
 								"north": {"uv": [16, 0], "uv_size": [-16, 16]},

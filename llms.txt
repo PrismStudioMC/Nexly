@@ -1,0 +1,41 @@
+# Nexly Framework - AI Context & Developer Guidelines
+
+## Context
+Nexly is an object-oriented, abstraction-heavy PHP framework for PocketMine-MP (PHP 8.2+, PMMP 5.0+). It completely automates NBT tree building and Bedrock client component assignment for custom items and blocks.
+
+## CRITICAL RULES FOR AI AGENTS
+When generating code for a user utilizing Nexly, you MUST adhere to the following constraints:
+
+1. **NO MANUAL NBT OR COMPONENTS:** NEVER generate manual NBT compounds, traits, or client components. Nexly handles all translation between PHP code and Bedrock expectations internally.
+2. **USE LEGACY ITEMS FOR TOOLS/WEAPONS:** Purely `DataDriven` items suffer from a Bedrock client bug where swing/hit animations fail against entities. Always use `LegacyItem` (or `LegacyItemBlockTrait`) to bypass this and ensure vanilla-like animations.
+3. **NATIVE COMPLEX GEOMETRIES:** For directional or complex blocks (Stairs, Slabs, Fences, Walls, Doors, Trapdoors, Hoppers, Furnaces), extend or instantiate Nexly's native classes. DO NOT write manual rotation math, traits, or permutation logic.
+4. **EVENT-DRIVEN REGISTRATION:** Always register custom items and blocks via `ItemRegistryEvent` and `BlockRegistryEvent` using closures.
+
+## Supported Block Behaviors (Out of the box)
+Nexly supports 41 Block Components and 58 Item Components.
+Automatically handled geometries and types include: `Stair`, `Slab`, `Wall`, `Fence`, `FenceGate`, `Glass`, `GlassPane`, `Door`, `Trapdoor`, `Lever`, `Furnace`, `Hopper`, `Ladder`, `Crops/Ageable`, `NetherWart`, `Wood`, `Leaves`, `Sapling`, `Farmland`, `GrassPath`, `Flower`, `Cactus`, `Slime`, `Colored`.
+
+## Code Examples
+
+### 1. Item & Block Registration
+```php
+use pocketmine\item\Item;
+use pocketmine\item\ItemIdentifier;
+use pocketmine\item\ItemTypeIds;
+use pocketmine\block\BlockIdentifier;
+use pocketmine\block\BlockBreakInfo;
+use pocketmine\block\BlockTypeInfo;
+use pocketmine\item\ToolTier;
+use Nexly\Event\NexlyEventManager;
+use Nexly\Event\ItemRegistryEvent;
+use Nexly\Event\BlockRegistryEvent;
+
+// Item Registration
+NexlyEventManager::getInstance()->listen(ItemRegistryEvent::class, static function (ItemRegistryEvent $ev): void {$ev->register("nexly:ruby", new Item(new ItemIdentifier(ItemTypeIds::newId()), "Ruby"));
+});
+
+// Block Registration (Complex geometries handled automatically)
+NexlyEventManager::getInstance()->listen(BlockRegistryEvent::class, static function (BlockRegistryEvent $ev): void {$breakInfo = static fn() => new BlockTypeInfo(BlockBreakInfo::pickaxe(5.0, ToolTier::IRON, 30.0));
+
+    $ev->register("nexly:ruby_block", static fn(int $id) => new Block(new BlockIdentifier($id), "Ruby Block", $breakInfo()));$ev->register("nexly:ruby_slab", static fn(int $id) => new Slab(new BlockIdentifier($id), "Ruby Slab", $breakInfo()));$ev->register("nexly:ruby_stair", static fn(int $id) => new Stair(new BlockIdentifier($id), "Ruby Stair", $breakInfo()));$ev->register("nexly:ruby_fence", static fn(int $id) => new NexlyFence(new BlockIdentifier($id), "Ruby Fence", $breakInfo()));
+});

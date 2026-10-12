@@ -1,5 +1,25 @@
 <?php
 
+/*
+ *  _   _           _
+ * | \ | | _____  _| |_   _
+ * |  \| |/ _ \ \/ / | | | |
+ * | |\  |  __/>  <| | |_| |
+ * |_| \_|\___/_/\_\_|\__, |
+ *                    |___/
+ *
+ * Nexly - A modern PocketMine-MP framework for custom blocks and items.
+ *
+ * This project is free software: you can redistribute it and/or modify
+ * it under the terms of the Apache License, Version 2.0 as published by
+ * the Apache Software Foundation.
+ *
+ * @author Zwuiix-cmd
+ * @link   https://github.com/Zwuiix-cmd/Nexly
+ *
+ *
+ */
+
 namespace Nexly\Listeners;
 
 use Nexly\Blocks\Vanilla\NexlyLadder;
@@ -16,101 +36,89 @@ use pocketmine\player\Player;
 
 class LadderClimbingListener implements Listener
 {
-    /**
-     * Called when a player joins the server to initialize climbing ability.
-     *
-     * @param PlayerJoinEvent $ev
-     * @return void
-     */
-    public function onLogin(PlayerJoinEvent $ev): void
-    {
-        $ev->getPlayer()->setCanClimb(false); // Disable climbing by default
-    }
+	/**
+	 * Called when a player joins the server to initialize climbing ability.
+	 */
+	public function onLogin(PlayerJoinEvent $ev) : void
+	{
+		$ev->getPlayer()->setCanClimb(false); // Disable climbing by default
+	}
 
-    /**
-     * @param DataPacketReceiveEvent $ev
-     * @return void
-     */
-    public function onMove(DataPacketReceiveEvent $ev): void
-    {
-        $origin = $ev->getOrigin();
-        $packet = $ev->getPacket();
+	public function onMove(DataPacketReceiveEvent $ev) : void
+	{
+		$origin = $ev->getOrigin();
+		$packet = $ev->getPacket();
 
-        $handler = $origin->getHandler();
-        if (!$handler instanceof InGamePacketHandler) {
-            return; // Not an in-game packet handler
-        }
+		$handler = $origin->getHandler();
+		if (!$handler instanceof InGamePacketHandler) {
+			return; // Not an in-game packet handler
+		}
 
-        if (!$packet instanceof PlayerAuthInputPacket) {
-            return; // Not a PlayerAuthInputPacket
-        }
+		if (!$packet instanceof PlayerAuthInputPacket) {
+			return; // Not a PlayerAuthInputPacket
+		}
 
-        $player = $origin->getPlayer();
-        if ($player == null || !$player->isConnected()) {
-            return; // Player is not connected
-        }
+		$player = $origin->getPlayer();
+		if ($player == null || !$player->isConnected()) {
+			return; // Player is not connected
+		}
 
-        $now = $packet->getPosition()->subtract(0, $player->getEyeHeight(), 0);
-        if ($player->getPosition()->distance($now) > 2) {
-            return; // Player moved too far
-        }
+		$now = $packet->getPosition()->subtract(0, $player->getEyeHeight(), 0);
+		if ($player->getPosition()->distance($now) > 2) {
+			return; // Player moved too far
+		}
 
-        $block = $player->getWorld()->getBlock($now);
-        if (!$block instanceof Ladder) {
-            if ($player->canClimbWalls()) {
-                $player->setCanClimbWalls(false);
-            }
-            return;
-        }
+		$block = $player->getWorld()->getBlock($now);
+		if (!$block instanceof Ladder) {
+			if ($player->canClimbWalls()) {
+				$player->setCanClimbWalls(false);
+			}
+			return;
+		}
 
-        if (!$player->canClimbWalls()) {
-            $player->setCanClimbWalls();
-        }
+		if (!$player->canClimbWalls()) {
+			$player->setCanClimbWalls();
+		}
 
-        if ($player->isSneaking()) {
-            $player->setMotion(Vector3::zero());
-            return; // Stop climbing when sneaking
-        }
+		if ($player->isSneaking()) {
+			$player->setMotion(Vector3::zero());
+			return; // Stop climbing when sneaking
+		}
 
-        if (!$packet->getInputFlags()->get(PlayerAuthInputFlags::HORIZONTAL_COLLISION)) {
-            return; // Not colliding with a wall
-        }
+		if (!$packet->getInputFlags()->get(PlayerAuthInputFlags::HORIZONTAL_COLLISION)) {
+			return; // Not colliding with a wall
+		}
 
-        if ($block instanceof NexlyLadder) {
-            $speed = $block->getClimbSpeed();
+		if ($block instanceof NexlyLadder) {
+			$speed = $block->getClimbSpeed();
 
-            $upBlock = $block->getSide(Facing::UP);
-            if (!$upBlock instanceof Ladder) {
-                $speed /= 1.5;
-            }
+			$upBlock = $block->getSide(Facing::UP);
+			if (!$upBlock instanceof Ladder) {
+				$speed /= 1.5;
+			}
 
-            $this->addVelocity($player, $now, $speed);
-        }
-    }
+			$this->addVelocity($player, $now, $speed);
+		}
+	}
 
-    /**
-     * Applies climbing velocity to the player if they are on a ladder.
-     *
-     * @param Player $player
-     * @param Vector3 $now
-     * @param float $climbSpeed
-     * @return void
-     */
-    public function addVelocity(Player $player, Vector3 $now, float $climbSpeed): void
-    {
-        if ($climbSpeed <= 0) {
-            return; // No climbing speed defined
-        }
+	/**
+	 * Applies climbing velocity to the player if they are on a ladder.
+	 */
+	public function addVelocity(Player $player, Vector3 $now, float $climbSpeed) : void
+	{
+		if ($climbSpeed <= 0) {
+			return; // No climbing speed defined
+		}
 
-        if (!$player->isConnected()) {
-            return;
-        }
+		if (!$player->isConnected()) {
+			return;
+		}
 
-        $pos = $player->getPosition();
-        if ($pos->y >= $now->y) {
-            return; // Player is moving downwards
-        }
+		$pos = $player->getPosition();
+		if ($pos->y >= $now->y) {
+			return; // Player is moving downwards
+		}
 
-        $player->setMotion(new Vector3(0, $climbSpeed, 0));
-    }
+		$player->setMotion(new Vector3(0, $climbSpeed, 0));
+	}
 }
