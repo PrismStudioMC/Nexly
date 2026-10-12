@@ -175,7 +175,7 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 
-<a href="https://star-history.com/#Zwuiix-cmd/Nexly&CustomiesDevs/Customies&AID-LEARNING/SymplyPlugin&Date">
+<a href="https://www.star-history.com/?repos=Zwuiix-cmd%2FNexly%2CCustomiesDevs%2FCustomies%2CAID-LEARNING%2FSymplyPlugin&type=timeline&logscale=&legend=top-left">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Zwuiix-cmd/Nexly,CustomiesDevs/Customies,AID-LEARNING/SymplyPlugin&type=Date&theme=dark" />
     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Zwuiix-cmd/Nexly,CustomiesDevs/Customies,AID-LEARNING/SymplyPlugin&type=Date" />
