@@ -31,8 +31,6 @@ The process boils down to a simple declaration. You register the type of item or
 * **Seamless Component management:** You barely have to touch `components` anymore. The tool handles the translation between your code and what the game expects.
 * **Focus on the essentials:** You enjoy a clean codebase, allowing you to dedicate your time to what really matters: developing your server's gameplay.
 
-Voici la version avec les balises de code (```) et un peu de mise en forme pour faire ressortir les termes techniques. C'est parfait pour un README :
-
 ## Why choose Nexly?
 
 ### Features
