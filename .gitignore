@@ -2,3 +2,4 @@
 .php-cs-fixer.generated.php
 .php-cs-fixer.cache
 /.idea
+Nexly.phar
