@@ -53,7 +53,7 @@ class DestructibleByMiningBlockComponent extends BlockComponent
 	{
 		$items = array_map(fn (ItemSpecificSpeed $speed) => $speed->toNBT(), $this->itemSpecificSpeeds);
 		return CompoundTag::create()
-			->setTag("seconds_to_destroy", new FloatTag($this->secondsToDestroy))
+			->setTag("value", new FloatTag($this->secondsToDestroy))
 			->setTag("item_specific_speeds", new ListTag($items, NBT::TAG_Compound));
 	}
 }
