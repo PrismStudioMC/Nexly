@@ -624,7 +624,9 @@ class BlockBuilder
 		$serializer = $this->serializer ??= static fn () => new BlockStateWriter($stringId);
 		$deserializer = $this->deserializer ??= static fn (BlockStateReader $in) => clone $block;
 
-		BlockStateHandlers::getSerializer()->map($block, $serializer);
+		if (!($handler = BlockStateHandlers::getSerializer())->isRegistered($block)) {
+			$handler->map($block, $serializer);
+		}
 		BlockStateHandlers::getDeserializer()->map($stringId, $deserializer);
 
 		AsyncInitialization::addAsyncBlock($stringId, [

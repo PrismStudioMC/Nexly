@@ -22,6 +22,7 @@
 
 namespace Nexly;
 
+use muqsit\simplepackethandler\SimplePacketHandler;
 use Nexly\Blocks\AsyncInitialization;
 use Nexly\Blocks\BlockPalette;
 use Nexly\Events\Impl\BlockRegistryEvent;
@@ -31,13 +32,11 @@ use Nexly\Listeners\LadderClimbingListener;
 use Nexly\Mappings\BlockMappings;
 use Nexly\Recipes\NexlyRecipes;
 use Nexly\Tasks\AsyncRegisterBlocksTask;
-use pocketmine\event\EventPriority;
-use pocketmine\event\server\DataPacketSendEvent;
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 use zwuiix\extpack\ExtPack;
-use zwuiix\extpack\PackPacketHooker;
 use function array_merge;
 use function count;
 
@@ -53,10 +52,6 @@ class Nexly extends PluginBase
 
 	protected function onEnable() : void
 	{
-		if (!PackPacketHooker::isRegistered()) {
-			PackPacketHooker::register($this);
-		}
-
 		ExtPack::fromUrl(self::PACK_URL . $this->getDescription()->getVersion() . ".zip");
 
 		$config = $this->getConfig();
@@ -84,15 +79,11 @@ class Nexly extends PluginBase
 		$ev->trigger();
 		$this->getLogger()->notice("Registered " . $ev->getCount() . " items.");
 
-		$this->getServer()->getPluginManager()->registerEvent(DataPacketSendEvent::class, function (DataPacketSendEvent $ev) : void {
-			$packets = $ev->getPackets();
-			foreach ($packets as $packet) {
-				if ($packet instanceof StartGamePacket) {
-					$packet->blockNetworkIdsAreHashes = true; // Always true for Nexly
-					$packet->blockPalette = array_merge($packet->blockPalette, BlockMappings::getInstance()->getEntries());
-				}
-			}
-		}, EventPriority::NORMAL, $this);
+		$monitor = SimplePacketHandler::createMonitor($this);
+		$monitor->monitorOutgoing(function (StartGamePacket $pk, NetworkSession $target) : void {
+			$pk->blockNetworkIdsAreHashes = true; // Always true for Nexly
+			$pk->blockPalette = array_merge($pk->blockPalette, BlockMappings::getInstance()->getEntries());
+		});
 
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function () : void {
 			$pool = $this->getServer()->getAsyncPool();
