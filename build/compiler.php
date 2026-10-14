@@ -38,11 +38,173 @@ function verify_environment() : void
 		echo format_text("        Please set 'phar.readonly = 0' in your CLI php.ini file.\n\n", Style::Dim);
 		exit(1);
 	}
+	if (!class_exists('ZipArchive')) {
+		echo format_text("\n[ERROR] ZipArchive extension is missing.\n", Style::Red, Style::Bold);
+		echo format_text("        Please enable the zip extension in your php.ini to download libraries.\n\n", Style::Dim);
+		exit(1);
+	}
+}
+
+function get_yaml_value(string $yaml, string $key) : ?string
+{
+	if (preg_match('/^' . preg_quote($key, '/') . '\s*:\s*(.+)$/m', $yaml, $matches)) {
+		return trim($matches[1], "\"' \t\n\r\0\x0B");
+	}
+	return null;
+}
+
+function get_target_namespace(string $basePath) : string
+{
+	$pluginYmlPath = $basePath . DIRECTORY_SEPARATOR . 'plugin.yml';
+	if (!file_exists($pluginYmlPath)) {
+		return "App";
+	}
+
+	$yaml = file_get_contents($pluginYmlPath);
+	$prefix = get_yaml_value($yaml, 'src-namespace-prefix');
+	if ($prefix) {
+		return trim($prefix, '\\');
+	}
+
+	$main = get_yaml_value($yaml, 'main');
+	if ($main) {
+		$parts = explode('\\', $main);
+		array_pop($parts);
+		return implode('\\', $parts);
+	}
+
+	return "App";
+}
+
+function apply_global_shading(string $content, array $antigenMap) : string
+{
+	foreach ($antigenMap as $original => $new) {
+		$content = preg_replace('/namespace\s+' . preg_quote($original, '/') . '(\s*[;\\\\])/m', 'namespace ' . $new . '$1', $content);
+
+		$content = preg_replace('/use\s+(function\s+|const\s+)?' . preg_quote($original, '/') . '(\s*[;\\\\])/m', 'use $1' . $new . '$2', $content);
+
+		$content = preg_replace('/(?<![\w\\\\])\\\\' . preg_quote($original, '/') . '(\s*[;\\\\])/m', '\\' . $new . '$1', $content);
+
+		$originalStr = str_replace('\\', '\\\\', $original);
+		$newStr = str_replace('\\', '\\\\', $new);
+		$content = str_replace($originalStr, $newStr, $content);
+	}
+
+	return $content;
+}
+
+function process_libraries(string $basePath, string $targetNamespace) : array
+{
+	$libFiles = [];
+	$antigenMap = [];
+	$jsonPath = $basePath . DIRECTORY_SEPARATOR . 'libraries.json';
+
+	if (!file_exists($jsonPath)) {
+		return ['files' => $libFiles, 'map' => $antigenMap];
+	}
+
+	$libraries = json_decode(file_get_contents($jsonPath), true);
+	if (!is_array($libraries)) {
+		echo format_text("    [!] Invalid libraries.json format.\n", Style::Yellow);
+		return ['files' => $libFiles, 'map' => $antigenMap];
+	}
+
+	$context = stream_context_create([
+		'http' => [
+			'header' => "User-Agent: Nexly-Compiler/1.0\r\n"
+		]
+	]);
+
+	foreach ($libraries as $repo => $version) {
+		if (str_starts_with($version, 'http')) {
+			$url = $version;
+			$displayName = basename($url);
+		} else {
+			$url = "https://github.com/{$repo}/archive/refs/tags/{$version}.zip";
+			if ($version === 'main' || $version === 'master') {
+				$url = "https://github.com/{$repo}/archive/refs/heads/{$version}.zip";
+			}
+			$displayName = "$repo ($version)";
+		}
+
+		echo format_text("    -> Downloading library: ", Style::Dim) . format_text($displayName, Style::Cyan) . "\n";
+
+		$tmpZip = sys_get_temp_dir() . DIRECTORY_SEPARATOR . md5($url) . '.zip';
+		$zipData = @file_get_contents($url, false, $context);
+
+		if ($zipData === false) {
+			echo format_text("       [!] Failed to download from $url\n", Style::Red);
+			continue;
+		}
+
+		file_put_contents($tmpZip, $zipData);
+		$zip = new ZipArchive();
+
+		if ($zip->open($tmpZip) === true) {
+			$rootDir = '';
+			for ($i = 0; $i < $zip->numFiles; $i++) {
+				$stat = $zip->statIndex($i);
+				if (str_ends_with($stat['name'], 'virion.yml')) {
+					$rootDir = dirname($stat['name']);
+					$rootDir = $rootDir === '.' ? '' : $rootDir . '/';
+					break;
+				}
+			}
+
+			$virionYml = $zip->getFromName($rootDir . 'virion.yml');
+			if ($virionYml) {
+				$antigen = get_yaml_value($virionYml, 'antigen');
+				if ($antigen) {
+					$originalAntigen = trim($antigen, '\\');
+
+					$antigenClean = str_replace('-', '', $originalAntigen);
+
+					$newAntigen = trim($targetNamespace, '\\') . '\\Libs\\' . $antigenClean;
+
+					$antigenMap[$originalAntigen] = $newAntigen;
+
+					$antigenPath = str_replace('\\', '/', $antigenClean);
+
+					for ($i = 0; $i < $zip->numFiles; $i++) {
+						$stat = $zip->statIndex($i);
+						$fileName = $stat['name'];
+
+						if (str_starts_with($fileName, $rootDir . 'src/') && str_ends_with($fileName, '.php')) {
+							$content = $zip->getFromIndex($i);
+
+							$relativePath = substr($fileName, strlen($rootDir . 'src/'));
+							$cleanRelativePath = ltrim(str_replace('-', '', $relativePath), '/');
+
+							if (!str_starts_with($cleanRelativePath, $antigenPath . '/')) {
+								$newLocalPath = 'src/Libs/' . $antigenPath . '/' . $cleanRelativePath;
+							} else {
+								$newLocalPath = 'src/Libs/' . $cleanRelativePath;
+							}
+
+							$libFiles[$newLocalPath] = $content;
+						}
+					}
+				}
+			} else {
+				echo format_text("       [!] virion.yml not found in $displayName.\n", Style::Yellow);
+			}
+			$zip->close();
+		} else {
+			echo format_text("       [!] Failed to read downloaded ZIP for $displayName.\n", Style::Red);
+		}
+
+		@unlink($tmpZip);
+	}
+
+	uksort($antigenMap, fn($a, $b) => strlen($b) <=> strlen($a));
+
+	return ['files' => $libFiles, 'map' => $antigenMap];
 }
 
 function get_build_files(string $basePath) : array
 {
-	$files = [];
+	$phpFiles = [];
+	$otherFiles = [];
 	$directories = ['src', 'resources'];
 
 	foreach ($directories as $dir) {
@@ -60,19 +222,24 @@ function get_build_files(string $basePath) : array
 			$realPath = $file->getRealPath();
 			$localPath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $realPath);
 			$localPath = str_replace('\\', '/', $localPath);
-			$files[$localPath] = $realPath;
+
+			if (pathinfo($realPath, PATHINFO_EXTENSION) === 'php' && str_starts_with($localPath, 'src/')) {
+				$phpFiles[$localPath] = file_get_contents($realPath);
+			} else {
+				$otherFiles[$localPath] = $realPath;
+			}
 		}
 	}
 
 	$pluginYml = $basePath . DIRECTORY_SEPARATOR . 'plugin.yml';
 	if (file_exists($pluginYml)) {
-		$files['plugin.yml'] = $pluginYml;
+		$otherFiles['plugin.yml'] = $pluginYml;
 	}
 
-	return $files;
+	return ['php' => $phpFiles, 'other' => $otherFiles];
 }
 
-function compile_phar(string $outputPath, array $files) : void
+function compile_phar(string $outputPath, array $physicalOtherFiles, array $virtualShadedFiles) : void
 {
 	if (file_exists($outputPath)) {
 		@unlink($outputPath);
@@ -87,8 +254,12 @@ function compile_phar(string $outputPath, array $files) : void
 	$phar->setSignatureAlgorithm(Phar::SHA1);
 	$phar->startBuffering();
 
-	foreach ($files as $localPath => $realPath) {
+	foreach ($physicalOtherFiles as $localPath => $realPath) {
 		$phar->addFile($realPath, $localPath);
+	}
+
+	foreach ($virtualShadedFiles as $localPath => $content) {
+		$phar->addFromString($localPath, $content);
 	}
 
 	$phar->setStub("<?php __HALT_COMPILER();");
@@ -128,16 +299,40 @@ verify_environment();
 print_header();
 
 $basePath = dirname(__DIR__);
-var_dump($basePath);
 $outputPath = $basePath . '/Nexly.phar';
-
-echo format_text("  » Gathering files and compiling...", Style::Dim) . "\r";
-
 $startTime = microtime(true);
-$files = get_build_files($basePath);
-compile_phar($outputPath, $files);
+
+$targetNamespace = get_target_namespace($basePath);
+echo format_text("  » Project Namespace : ", Style::Dim) . format_text($targetNamespace, Style::Cyan) . "\n";
+echo format_text("  » Gathering files and injecting...\n", Style::Dim);
+
+$pluginData = get_build_files($basePath);
+$librariesData = process_libraries($basePath, $targetNamespace);
+
+$pluginPhpFiles = $pluginData['php'];
+$otherFiles = $pluginData['other'];
+
+$rawLibFiles = $librariesData['files'];
+$antigenMap = $librariesData['map'];
+
+echo format_text("  » Remapping namespaces globally...\n", Style::Dim);
+$finalVirtualFiles = [];
+
+$allPhpFilesToShade = array_merge($pluginPhpFiles, $rawLibFiles);
+
+foreach ($allPhpFilesToShade as $localPath => $rawContent) {
+	if (!empty($antigenMap)) {
+		$finalVirtualFiles[$localPath] = apply_global_shading($rawContent, $antigenMap);
+	} else {
+		$finalVirtualFiles[$localPath] = $rawContent;
+	}
+}
+
+echo format_text("  » Compiling Phar...", Style::Dim) . "\r";
+compile_phar($outputPath, $otherFiles, $finalVirtualFiles);
+
 $endTime = microtime(true);
+$totalFiles = count($otherFiles) + count($finalVirtualFiles);
 
 echo str_repeat(" ", 60) . "\r";
-
-print_summary($outputPath, count($files), $endTime - $startTime);
+print_summary($outputPath, $totalFiles, $endTime - $startTime);

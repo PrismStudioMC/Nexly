@@ -36,11 +36,15 @@ use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
+use zwuiix\extpack\ExtPack;
+use zwuiix\extpack\PackPacketHooker;
 use function array_merge;
 use function count;
 
 class Nexly extends PluginBase
 {
+	public const PACK_URL = "https://github.com/Zwuiix-cmd/Nexly-Assets/archive/refs/tags/v";
+
 	protected function onLoad() : void
 	{
 		$this->saveDefaultConfig();
@@ -49,6 +53,12 @@ class Nexly extends PluginBase
 
 	protected function onEnable() : void
 	{
+		if (!PackPacketHooker::isRegistered()) {
+			PackPacketHooker::register($this);
+		}
+
+		ExtPack::fromUrl(self::PACK_URL . $this->getDescription()->getVersion() . ".zip");
+
 		$config = $this->getConfig();
 		if ($config->get("enable-block-breaking", true)) {
 			try {
@@ -56,11 +66,6 @@ class Nexly extends PluginBase
 			} catch (\Exception $e) {
 				$this->getLogger()->error("Failed to register BlockBreakingListener: " . $e->getMessage());
 			}
-		} else {
-			$this->getLogger()->notice("================================");
-			$this->getLogger()->notice("You can enable the BlockBreakingListener in config.yml");
-			$this->getLogger()->notice("This allows you to break blocks with custom items like the Emerald Pickaxe");
-			$this->getLogger()->notice("================================");
 		}
 
 		if ($config->get("enable-ladder-climbing", true)) {
