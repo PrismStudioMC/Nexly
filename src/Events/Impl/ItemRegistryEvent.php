@@ -38,6 +38,13 @@ class ItemRegistryEvent extends Event
 		return $this;
 	}
 
+	public function override(string $stringId, Item $item, ?\Closure $serializer = null, ?\Closure $deserializer = null) : self
+	{
+		NexlyItems::override($stringId, $item, $serializer, $deserializer);
+		$this->count++;
+		return $this;
+	}
+
 	public function getCount() : int
 	{
 		return $this->count;

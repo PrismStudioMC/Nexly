@@ -28,8 +28,10 @@ use Nexly\Items\Creative\NexlyCreative;
 use Nexly\Mappings\ItemMappings;
 use Nexly\Recipes\NexlyRecipes;
 use Nexly\Recipes\Types\Recipe;
+use pocketmine\data\bedrock\item\ItemSerializer;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\data\bedrock\item\upgrade\LegacyItemIdToStringIdMap;
+use pocketmine\data\bedrock\LegacyToStringIdMap;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
@@ -78,10 +80,6 @@ abstract class ItemBuilder
 	 */
 	public function setStringId(string $stringId) : self
 	{
-		if (str_contains("minecraft:", $stringId)) {
-			throw new \InvalidArgumentException("Custom item string ID cannot contain the 'minecraft:' namespace.");
-		}
-
 		$this->stringId = $stringId;
 		return $this;
 	}
@@ -199,8 +197,15 @@ abstract class ItemBuilder
 		}
 
 		$item = $this->getItem();
-		ItemDataHandlers::getDeserializer()->map($this->getStringId(), $this->getDeserializer() ?? fn () => clone $item);
-		ItemDataHandlers::getSerializer()->map($item, $this->getSerializer() ?? fn () => new SavedItemData($this->getStringId()));
+
+		$this->serializer ??= fn () => new SavedItemData($this->getStringId());
+		$this->deserializer ??= fn () => clone $item;
+
+		$clazz = ItemDataHandlers::getSerializer();
+		$ref = new \ReflectionProperty(ItemSerializer::class, "itemSerializers");
+		$ref->setValue($clazz, $ref->getValue($clazz) + [$this->getNumericId() => $this->serializer]);
+
+		ItemDataHandlers::getDeserializer()->map($this->getStringId(), $this->deserializer);
 		ItemMappings::getInstance()->registerMapping($this, new ItemTypeEntry(
 			$this->getStringId(),
 			$this->getNumericId(),
@@ -215,8 +220,11 @@ abstract class ItemBuilder
 			$identifier = $path;
 		}
 
-		StringToItemParser::getInstance()->register($identifier, fn () => clone $item);
-		LegacyItemIdToStringIdMap::getInstance()->add($identifier, $item->getTypeId());
+		StringToItemParser::getInstance()->override($identifier, fn () => clone $item);
+
+		$clazz = LegacyItemIdToStringIdMap::getInstance();
+		$ref = new \ReflectionProperty(LegacyToStringIdMap::class, "legacyToString");
+		$ref->setValue($clazz, $ref->getValue($clazz) + [$this->getNumericId() => $this->getNumericId()]);
 
 		$creativeInfo = $this->getCreativeInfo() ?? NexlyCreative::detectCreativeInfoFrom($item);
 		$reflection = new \ReflectionClass($item);
@@ -233,6 +241,8 @@ abstract class ItemBuilder
 			}
 		}
 
-		NexlyCreative::add($item, $creativeInfo?->getCategory(), $creativeInfo?->getGroup());
+		if (!$creativeInfo->isHidden()) {
+			NexlyCreative::add($item, $creativeInfo?->getCategory(), $creativeInfo?->getGroup());
+		}
 	}
 }

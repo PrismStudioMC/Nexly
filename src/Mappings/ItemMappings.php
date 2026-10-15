@@ -96,6 +96,19 @@ class ItemMappings
 
 		$itemTypes = $reflection->getProperty("itemTypes");
 		$value = $itemTypes->getValue($dictionary);
+
+		/**
+		 * @var int $k
+		 * @var ItemTypeEntry $entry_
+		 */
+		foreach ($value as $k => $entry_) {
+			if ($entry_->getStringId() === $stringId) {
+				$value[$k] = new ItemTypeEntry($stringId, $entry_->getNumericId(), $entry->isComponentBased(), $entry->getVersion(), $entry->getComponentNbt());
+				$itemTypes->setValue($dictionary, $value);
+				return;
+			}
+		}
+
 		$value[] = $entry;
 		$itemTypes->setValue($dictionary, $value);
 	}

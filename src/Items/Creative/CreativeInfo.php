@@ -50,4 +50,9 @@ class CreativeInfo
 	{
 		return $this->isHidden;
 	}
+
+	public static function hidden() : CreativeInfo
+	{
+		return new self(null, null, true);
+	}
 }

@@ -27,8 +27,16 @@
         "php": "^8.2"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.94"
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "axolotl-pm/pocketmine-mp": "dev-stable"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/axolotl-pm/PocketMine-MP",
+            "no-api": true
+        }
+    ],
     "scripts": {
         "make": [
             "@composer install --classmap-authoritative --ignore-platform-reqs",
